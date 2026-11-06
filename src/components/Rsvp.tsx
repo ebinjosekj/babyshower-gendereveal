@@ -2,9 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { confetti } from '../lib/confetti';
 import { cleanName, isConfigured, supabase, type Attendance } from '../lib/supabase';
-import { CloudLayer, Meadow, Motes, SKY } from './atmosphere';
 import { Reveal, SectionHead } from './ui';
-import { Spark } from './world';
 
 const KEY = 'wonder-rsvp';
 
@@ -73,16 +71,14 @@ export default function Rsvp() {
   };
 
   return (
-    <section id="rsvp" aria-label="RSVP" className="relative overflow-hidden px-4 pb-32 pt-24 sm:pt-32" style={{ background: SKY.dusk }}>
-      <CloudLayer count={3} seed={151} depth={0.25} top={[0, 30]} />
-      <Motes count={12} seed={29} />
-      <SectionHead dark kicker="Kindly reply" title="Will You Join Our Wonder?" sub="Let us know you’re coming — or send your blessings." />
+    <section id="rsvp" aria-label="RSVP" className="relative px-4 py-28 sm:py-36">
+      <SectionHead dark kicker="Kindly reply" title="Will you join us?" sub="Let us know you’re coming — or send your blessings." />
 
       <Reveal delay={0.1} className="mx-auto mt-12 max-w-xl">
         <AnimatePresence mode="wait">
           {done ? (
             <motion.div key="thanks" initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }} className="glass relative overflow-hidden rounded-[32px] px-6 py-14 text-center" role="status">
-              <Spark className="mx-auto w-8" />
+              <span className="mx-auto block h-3 w-3 rotate-45 bg-sun" aria-hidden="true" />
               <p className="mt-4 font-display text-5xl font-semibold italic text-ocean sm:text-6xl">Thank you, {done.name.split(' ')[0]}!</p>
               <p className="mx-auto mt-5 max-w-sm font-display text-xl text-forest sm:text-2xl">
                 {done.status === 'attending' ? 'We’ll see you at the celebration.' : 'Your blessings mean the world to us.'}
@@ -130,7 +126,6 @@ export default function Rsvp() {
           )}
         </AnimatePresence>
       </Reveal>
-      <Meadow className="pointer-events-none absolute inset-x-0 bottom-0 h-[8%] w-full" />
     </section>
   );
 }

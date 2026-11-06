@@ -1,7 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { EVENT } from '../config';
 import { useCountdown } from '../hooks/useCountdown';
-import { CloudLayer, Motes, SKY } from './atmosphere';
 import { Reveal, SectionHead } from './ui';
 
 const UNITS = [
@@ -11,34 +10,27 @@ const UNITS = [
   { label: 'Seconds', max: 60 },
 ] as const;
 
-// A golden ring: the arc shows how far through the unit we are.
-function Ring({ value, max, label, id }: { value: number; max: number; label: string; id: string }) {
+// A hairline orbit: the glowing dot sits at how far through the unit we are.
+function Ring({ value, max, label }: { value: number; max: number; label: string }) {
   const v = String(value).padStart(2, '0');
-  const r = 44;
-  const c = 2 * Math.PI * r;
   const frac = Math.min(1, value / max);
+  const a = frac * Math.PI * 2 - Math.PI / 2;
   return (
     <div className="relative mx-auto aspect-square w-full max-w-[150px]">
-      <svg viewBox="0 0 100 100" className="absolute inset-0 -rotate-90" aria-hidden="true">
-        <defs>
-          <linearGradient id={`ring-${id}`} x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="#F7E3A6" />
-            <stop offset="1" stopColor="#E98C56" />
-          </linearGradient>
-        </defs>
-        <circle cx="50" cy="50" r={r} fill="rgba(24,61,75,.55)" stroke="rgba(241,232,214,.25)" strokeWidth="5" />
-        <circle cx="50" cy="50" r={r} fill="none" stroke={`url(#ring-${id})`} strokeWidth="5" strokeLinecap="round" strokeDasharray={c} strokeDashoffset={c * (1 - frac)} style={{ transition: 'stroke-dashoffset .9s ease' }} />
-        <circle cx="50" cy="50" r="36" fill="none" stroke="#B8A16A" strokeOpacity=".45" strokeWidth=".6" />
+      <svg viewBox="0 0 100 100" className="absolute inset-0" aria-hidden="true" fill="none">
+        <circle cx="50" cy="50" r="46" stroke="#E3BE74" strokeOpacity=".25" strokeWidth=".6" />
+        <circle cx="50" cy="50" r="46" stroke="#E3BE74" strokeWidth="1" strokeDasharray={2 * Math.PI * 46} strokeDashoffset={2 * Math.PI * 46 * (1 - frac)} transform="rotate(-90 50 50)" style={{ transition: 'stroke-dashoffset .9s ease' }} />
+        <circle cx={50 + Math.cos(a) * 46} cy={50 + Math.sin(a) * 46} r="2.2" fill="#FFE9A8" style={{ filter: 'drop-shadow(0 0 3px #E3BE74)', transition: 'all .9s ease' }} />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <div className="relative h-[1.05em] overflow-hidden font-display text-4xl font-semibold text-ivory sm:text-5xl">
+        <div className="relative h-[1.05em] overflow-hidden font-display text-4xl font-light text-ivory sm:text-5xl">
           <AnimatePresence mode="popLayout" initial={false}>
             <motion.span key={v} className="block tabular-nums" initial={{ y: '100%', opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: '-100%', opacity: 0 }} transition={{ duration: 0.4, ease: 'easeOut' }}>
               {v}
             </motion.span>
           </AnimatePresence>
         </div>
-        <p className="mt-0.5 font-sans text-[10px] font-medium uppercase tracking-[0.22em] text-sun sm:text-xs">{label}</p>
+        <p className="mt-0.5 font-sans text-[9px] font-medium uppercase tracking-[0.25em] text-sun sm:text-[11px]">{label}</p>
       </div>
     </div>
   );
@@ -47,30 +39,25 @@ function Ring({ value, max, label, id }: { value: number; max: number; label: st
 export default function Countdown() {
   const t = useCountdown(EVENT.startISO);
   const values = [t.days, t.hours, t.minutes, t.seconds];
-
   return (
-    <section id="countdown" aria-label="Countdown" className="relative overflow-hidden px-4 pb-28 pt-28 sm:pt-36" style={{ background: SKY.dusk }}>
-      <CloudLayer count={3} seed={111} depth={0.2} top={[2, 30]} />
-      <Motes count={22} seed={17} />
-      <div className="relative z-10">
-        <SectionHead dark kicker="The countdown" title="Every Second Brings Us Closer" sub="Counting down to our little wonder’s celebration." />
-        <Reveal delay={0.15} className="mx-auto mt-14 max-w-3xl">
-          {t.done ? (
-            <p className="text-center font-display text-5xl font-semibold italic text-sun sm:text-7xl" role="status">
-              It’s celebration time!
-            </p>
-          ) : (
-            <div className="grid grid-cols-4 gap-2 sm:gap-6" role="timer" aria-label="Time until the celebration">
-              {UNITS.map((u, i) => (
-                <Ring key={u.label} id={u.label} value={values[i]} max={u.max} label={u.label} />
-              ))}
-            </div>
-          )}
-          <p className="mt-10 text-center font-sans text-sm font-medium uppercase tracking-[0.3em] text-champagne">
-            {EVENT.dateLabel} · {EVENT.timeLabel} · {EVENT.venueName}
+    <section id="countdown" aria-label="Countdown" className="relative px-4 py-28 sm:py-36">
+      <SectionHead dark kicker="The countdown" title="Every second brings us closer" />
+      <Reveal delay={0.15} className="mx-auto mt-14 max-w-3xl">
+        {t.done ? (
+          <p className="text-center font-display text-5xl font-light italic text-sun sm:text-7xl" role="status">
+            It’s celebration time.
           </p>
-        </Reveal>
-      </div>
+        ) : (
+          <div className="grid grid-cols-4 gap-2 sm:gap-6" role="timer" aria-label="Time until the celebration">
+            {UNITS.map((u, i) => (
+              <Ring key={u.label} value={values[i]} max={u.max} label={u.label} />
+            ))}
+          </div>
+        )}
+        <p className="mt-10 text-center font-sans text-xs font-medium uppercase tracking-[0.35em] text-champagne">
+          {EVENT.dateLabel} · {EVENT.timeLabel} · {EVENT.venueName}
+        </p>
+      </Reveal>
     </section>
   );
 }

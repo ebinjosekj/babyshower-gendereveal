@@ -14,18 +14,18 @@ html.lenis body {
 }
 
 body {
-  @apply bg-ocean font-sans text-ink antialiased;
+  @apply bg-ocean font-sans text-ivory antialiased;
   overflow-x: clip;
 }
 
 ::selection {
-  background: #f0b94b;
-  color: #183d4b;
+  background: #e3be74;
+  color: #0b100e;
 }
 
 @layer components {
   .title-grad {
-    background: linear-gradient(100deg, #f0b94b 0%, #e98c56 40%, #f1e8d6 75%, #77b7b0 100%);
+    background: linear-gradient(100deg, #b89a5e 0%, #e3be74 45%, #f6ecd0 75%, #b89a5e 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -41,17 +41,17 @@ body {
     animation: shimmer 7s linear infinite;
   }
   .glass {
-    background: linear-gradient(145deg, rgba(246, 239, 222, 0.94), rgba(241, 232, 214, 0.8));
+    background: linear-gradient(145deg, rgba(243, 235, 216, 0.97), rgba(232, 222, 198, 0.92));
     -webkit-backdrop-filter: blur(12px);
     backdrop-filter: blur(12px);
     border: 1px solid rgba(184, 161, 106, 0.7);
     box-shadow: 0 24px 50px -24px rgba(24, 61, 75, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.8);
   }
   .glass-dark {
-    background: linear-gradient(145deg, rgba(24, 61, 75, 0.78), rgba(38, 59, 66, 0.62));
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
     -webkit-backdrop-filter: blur(12px);
     backdrop-filter: blur(12px);
-    border: 1px solid rgba(184, 161, 106, 0.5);
+    border: 1px solid rgba(227, 190, 116, 0.28);
     box-shadow: 0 24px 50px -24px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.18);
   }
   .btn {
@@ -59,16 +59,16 @@ body {
   }
   .btn-sun {
     @apply btn text-plum;
-    background: linear-gradient(135deg, #f7d98b 0%, #f0b94b 55%, #e98c56 100%);
-    box-shadow: 0 12px 28px -10px rgba(233, 140, 86, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.65);
+    background: linear-gradient(135deg, #f1d89a 0%, #e3be74 55%, #b89a5e 100%);
+    box-shadow: 0 12px 28px -10px rgba(227, 190, 116, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.65);
   }
   .btn-sun:hover {
     filter: brightness(1.05);
   }
   .btn-mint {
-    @apply btn text-plum;
-    background: linear-gradient(135deg, #a9d6d1 0%, #77b7b0 60%, #347d76 100%);
-    box-shadow: 0 12px 28px -10px rgba(52, 125, 118, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.65);
+    @apply btn text-ivory;
+    background: linear-gradient(135deg, #2e7d67 0%, #1f6b55 60%, #14473a 100%);
+    box-shadow: 0 12px 28px -10px rgba(31, 107, 85, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.65);
   }
   .btn-ghost {
     @apply btn border-2 border-champagne bg-ivory/70 text-ink hover:bg-sun/25;
@@ -88,7 +88,7 @@ body {
   font-style: italic;
 }
 :focus-visible {
-  outline: 3px solid #f0b94b;
+  outline: 3px solid #e3be74;
   outline-offset: 3px;
 }
 .sr-only-focus:focus {
@@ -249,4 +249,16 @@ body {
   from { transform: translate3d(0, 0, 0) scale(0.6); opacity: 0; }
   15% { opacity: 1; }
   to { transform: translate3d(var(--dx), var(--dy), 0) scale(1); opacity: 0; }
+}
+
+@keyframes orbBreath {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.025); }
+}
+@keyframes orbit {
+  to { transform: rotate(360deg); }
+}
+@keyframes ringPulse {
+  from { transform: scale(.6); opacity: .9; }
+  to { transform: scale(2.4); opacity: 0; }
 }

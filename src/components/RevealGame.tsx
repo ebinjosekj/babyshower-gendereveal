@@ -4,9 +4,7 @@ import { Check } from 'lucide-react';
 import { TEAM_LABEL } from '../config';
 import { confetti } from '../lib/confetti';
 import { cleanName, isConfigured, supabase, type Team } from '../lib/supabase';
-import { CloudLayer, Motes, SKY } from './atmosphere';
 import { Reveal, SectionHead } from './ui';
-import { Spark, StarSculpture, SunSculpture } from './world';
 
 const KEY = 'wonder-team';
 const TEAMS: Team[] = ['boy', 'girl'];
@@ -123,23 +121,21 @@ export default function RevealGame() {
         whileHover={saved ? undefined : { y: -8 }}
         whileTap={saved ? undefined : { scale: 0.96 }}
         animate={active ? { scale: 1.04 } : { scale: 1 }}
-        className={`relative flex flex-col items-center overflow-hidden rounded-[30px] border-2 px-3 pb-6 pt-8 text-center transition-shadow disabled:cursor-default sm:pb-8 sm:pt-10 ${
-          active ? 'shadow-[0_0_0_4px_rgba(240,185,75,.8),0_30px_60px_-20px_rgba(0,0,0,.7)]' : 'shadow-[0_24px_40px_-24px_rgba(0,0,0,.8)]'
-        } ${saved && !active ? 'opacity-55 saturate-50' : ''}`}
-        style={{
-          background: gold
-            ? 'linear-gradient(160deg,#F2D48A 0%,#E0A04A 55%,#B8643A 100%)'
-            : 'linear-gradient(160deg,#4E9A92 0%,#27605F 55%,#14323C 100%)',
-          borderColor: gold ? '#F2D48A' : '#77B7B0',
-        }}
+        className={`glass-dark relative flex flex-col items-center overflow-hidden rounded-[30px] border px-3 pb-6 pt-8 text-center transition-shadow disabled:cursor-default sm:pb-8 sm:pt-10 ${
+          active ? 'border-sun shadow-[0_0_60px_-8px_rgba(227,190,116,.55)]' : 'border-white/10'
+        } ${saved && !active ? 'opacity-50' : ''}`}
       >
-        {gold ? <SunSculpture className="h-24 w-24 sm:h-32 sm:w-32" /> : <StarSculpture className="h-24 w-24 sm:h-32 sm:w-32" />}
-        <span className={`mt-3 font-display text-3xl font-semibold sm:text-4xl ${gold ? 'text-ocean' : 'text-ivory'}`}>{TEAM_LABEL[team]}</span>
-        <span className={`mt-1 text-xs font-medium uppercase tracking-[0.2em] ${gold ? 'text-ocean/85' : 'text-ivory/85'}`}>
-          {saved ? `${members(team).length} on the team` : 'Tap to join'}
+        <span className="relative block h-24 w-24 sm:h-32 sm:w-32" aria-hidden="true">
+          <span className="absolute inset-0 rounded-full border border-white/15" />
+          <span className="ambient absolute inset-0" style={{ animation: `orbit ${gold ? 14 : 18}s linear infinite` }}>
+            <span className="absolute left-1/2 top-[-4px] h-2 w-2 -translate-x-1/2 rounded-full" style={{ background: gold ? '#FFE9A8' : '#9BE0BF', boxShadow: `0 0 12px 3px ${gold ? 'rgba(227,190,116,.8)' : 'rgba(80,200,150,.7)'}` }} />
+          </span>
+          <span className="absolute inset-[22%] rounded-full" style={{ background: gold ? 'radial-gradient(circle at 35% 30%,#FFF4D2,#C99A52 55%,#3A280F)' : 'radial-gradient(circle at 35% 30%,#D9F2E0,#2E8266 55%,#08201A)', boxShadow: gold ? '0 0 40px rgba(227,190,116,.5)' : '0 0 40px rgba(60,170,130,.45)' }} />
         </span>
+        <span className="mt-4 font-display text-3xl font-light text-ivory sm:text-4xl">{TEAM_LABEL[team]}</span>
+        <span className="mt-1 text-xs font-medium uppercase tracking-[0.25em] text-sun">{saved ? `${members(team).length} on the team` : 'Tap to join'}</span>
         {active && (
-          <span className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-ocean text-sun">
+          <span className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-sun text-ocean">
             <Check size={18} aria-hidden="true" />
           </span>
         )}
@@ -148,11 +144,9 @@ export default function RevealGame() {
   };
 
   return (
-    <section id="reveal" aria-label="Join a team" className="relative overflow-hidden px-4 pb-28 pt-28 sm:pt-36" style={{ background: SKY.dusk }}>
-      <CloudLayer count={3} seed={131} depth={0.25} top={[2, 30]} />
-      <Motes count={14} seed={23} />
+    <section id="reveal" aria-label="Join a team" className="relative px-4 py-28 sm:py-36">
 
-      <SectionHead dark kicker="Who will our little wonder be?" title="Join a Team" sub="Pick Team Boy or Team Girl — the real answer stays a surprise until the celebration." />
+      <SectionHead dark kicker="Who will our little wonder be?" title="Join a team" sub="Pick Team Boy or Team Girl — the real answer stays a surprise until the celebration." />
 
       <Reveal delay={0.1} className="mx-auto mt-12 max-w-3xl">
         <div className="grid grid-cols-2 gap-3 sm:gap-8">{TEAMS.map(renderTeam)}</div>
@@ -166,7 +160,7 @@ export default function RevealGame() {
         </div>
 
         {/* team list — directly below the join options */}
-        <div className="glass-dark mt-8 rounded-[28px] p-5 text-ivory sm:p-7" aria-label="Team lists">
+        <div className="glass-dark mt-8 rounded-[28px] border border-white/10 p-5 text-ivory sm:p-7" aria-label="Team lists">
           <h3 className="text-center font-sans text-xs font-medium uppercase tracking-[0.35em] text-sun">Team lists</h3>
           <div className="mt-5 grid gap-6 sm:grid-cols-2">
             {TEAMS.map((t) => {
@@ -181,7 +175,7 @@ export default function RevealGame() {
                     <ul className="mt-3 max-h-56 space-y-1 overflow-y-auto pr-1 text-base" data-lenis-prevent>
                       {list.map((m, i) => (
                         <li key={`${m.name}-${i}`} className="flex items-center gap-2">
-                          <Spark className="w-3 shrink-0" /> {m.name}
+                          <span className="h-1.5 w-1.5 shrink-0 rotate-45 bg-sun" /> {m.name}
                         </li>
                       ))}
                     </ul>
@@ -193,7 +187,7 @@ export default function RevealGame() {
             })}
           </div>
           {!isConfigured && (
-            <p className="mt-5 rounded-xl bg-ocean/60 p-3 text-center text-xs italic">
+            <p className="mt-5 rounded-xl bg-white/5 p-3 text-center text-xs italic">
               Preview mode: joins are only kept on this device. To save and share the lists with every guest, the Supabase database needs to be connected (see README).
             </p>
           )}
@@ -204,7 +198,7 @@ export default function RevealGame() {
       <AnimatePresence>
         {pick && !saved && (
           <motion.div
-            className="fixed inset-0 z-[140] flex items-end justify-center bg-ocean/75 p-3 backdrop-blur-sm sm:items-center"
+            className="fixed inset-0 z-[140] flex items-end justify-center bg-black/70 p-3 backdrop-blur-sm sm:items-center"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

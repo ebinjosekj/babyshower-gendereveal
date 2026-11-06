@@ -6,14 +6,10 @@ import { scrollToId } from '../lib/scroll';
 
 const LINKS: [string, string][] = [
   ['top', 'Welcome'],
-  ['story', 'Our Story'],
-  ['explorer', 'Little Explorer'],
   ['countdown', 'Countdown'],
-  ['journey', 'Rainbow Journey'],
-  ['reveal', 'Make a Prediction'],
+  ['reveal', 'Join a Team'],
   ['details', 'Celebration Details'],
   ['rsvp', 'RSVP'],
-  ['memories', 'Memories'],
 ];
 
 export default function Nav({ visible }: { visible: boolean }) {

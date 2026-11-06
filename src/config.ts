@@ -25,22 +25,6 @@ export const EVENT = {
 
 export const TEAM_LABEL = { boy: 'Team Boy', girl: 'Team Girl' } as const;
 
-// Photos live in /public/photos. Missing files are skipped automatically.
-// "invitation.jpg" is the artwork from your original invitation site.
-export const GALLERY: { file: string; caption: string }[] = [
-  { file: 'invitation.jpg', caption: 'Our invitation' },
-  { file: '01.jpg', caption: 'Together' },
-  { file: '02.jpg', caption: 'Little moments' },
-  { file: '03.jpg', caption: 'Waiting for you' },
-  { file: '04.jpg', caption: 'Growing love' },
-  { file: '05.jpg', caption: 'Almost here' },
-  { file: '06.jpg', caption: 'Our family' },
-  { file: '07.jpg', caption: 'Forever grateful' },
-];
-
-// Optional framed couple photo in "Our Little Adventure": public/photos/couple.jpg
-export const COUPLE_PHOTO = 'couple.jpg';
-
 // Music: by default an original music-box lullaby is generated in the browser
 // (no file, no licensing). To use your own licensed track instead, put it at
 // public/audio/wonder.mp3 and set useFile to true.

@@ -5,24 +5,24 @@ export default {
     extend: {
       // Storybook palette. No pink or blue anywhere.
       colors: {
-        // Little Wonderland palette
-        ocean: '#183D4B',
-        forest: '#263B42',
-        jade: '#347D76',
-        turquoise: '#77B7B0',
-        sun: '#F0B94B',
-        champagne: '#B8A16A',
-        coral: '#E98C56',
-        lavender: '#8974BD',
-        ivory: '#F1E8D6',
-        // legacy names used by older components, mapped onto the new palette
-        tangerine: '#E98C56',
-        mint: '#77B7B0',
-        emerald: '#347D76',
-        gold: '#B8A16A',
-        plum: '#183D4B',
-        ink: '#263B42',
-        'ink-soft': '#46666B',
+        // "Little Orb": charcoal-green, champagne gold, ivory, deep emerald. No pink / blue.
+        ocean: '#0B100E',
+        forest: '#1A241F',
+        jade: '#1F6B55',
+        turquoise: '#2E7D67',
+        sun: '#E3BE74',
+        champagne: '#B89A5E',
+        coral: '#C9975A',
+        lavender: '#6C8F7F',
+        ivory: '#EFE6D2',
+        // legacy names still used in a few components, mapped onto the new palette
+        tangerine: '#C9975A',
+        mint: '#2E7D67',
+        emerald: '#1F6B55',
+        gold: '#B89A5E',
+        plum: '#0B100E',
+        ink: '#1A241F',
+        'ink-soft': '#4A554F',
       },
       fontFamily: {
         display: ['"Cormorant Garamond"', 'Georgia', 'serif'],

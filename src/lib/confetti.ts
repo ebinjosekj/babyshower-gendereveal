@@ -1,6 +1,6 @@
 // Tiny canvas confetti (no dependency). Respects reduced-motion / simplified mode.
 
-const COLORS = ['#F0B94B', '#E98C56', '#D9715A', '#77B7B0', '#347D76', '#8974BD', '#F1E8D6', '#B8A16A'];
+const COLORS = ['#E3BE74', '#F6ECD0', '#C9975A', '#2E7D67', '#9BE0BF', '#B89A5E'];
 
 interface Piece {
   x: number;

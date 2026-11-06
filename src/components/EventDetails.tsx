@@ -4,8 +4,6 @@ import { CalendarPlus, Heart, MapPin } from 'lucide-react';
 import { EVENT } from '../config';
 import { directionsUrl, downloadIcs, googleCalendarUrl, mapEmbedUrl } from '../lib/calendar';
 import { scrollToId } from '../lib/scroll';
-import { CloudLayer, Meadow, Motes, SKY } from './atmosphere';
-import { Balloon, Spark } from './world';
 import { Reveal } from './ui';
 
 const hasAddress: boolean = EVENT.venueAddress.length > 0; // directions + map need a real address
@@ -14,28 +12,23 @@ export default function EventDetails() {
   const [calOpen, setCalOpen] = useState(false);
 
   return (
-    <section id="details" aria-label="Event details" className="relative overflow-hidden px-4 pb-32 pt-24 sm:pt-32" style={{ background: SKY.day }}>
-      <CloudLayer count={4} seed={141} depth={0.35} top={[0, 40]} />
-      <Motes count={14} seed={27} />
-      <Balloon className="ambient absolute left-[3%] top-[10%] w-14 sm:left-[8%] sm:w-24" colors={['#E98C56', '#F1E8D6']} style={{ animation: 'bob 11s ease-in-out infinite' }} />
-      <Balloon className="ambient absolute right-[3%] top-[16%] w-12 sm:right-[8%] sm:w-20" colors={['#8974BD', '#F0B94B']} style={{ animation: 'bob 13s ease-in-out -4s infinite' }} />
-
+    <section id="details" aria-label="Event details" className="relative px-4 py-28 sm:py-36">
       <Reveal className="relative z-10 mx-auto max-w-2xl">
         <div className="glass relative rounded-[36px] px-6 py-12 text-center sm:px-14 sm:py-16">
-          <Spark className="absolute -top-3 left-1/2 w-7 -translate-x-1/2" />
+          <span className="absolute -top-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 bg-sun" aria-hidden="true" />
           <p className="kicker">The celebration</p>
           <p className="mt-5 font-display text-sm font-medium uppercase tracking-[0.3em] text-ink-soft">
             <span className="text-jade">{EVENT.parents}</span> invite you
           </p>
           <p className="mt-1 font-display text-sm uppercase tracking-[0.35em] text-ink-soft">to celebrate our</p>
-          <h2 className="mt-4 font-display text-4xl font-semibold uppercase leading-[1.1] text-plum sm:text-6xl">
+          <h2 className="mt-4 font-display text-5xl font-light leading-[1.05] text-ocean sm:text-7xl">
             Baby Shower
             <br />
             <span className="text-coral">&amp;</span> Gender Reveal
           </h2>
 
           <div className="mx-auto mt-8 flex max-w-sm flex-col gap-1">
-            <p className="font-display text-3xl font-semibold text-plum sm:text-4xl">{EVENT.dateLabel}</p>
+            <p className="font-display text-3xl font-light text-ocean sm:text-4xl">{EVENT.dateLabel}</p>
             <p className="font-display text-2xl font-medium text-coral sm:text-3xl">{EVENT.timeLabel}</p>
             <p className="mt-2 font-display text-3xl font-semibold uppercase tracking-[0.3em] text-jade sm:text-4xl">{EVENT.venueName}</p>
             <p className="font-sans text-base font-medium text-forest sm:text-lg">{EVENT.venueAddress}</p>
@@ -83,12 +76,12 @@ export default function EventDetails() {
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
               allowFullScreen
-              className="block h-[300px] w-full border-0 sm:h-[400px]"
+              className="block h-[300px] w-full border-0 [filter:grayscale(1)_contrast(.95)_brightness(.85)] sm:h-[400px]"
             />
           </div>
         </div>
         )}
-        <p className="mt-4 rounded-2xl bg-ocean/55 px-4 py-3 text-ivory backdrop-blur text-center text-sm font-medium">
+        <p className="mt-4 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-center text-ivory text-sm font-medium">
           Questions? Call{' '}
           {EVENT.contacts.map((c, i) => (
             <span key={c.tel}>
@@ -101,7 +94,6 @@ export default function EventDetails() {
         </p>
       </Reveal>
 
-      <Meadow className="pointer-events-none absolute inset-x-0 bottom-0 h-[8%] w-full" />
     </section>
   );
 }

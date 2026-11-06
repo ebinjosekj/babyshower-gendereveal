@@ -2,20 +2,17 @@ import { lazy, Suspense, useEffect, useState } from 'react';
 import Opening from './components/Opening';
 import Nav from './components/Nav';
 import MusicPlayer from './components/MusicPlayer';
-import Hero from './components/Hero';
-import Story from './components/Story';
-import Explorer from './components/Explorer';
+import Intro from './components/Intro';
+import { ScrollOrb } from './components/Orb';
 import Countdown from './components/Countdown';
 import { MotionProvider, useMotion } from './context/MotionContext';
 import { useMusic } from './hooks/useMusic';
 import { useSmoothScroll } from './hooks/useSmoothScroll';
 
 // Everything below the fold loads on demand so the opening appears fast on phones.
-const Journey = lazy(() => import('./components/Journey'));
 const RevealGame = lazy(() => import('./components/RevealGame'));
 const EventDetails = lazy(() => import('./components/EventDetails'));
 const Rsvp = lazy(() => import('./components/Rsvp'));
-const Gallery = lazy(() => import('./components/Gallery'));
 const Finale = lazy(() => import('./components/Finale'));
 const AdminApp = lazy(() => import('./components/admin/AdminApp'));
 
@@ -33,20 +30,17 @@ function Experience() {
   return (
     <>
       {!entered && <Opening onStartMusic={music.start} onEnter={() => setEntered(true)} />}
+      {entered && <ScrollOrb />}
       <Nav visible={entered} />
       <MusicPlayer music={music} visible={entered} />
 
-      <main>
-        <Hero />
-        <Story />
-        <Explorer />
+      <main className="relative z-10">
+        <Intro />
         <Countdown />
         <Suspense fallback={<div className="min-h-[100svh]" aria-hidden="true" />}>
-          <Journey />
           <RevealGame />
           <EventDetails />
           <Rsvp />
-          <Gallery />
           <Finale onReplay={replay} />
         </Suspense>
       </main>
