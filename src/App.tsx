@@ -20,24 +20,26 @@ const AdminApp = lazy(() => import('./components/admin/AdminApp'));
 function Experience() {
   const { simple } = useMotion();
   const [entered, setEntered] = useState(false);
+  const [showOpening, setShowOpening] = useState(true);
   const music = useMusic();
   useSmoothScroll(entered, !simple);
 
   const replay = () => {
     window.scrollTo(0, 0);
     setEntered(false);
+    setShowOpening(true);
   };
 
   return (
     <>
-      {!entered && <Opening onStartMusic={music.start} onEnter={() => setEntered(true)} />}
+      {showOpening && <Opening onStartMusic={music.start} onEnter={() => setEntered(true)} onDone={() => setShowOpening(false)} />}
       {entered && <ScrollOrb />}
       {entered && !simple && <Atmosphere />}
       <Nav visible={entered} />
       <MusicPlayer music={music} visible={entered} />
 
       <main className="relative z-10">
-        <Intro />
+        <Intro entered={entered} />
         <Countdown />
         <Suspense fallback={<div className="min-h-[100svh]" aria-hidden="true" />}>
           <RevealGame />

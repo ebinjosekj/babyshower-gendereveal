@@ -55,7 +55,7 @@ export function ScrollOrb() {
 
   const still = simple ? { scale: 1, opacity: 0.55 } : undefined;
   return (
-    <div className="pointer-events-none fixed inset-0 z-0 flex items-start justify-center overflow-hidden" aria-hidden="true">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.8, ease: 'easeInOut' }} className="pointer-events-none fixed inset-0 z-0 flex items-start justify-center overflow-hidden" aria-hidden="true">
       <motion.div style={still ?? { scale, y, opacity, rotate }} className="mt-[9svh] w-[min(72vw,440px)]">
         <div className="relative">
           <motion.div style={{ opacity: simple ? 1 : gold }}>
@@ -68,6 +68,6 @@ export function ScrollOrb() {
           )}
         </div>
       </motion.div>
-    </div>
+    </motion.div>
   );
 }

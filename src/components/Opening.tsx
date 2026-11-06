@@ -6,13 +6,15 @@ import { OrbBody } from './Orb';
 
 interface Props {
   onStartMusic: () => void; // runs inside a user gesture
-  onEnter: () => void; // opening finished → show the site
+  onEnter: () => void; // the flash peaks → the page behind starts its entrance
+  onDone: () => void; // the overlay has fully faded away → remove it
 }
 
 // A dark screen with one small, waiting light. Tap / click / Enter ignites it and opens the invitation.
-export default function Opening({ onStartMusic, onEnter }: Props) {
+export default function Opening({ onStartMusic, onEnter, onDone }: Props) {
   const { simple } = useMotion();
   const [lit, setLit] = useState(false);
+  const [leaving, setLeaving] = useState(false);
   const timers = useRef<number[]>([]);
 
   useEffect(() => {
@@ -24,15 +26,34 @@ export default function Opening({ onStartMusic, onEnter }: Props) {
     if (lit) return;
     onStartMusic();
     setLit(true);
-    timers.current.push(window.setTimeout(onEnter, simple ? 500 : 2100));
+    leave(simple ? 400 : 1900);
   };
   const skip = () => {
     onStartMusic();
-    onEnter();
+    leave(0);
+  };
+  // Cross-dissolve: the page starts appearing underneath while the golden overlay fades away on top of it.
+  const FADE = simple ? 0.4 : 1.8;
+  const leave = (after: number) => {
+    timers.current.push(
+      window.setTimeout(() => {
+        onEnter();
+        setLeaving(true);
+        timers.current.push(window.setTimeout(onDone, FADE * 1000 + 100));
+      }, after),
+    );
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden bg-ocean" role="dialog" aria-label="Invitation introduction">
+    <motion.div
+      initial={{ opacity: 1 }}
+      animate={{ opacity: leaving ? 0 : 1 }}
+      transition={{ duration: FADE, ease: 'easeInOut' }}
+      style={{ pointerEvents: leaving ? 'none' : 'auto' }}
+      className="fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden bg-ocean"
+      role="dialog"
+      aria-label="Invitation introduction"
+    >
       <div className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 46%, rgba(227,190,116,.10), rgba(11,16,14,0) 60%)' }} aria-hidden="true" />
 
       <motion.p initial={{ opacity: 0 }} animate={{ opacity: lit ? 0 : 1 }} transition={{ duration: 1.4, delay: lit ? 0 : 0.4 }} className="absolute top-[14%] px-8 text-center font-display text-3xl font-light italic text-ivory sm:text-5xl">
@@ -66,6 +87,6 @@ export default function Opening({ onStartMusic, onEnter }: Props) {
       <button type="button" onClick={skip} className="absolute right-3 top-3 z-10 inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-ivory/30 px-4 text-xs font-medium uppercase tracking-[0.18em] text-ivory hover:bg-white/10">
         <SkipForward size={14} aria-hidden="true" /> Skip introduction
       </button>
-    </div>
+    </motion.div>
   );
 }
