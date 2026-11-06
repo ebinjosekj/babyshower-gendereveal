@@ -4,6 +4,7 @@ import { SkipForward } from 'lucide-react';
 import { useMotion } from '../context/MotionContext';
 import { OrbBody } from './Orb';
 import { confetti } from '../lib/confetti';
+import NudgeStar from './NudgeStar';
 import { StarField } from './ui';
 
 const rnd = (n: number) => {
@@ -47,6 +48,19 @@ export default function Opening({ onStartMusic, onEnter, onDone }: Props) {
   const [lit, setLit] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const timers = useRef<number[]>([]);
+  // if the guest hasn't tapped after 5 seconds, a shooting star flies to the orb (and again every 9 seconds)
+  const [nudge, setNudge] = useState(0);
+  const [pulse, setPulse] = useState(0);
+  useEffect(() => {
+    if (lit || simple) return;
+    let id = 0;
+    const loop = () => {
+      setNudge((n) => n + 1);
+      id = window.setTimeout(loop, 9000);
+    };
+    id = window.setTimeout(loop, 5000);
+    return () => window.clearTimeout(id);
+  }, [lit, simple]);
   // the light leans gently towards the finger / cursor
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
@@ -224,9 +238,15 @@ export default function Opening({ onStartMusic, onEnter, onDone }: Props) {
             </span>
             Tap the light to open
             <span className="ambient absolute -inset-1.5 rounded-full border border-sun/25" style={{ animation: 'gatePulse 3.2s ease-in-out infinite' }} />
+            <span key={pulse} className="absolute -inset-2 rounded-full border-2 border-sun opacity-0" style={{ animation: pulse ? 'pillFlash 1.8s ease-out 1' : undefined }} />
           </span>
         </motion.div>
       </div>
+
+      {nudge > 0 && !lit && (
+        <NudgeStar key={nudge} from={{ x: window.innerWidth * 0.9, y: window.innerHeight * 0.07 }} to={{ x: window.innerWidth / 2, y: window.innerHeight * 0.5 }} onLand={() => setPulse((p) => p + 1)} />
+      )}
+      {pulse > 0 && !lit && <span key={`r${pulse}`} aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2 -ml-12 -mt-12 block h-24 w-24 rounded-full border-2 border-sun" style={{ animation: 'openRing 1.5s ease-out both' }} />}
 
       <button type="button" onClick={(e) => { e.stopPropagation(); skip(); }} className="absolute right-3 top-3 z-10 inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-ivory/30 px-4 text-xs font-medium uppercase tracking-[0.18em] text-ivory hover:bg-white/10">
         <SkipForward size={14} aria-hidden="true" /> Skip introduction
