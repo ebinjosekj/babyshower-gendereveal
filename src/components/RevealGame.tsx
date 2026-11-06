@@ -78,10 +78,11 @@ export default function RevealGame() {
       if (supabase) {
         const { error: err } = await supabase.from('predictions').insert({ guest_name: clean, selected_team: pick });
         if (err) {
+          console.error('Join team failed', err);
           setError(
             err.code === '23505'
               ? 'That name has already joined a team. If you are someone different, please add your last initial.'
-              : 'We couldn’t save that. Please try again in a moment.',
+              : `We couldn’t save that. Please try again in a moment. (${err.code || err.message})`,
           );
           return;
         }

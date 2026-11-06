@@ -47,10 +47,11 @@ export default function Rsvp() {
           attendance_status: status,
         });
         if (err) {
+          console.error('RSVP failed', err);
           setError(
             err.code === '23505'
               ? 'We already have a reply for that name. To change it, please call Ebin or Nikhitha.'
-              : 'We couldn’t save your reply. Please try again in a moment.',
+              : `We couldn’t save your reply. Please try again in a moment. (${err.code || err.message})`,
           );
           return;
         }
