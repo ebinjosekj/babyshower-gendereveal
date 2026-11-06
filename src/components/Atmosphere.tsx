@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
-import { motion, useScroll, useSpring } from 'framer-motion';
+import { motion, useScroll, useSpring, useTransform } from 'framer-motion';
+import { confetti } from '../lib/confetti';
 
 const rnd = (n: number) => {
   const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
@@ -42,6 +43,33 @@ export default function Atmosphere() {
   const { scrollYProgress } = useScroll();
   const x = useSpring(scrollYProgress, { stiffness: 120, damping: 24, mass: 0.4 });
   const glow = useRef<HTMLDivElement>(null);
+  // scroll-linked layers: soft colour clouds drift at different speeds, a thin gold ring turns as you scroll
+  const { scrollY } = useScroll();
+  const cloudA = useTransform(scrollY, (v) => -v * 0.22);
+  const cloudB = useTransform(scrollY, (v) => -v * 0.38);
+  const cloudC = useTransform(scrollY, (v) => -v * 0.12);
+  const ringTurn = useTransform(scrollYProgress, [0, 1], [0, 720]);
+  const ringScale = useTransform(scrollYProgress, [0, 0.5, 1], [0.8, 1.25, 0.8]);
+
+  // each chapter announces itself with a little gold burst the first time it comes into view
+  useEffect(() => {
+    const seen = new Set<string>();
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((en) => {
+          if (!en.isIntersecting || seen.has(en.target.id)) return;
+          seen.add(en.target.id);
+          confetti({ x: window.innerWidth / 2, y: window.innerHeight * 0.3, count: 34 });
+        });
+      },
+      { threshold: 0.4 },
+    );
+    ['countdown', 'reveal', 'details', 'rsvp', 'finale'].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) io.observe(el);
+    });
+    return () => io.disconnect();
+  }, []);
 
   useEffect(() => {
     if (!window.matchMedia('(hover: hover)').matches) return;
@@ -71,6 +99,30 @@ export default function Atmosphere() {
       r.style.top = `${e.clientY}px`;
       r.addEventListener('animationend', () => r.remove());
       document.body.appendChild(r);
+      window.dispatchEvent(new Event('wonder-tap'));
+      if (!document.documentElement.classList.contains('simple') && !document.querySelector('.simple')) {
+        for (let i = 0; i < 7; i++) {
+          const sp = document.createElement('span');
+          sp.className = 'spark';
+          sp.style.position = 'fixed';
+          sp.style.zIndex = '150';
+          sp.style.left = `${e.clientX}px`;
+          sp.style.top = `${e.clientY}px`;
+          const a = (i / 7) * Math.PI * 2 + Math.random() * 0.6;
+          const d = 36 + Math.random() * 34;
+          sp.style.setProperty('--dx', `${Math.cos(a) * d}px`);
+          sp.style.setProperty('--dy', `${Math.sin(a) * d}px`);
+          sp.addEventListener('animationend', () => sp.remove());
+          document.body.appendChild(sp);
+        }
+      }
+      if ((e.target as HTMLElement | null)?.closest('button, a')) {
+        try {
+          navigator.vibrate?.(8);
+        } catch {
+          /* not supported */
+        }
+      }
     };
     window.addEventListener('pointermove', move);
     window.addEventListener('pointerdown', ripple);
@@ -112,6 +164,13 @@ export default function Atmosphere() {
         ))}
       </div>
       <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-[1] overflow-hidden">
+        <motion.div className="absolute -left-[20%] top-[60%] h-[60vmax] w-[60vmax] rounded-full opacity-[.16] blur-3xl" style={{ y: cloudA, background: 'radial-gradient(circle, #7FB6E6, transparent 65%)' }} />
+        <motion.div className="absolute -right-[25%] top-[100%] h-[55vmax] w-[55vmax] rounded-full opacity-[.15] blur-3xl" style={{ y: cloudB, background: 'radial-gradient(circle, #F2A6C0, transparent 65%)' }} />
+        <motion.div className="absolute left-[10%] top-[170%] h-[50vmax] w-[50vmax] rounded-full opacity-[.14] blur-3xl" style={{ y: cloudC, background: 'radial-gradient(circle, #E3BE74, transparent 65%)' }} />
+        <motion.div className="absolute left-1/2 top-1/2 -ml-[min(48vw,330px)] -mt-[min(48vw,330px)] h-[min(96vw,660px)] w-[min(96vw,660px)] rounded-full border border-sun/25" style={{ rotate: ringTurn, scale: ringScale }}>
+          <span className="absolute -top-1 left-1/2 h-2 w-2 -translate-x-1/2 rounded-full bg-[#FFE9A8] shadow-[0_0_12px_3px_rgba(227,190,116,.8)]" />
+          <span className="absolute -bottom-1 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-blush shadow-[0_0_10px_2px_rgba(242,166,192,.7)]" />
+        </motion.div>
         {SHOOTERS.map((m, i) => (
           <span key={i} className="ambient absolute block h-[2px] w-[130px] rounded-full opacity-0" style={{ top: `${m.top}%`, left: `${m.left}%`, background: 'linear-gradient(90deg,#FFF6D6,rgba(255,246,214,0))', boxShadow: '0 0 10px 2px rgba(255,236,160,.5)', animation: `shoot ${m.dur}s linear ${m.delay}s infinite` }} />
         ))}

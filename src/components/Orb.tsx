@@ -1,4 +1,5 @@
-import { motion, useScroll, useTransform, type MotionValue } from 'framer-motion';
+import { useEffect } from 'react';
+import { motion, useAnimationControls, useScroll, useTransform, type MotionValue } from 'framer-motion';
 import { useMotion } from '../context/MotionContext';
 
 type Tone = 'gold' | 'emerald';
@@ -52,12 +53,19 @@ export function ScrollOrb() {
   const emerald = useTransform(p, [0.1, 0.32, 0.88, 0.97], [0, 1, 1, 0]);
   const gold: MotionValue<number> = useTransform(emerald, (v) => 1 - v);
   const rotate = useTransform(p, [0, 1], [0, 80]);
+  const kick = useAnimationControls();
+  // every tap anywhere makes the orb swell and settle, like a heartbeat
+  useEffect(() => {
+    const on = () => void kick.start({ scale: [1, 1.12, 1], transition: { duration: 0.7, ease: 'easeOut' } });
+    window.addEventListener('wonder-tap', on);
+    return () => window.removeEventListener('wonder-tap', on);
+  }, [kick]);
 
   const still = simple ? { scale: 1, opacity: 0.55 } : undefined;
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.8, ease: 'easeInOut' }} className="pointer-events-none fixed inset-0 z-0 flex items-start justify-center overflow-hidden" aria-hidden="true">
       <motion.div style={still ?? { scale, y, opacity, rotate }} className="mt-[9svh] w-[min(72vw,440px)]">
-        <div className="relative">
+        <motion.div animate={kick} className="relative">
           <motion.div style={{ opacity: simple ? 1 : gold }}>
             <OrbBody tone="gold" />
           </motion.div>
@@ -66,7 +74,7 @@ export function ScrollOrb() {
               <OrbBody tone="emerald" rings={false} />
             </motion.div>
           )}
-        </div>
+        </motion.div>
       </motion.div>
     </motion.div>
   );

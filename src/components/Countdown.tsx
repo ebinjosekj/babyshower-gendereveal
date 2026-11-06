@@ -11,12 +11,13 @@ const UNITS = [
 ] as const;
 
 // A hairline orbit: the glowing dot sits at how far through the unit we are.
-function Ring({ value, max, label }: { value: number; max: number; label: string }) {
+function Ring({ value, max, label, order }: { value: number; max: number; label: string; order: number }) {
   const v = String(value).padStart(2, '0');
   const frac = Math.min(1, value / max);
   const a = frac * Math.PI * 2 - Math.PI / 2;
   return (
-    <div className="ambient relative mx-auto aspect-square w-full max-w-[150px]" style={{ animation: 'ringGlow 3.6s ease-in-out infinite alternate' }}>
+    <motion.div initial={{ opacity: 0, scale: 0.5, rotate: -120 }} whileInView={{ opacity: 1, scale: 1, rotate: 0 }} viewport={{ once: true, margin: '-10%' }} transition={{ type: 'spring', damping: 16, stiffness: 70, delay: order * 0.15 }} className="relative mx-auto aspect-square w-full max-w-[150px]">
+    <div className="ambient relative h-full w-full" style={{ animation: 'ringGlow 3.6s ease-in-out infinite alternate' }}>
       <svg viewBox="0 0 100 100" className="absolute inset-0" aria-hidden="true" fill="none">
         <circle cx="50" cy="50" r="46" stroke="#E3BE74" strokeOpacity=".25" strokeWidth=".6" />
         <circle cx="50" cy="50" r="46" stroke="#E3BE74" strokeWidth="1" strokeDasharray={2 * Math.PI * 46} strokeDashoffset={2 * Math.PI * 46 * (1 - frac)} transform="rotate(-90 50 50)" style={{ transition: 'stroke-dashoffset .9s ease' }} />
@@ -34,6 +35,7 @@ function Ring({ value, max, label }: { value: number; max: number; label: string
         <p className="mt-0.5 font-sans text-[9px] font-medium uppercase tracking-[0.25em] text-sun sm:text-[11px]">{label}</p>
       </div>
     </div>
+    </motion.div>
   );
 }
 
@@ -51,7 +53,7 @@ export default function Countdown() {
         ) : (
           <div className="grid grid-cols-4 gap-2 sm:gap-6" role="timer" aria-label="Time until the celebration">
             {UNITS.map((u, i) => (
-              <Ring key={u.label} value={values[i]} max={u.max} label={u.label} />
+              <Ring key={u.label} value={values[i]} max={u.max} label={u.label} order={i} />
             ))}
           </div>
         )}

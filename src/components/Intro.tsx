@@ -30,8 +30,8 @@ export default function Intro({ entered }: { entered: boolean }) {
         {LINES.map((l, i) => (
           <div key={l} className="flex min-h-[72svh] items-center justify-center px-6 text-center">
             <motion.p
-              initial={{ opacity: 0, y: 40, filter: 'blur(8px)' }}
-              whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              initial={{ opacity: 0, y: 40, filter: 'blur(8px)', letterSpacing: '0.1em' }}
+              whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)', letterSpacing: '0em' }}
               viewport={{ once: false, margin: '-30% 0px' }}
               transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
               className={`max-w-3xl font-display text-5xl font-light leading-[1.05] text-ivory [text-shadow:0_4px_40px_rgba(0,0,0,.85)] sm:text-8xl ${i === 1 ? 'italic text-sun' : ''}`}
