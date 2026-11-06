@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { motion, useMotionValue, useSpring } from 'framer-motion';
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { SkipForward } from 'lucide-react';
 import { useMotion } from '../context/MotionContext';
 import { OrbBody } from './Orb';
@@ -16,6 +16,13 @@ const MOTES = Array.from({ length: 18 }, (_, i) => ({
   dur: 12 + rnd(i + 90) * 14,
   delay: -rnd(i + 130) * 24,
   sway: (rnd(i + 170) - 0.5) * 100,
+}));
+const SPARKS = Array.from({ length: 11 }, (_, i) => ({
+  left: 5 + rnd(i + 300) * 90,
+  top: 5 + rnd(i + 340) * 90,
+  size: 9 + rnd(i + 380) * 15,
+  dur: 4 + rnd(i + 420) * 5,
+  delay: -rnd(i + 460) * 8,
 }));
 const BURST = Array.from({ length: 30 }, (_, i) => {
   const a = (i / 30) * Math.PI * 2 + ((i * 7919) % 13) * 0.05;
@@ -40,6 +47,8 @@ export default function Opening({ onStartMusic, onEnter, onDone }: Props) {
   const my = useMotionValue(0);
   const sx = useSpring(mx, { stiffness: 50, damping: 14 });
   const sy = useSpring(my, { stiffness: 50, damping: 14 });
+  const farX = useTransform(sx, (v) => -v * 0.7);
+  const farY = useTransform(sy, (v) => -v * 0.7);
   const lean = (e: { clientX: number; clientY: number }) => {
     mx.set((e.clientX / window.innerWidth - 0.5) * 36);
     my.set((e.clientY / window.innerHeight - 0.5) * 36);
@@ -87,7 +96,19 @@ export default function Opening({ onStartMusic, onEnter, onDone }: Props) {
       <div className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 46%, rgba(227,190,116,.10), rgba(11,16,14,0) 60%)' }} aria-hidden="true" />
 
       {/* waiting-screen life: twinkling stars, rising gold dust, shooting stars, a breathing glow */}
-      <StarField count={46} />
+      <motion.div className="pointer-events-none absolute -inset-10" style={{ x: farX, y: farY }} aria-hidden="true">
+        <StarField count={46} />
+      </motion.div>
+      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+        <span className="ambient absolute -left-[25%] top-[8%] h-[70vmax] w-[70vmax] rounded-full opacity-[.16] blur-3xl" style={{ background: 'radial-gradient(circle, #7FB6E6, transparent 65%)', animation: 'aurora 16s ease-in-out infinite alternate' }} />
+        <span className="ambient absolute -right-[30%] top-[30%] h-[65vmax] w-[65vmax] rounded-full opacity-[.15] blur-3xl" style={{ background: 'radial-gradient(circle, #F2A6C0, transparent 65%)', animation: 'aurora 20s ease-in-out -6s infinite alternate-reverse' }} />
+        <span className="ambient absolute left-[10%] -bottom-[25%] h-[60vmax] w-[60vmax] rounded-full opacity-[.15] blur-3xl" style={{ background: 'radial-gradient(circle, #E3BE74, transparent 65%)', animation: 'aurora 18s ease-in-out -3s infinite alternate' }} />
+        {SPARKS.map((m, i) => (
+          <svg key={i} viewBox="0 0 24 24" className="ambient absolute opacity-0" style={{ left: `${m.left}%`, top: `${m.top}%`, width: m.size, height: m.size, animation: `twirl ${m.dur}s ease-in-out ${m.delay}s infinite` }}>
+            <path d="M12 0L14.6 9.4L24 12L14.6 14.6L12 24L9.4 14.6L0 12L9.4 9.4Z" fill="#F3DC9C" />
+          </svg>
+        ))}
+      </div>
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
         {MOTES.map((m, i) => (
           <span key={i} className="ambient absolute bottom-0 rounded-full bg-[#F3DC9C]" style={{ left: `${m.left}%`, width: m.size, height: m.size, opacity: 0.6, boxShadow: '0 0 8px 2px rgba(227,190,116,.55)', ['--sway' as string]: `${m.sway}px`, animation: `riseUp ${m.dur}s linear ${m.delay}s infinite` }} />
@@ -100,7 +121,7 @@ export default function Opening({ onStartMusic, onEnter, onDone }: Props) {
 
       <motion.p animate={{ opacity: lit ? 0 : 1 }} transition={{ duration: 1.4 }} className="absolute top-[14%] px-8 text-center font-display text-3xl font-light italic text-ivory sm:text-5xl">
         {['Something small', 'is on the way.'].map((line, i) => (
-          <motion.span key={line} className="block" initial={{ opacity: 0, y: 18, filter: 'blur(10px)' }} animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }} transition={{ duration: 1.5, delay: 0.5 + i * 0.7, ease: [0.22, 1, 0.36, 1] }}>
+          <motion.span key={line} className="shimmer-text block" initial={{ opacity: 0, y: 18, filter: 'blur(10px)' }} animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }} transition={{ duration: 1.5, delay: 0.5 + i * 0.7, ease: [0.22, 1, 0.36, 1] }}>
             {line}
           </motion.span>
         ))}
@@ -130,7 +151,7 @@ export default function Opening({ onStartMusic, onEnter, onDone }: Props) {
         <span className="ambient absolute inset-0 rounded-full border border-sun/50" style={{ animation: lit ? undefined : 'gatePulse 3s ease-in-out infinite' }} aria-hidden="true" />
         <span className="absolute inset-5 rounded-full border border-sun/20" aria-hidden="true" />
         {lit && <span className="absolute inset-0 rounded-full border border-sun" style={{ animation: 'ringPulse 1.6s ease-out forwards' }} aria-hidden="true" />}
-        <motion.div className="w-[46%]" animate={lit ? { scale: simple ? 1.6 : 7, opacity: simple ? 1 : 0.0 } : { scale: 1, opacity: 1 }} transition={lit ? { duration: simple ? 0.4 : 1.9, ease: [0.5, 0, 0.7, 0.3] } : { duration: 0.3 }} whileTap={lit ? undefined : { scale: 0.92 }}>
+        <motion.div className="w-[46%]" animate={lit ? { scale: simple ? 1.6 : 7, opacity: simple ? 1 : 0.0 } : simple ? { scale: 1, opacity: 1 } : { scale: [1, 1.08, 1, 1.05, 1], opacity: 1 }} transition={lit ? { duration: simple ? 0.4 : 1.9, ease: [0.5, 0, 0.7, 0.3] } : simple ? { duration: 0.3 } : { duration: 2.6, repeat: Infinity, ease: 'easeInOut' }} whileTap={lit ? undefined : { scale: 0.92 }}>
           <OrbBody tone="gold" rings={false} />
         </motion.div>
       </button>
@@ -170,6 +191,16 @@ export default function Opening({ onStartMusic, onEnter, onDone }: Props) {
         >
           Welcome
         </motion.p>
+      )}
+
+      {!lit && (
+        <div className="pointer-events-none absolute bottom-[calc(12%+64px)] flex flex-col items-center" aria-hidden="true">
+          {[0, 1, 2].map((i) => (
+            <svg key={i} viewBox="0 0 24 24" className="ambient -mb-3 h-6 w-6 opacity-0" style={{ animation: `chevUp 2s ease-in-out ${0.9 - i * 0.3 + 1.2}s infinite` }} fill="none" stroke="#E3BE74" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M6 15l6-6 6 6" />
+            </svg>
+          ))}
+        </div>
       )}
 
       <motion.p initial={{ opacity: 0 }} animate={{ opacity: lit ? 0 : 1 }} transition={{ delay: lit ? 0 : 1.2, duration: 0.8 }} className="absolute bottom-[12%] rounded-full border border-sun/50 px-6 py-3 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ivory">

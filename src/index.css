@@ -388,3 +388,28 @@ body {
   0%, 100% { transform: translate(-50%, -50%) scale(0.88); opacity: 0.6; }
   50% { transform: translate(-50%, -50%) scale(1.12); opacity: 1; }
 }
+
+/* ---- waiting screen extras ---- */
+@keyframes aurora {
+  from { transform: translate3d(-6vw, -3vh, 0) scale(0.9) rotate(0deg); }
+  to { transform: translate3d(8vw, 5vh, 0) scale(1.15) rotate(25deg); }
+}
+@keyframes chevUp {
+  0%, 100% { opacity: 0; transform: translateY(8px); }
+  40% { opacity: 1; }
+  80% { opacity: 0; transform: translateY(-8px); }
+}
+@keyframes textShine {
+  from { background-position: 120% 0; }
+  to { background-position: -120% 0; }
+}
+.shimmer-text {
+  background: linear-gradient(100deg, #f6ecd0 30%, #ffe9a8 44%, #ffffff 50%, #ffe9a8 56%, #f6ecd0 70%);
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: textShine 5s linear infinite;
+}
+.simple .shimmer-text { animation: none; background: none; -webkit-text-fill-color: currentColor; color: #f6ecd0; }
