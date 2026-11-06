@@ -3,6 +3,13 @@ import { motion } from 'framer-motion';
 import { SkipForward } from 'lucide-react';
 import { useMotion } from '../context/MotionContext';
 import { OrbBody } from './Orb';
+import { confetti } from '../lib/confetti';
+
+const BURST = Array.from({ length: 30 }, (_, i) => {
+  const a = (i / 30) * Math.PI * 2 + ((i * 7919) % 13) * 0.05;
+  const d = 140 + ((i * 6151) % 17) * 22;
+  return { dx: Math.cos(a) * d, dy: Math.sin(a) * d, delay: 0.35 + (i % 6) * 0.07, size: 3 + (i % 4) * 1.5 };
+});
 
 interface Props {
   onStartMusic: () => void; // runs inside a user gesture
@@ -26,17 +33,18 @@ export default function Opening({ onStartMusic, onEnter, onDone }: Props) {
     if (lit) return;
     onStartMusic();
     setLit(true);
-    leave(simple ? 400 : 1900);
+    leave(simple ? 400 : 2500);
   };
   const skip = () => {
     onStartMusic();
     leave(0);
   };
   // Cross-dissolve: the page starts appearing underneath while the golden overlay fades away on top of it.
-  const FADE = simple ? 0.4 : 1.8;
+  const FADE = simple ? 0.4 : 2.2;
   const leave = (after: number) => {
     timers.current.push(
       window.setTimeout(() => {
+        if (!simple) confetti({ x: window.innerWidth / 2, y: window.innerHeight / 2, count: 90 });
         onEnter();
         setLeaving(true);
         timers.current.push(window.setTimeout(onDone, FADE * 1000 + 100));
@@ -78,7 +86,41 @@ export default function Opening({ onStartMusic, onEnter, onDone }: Props) {
         </motion.div>
       </button>
 
+      {lit && !simple && (
+        <>
+          {/* slow turning rays of light */}
+          <motion.div
+            aria-hidden="true"
+            className="pointer-events-none absolute left-1/2 top-1/2 h-[150vmax] w-[150vmax] -translate-x-1/2 -translate-y-1/2 rounded-full"
+            style={{ background: 'repeating-conic-gradient(from 0deg, rgba(255,233,168,.42) 0deg 5deg, transparent 5deg 20deg)', WebkitMaskImage: 'radial-gradient(circle, #000 0%, transparent 55%)', maskImage: 'radial-gradient(circle, #000 0%, transparent 55%)' }}
+            initial={{ opacity: 0, rotate: 0, scale: 0.4 }}
+            animate={{ opacity: [0, 0.9, 0.9], rotate: 70, scale: 1 }}
+            transition={{ duration: 4.4, ease: 'easeOut', opacity: { duration: 2.4, times: [0, 0.4, 1] } }}
+          />
+          {/* rings of light spreading outwards */}
+          {[0.15, 0.6, 1.05].map((d) => (
+            <span key={d} aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2 h-[40vmin] w-[40vmin] rounded-full border-2 border-sun" style={{ marginLeft: '-20vmin', marginTop: '-20vmin', boxShadow: '0 0 30px rgba(227,190,116,.6)', animation: `openRing 2s ease-out ${d}s both` }} />
+          ))}
+          {/* sparks flying out of the light */}
+          {BURST.map((b, i) => (
+            <span key={i} aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2 rounded-full bg-[#FFF4B8]" style={{ width: b.size, height: b.size, boxShadow: '0 0 10px 3px rgba(255,224,140,.9)', ['--dx' as string]: `${b.dx}px`, ['--dy' as string]: `${b.dy}px`, animation: `burst 1.7s cubic-bezier(.15,.7,.3,1) ${b.delay}s both` }} />
+          ))}
+        </>
+      )}
+
       <motion.div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,#FFF1C8_0%,#E3BE74_40%,rgba(227,190,116,0)_75%)]" initial={{ opacity: 0 }} animate={{ opacity: lit ? 0.95 : 0 }} transition={{ duration: simple ? 0.3 : 1.5, delay: lit && !simple ? 0.5 : 0 }} aria-hidden="true" />
+
+      {lit && !simple && (
+        <motion.p
+          aria-hidden="true"
+          className="pointer-events-none absolute px-8 text-center font-display text-6xl font-light italic text-ocean sm:text-8xl"
+          initial={{ opacity: 0, scale: 0.85, filter: 'blur(14px)' }}
+          animate={{ opacity: [0, 1, 1], scale: 1, filter: 'blur(0px)' }}
+          transition={{ duration: 1.6, delay: 1.1, ease: [0.22, 1, 0.36, 1] }}
+        >
+          Welcome
+        </motion.p>
+      )}
 
       <motion.p initial={{ opacity: 0 }} animate={{ opacity: lit ? 0 : 1 }} transition={{ delay: lit ? 0 : 1.2, duration: 0.8 }} className="absolute bottom-[12%] rounded-full border border-sun/50 px-6 py-3 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ivory">
         Tap the light to begin
