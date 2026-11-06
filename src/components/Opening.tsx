@@ -1,13 +1,29 @@
 import { useEffect, useRef, useState } from 'react';
-import { motion, useMotionValue, useSpring } from 'framer-motion';
+import { animate, motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { SkipForward } from 'lucide-react';
 import { useMotion } from '../context/MotionContext';
 import { OrbBody } from './Orb';
 import { confetti } from '../lib/confetti';
-import MilkyWay from './MilkyWay';
+import { StarField } from './ui';
 
-type Phase = 'build' | 'l1' | 'gap1' | 'l2' | 'gap2' | 'orb' | 'ready';
-const READY_AT = 13; // seconds into the journey when the light has landed and the orb can be tapped
+const rnd = (n: number) => {
+  const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
+  return x - Math.floor(x);
+};
+const MOTES = Array.from({ length: 18 }, (_, i) => ({
+  left: rnd(i + 10) * 100,
+  size: 2 + rnd(i + 50) * 3,
+  dur: 12 + rnd(i + 90) * 14,
+  delay: -rnd(i + 130) * 24,
+  sway: (rnd(i + 170) - 0.5) * 100,
+}));
+const SPARKS = Array.from({ length: 11 }, (_, i) => ({
+  left: 5 + rnd(i + 300) * 90,
+  top: 5 + rnd(i + 340) * 90,
+  size: 9 + rnd(i + 380) * 15,
+  dur: 4 + rnd(i + 420) * 5,
+  delay: -rnd(i + 460) * 8,
+}));
 const BURST = Array.from({ length: 30 }, (_, i) => {
   const a = (i / 30) * Math.PI * 2 + ((i * 7919) % 13) * 0.05;
   const d = 140 + ((i * 6151) % 17) * 22;
@@ -20,22 +36,27 @@ interface Props {
   onDone: () => void; // the overlay has fully faded away → remove it
 }
 
-// The Milky Way opens the invitation: a small light leaves the galaxy's heart and lands as the glowing orb. Tap it to open.
+// A dark screen with one small, waiting light. Tap / click / Enter ignites it and opens the invitation.
 export default function Opening({ onStartMusic, onEnter, onDone }: Props) {
   const { simple } = useMotion();
   const [lit, setLit] = useState(false);
   const [leaving, setLeaving] = useState(false);
-  const [phase, setPhase] = useState<Phase>(simple ? 'ready' : 'build');
   const timers = useRef<number[]>([]);
-  const clock = useRef(0);
   const orbRef = useRef<HTMLButtonElement>(null);
-  const ready = phase === 'ready';
-  const orbVisible = simple || phase === 'orb' || ready;
+  // "iris" reveal: a circle of light opens from the orb and dissolves the dark screen away, revealing the page beneath
+  const [centre, setCentre] = useState({ x: 0, y: 0 });
+  const iris = useMotionValue(0);
+  const EDGE = 140;
+  const maskImage = useTransform(iris, (r) => (r <= 0 ? 'none' : `radial-gradient(circle at ${centre.x}px ${centre.y}px, transparent ${Math.max(0, r - EDGE)}px, #000 ${r}px)`));
+  const ringScale = useTransform(iris, (r) => Math.max(0.01, r / 100));
+  const ringOpacity = useTransform(iris, [0, 120, 500, 1300], [0, 0.9, 0.55, 0]);
   // the light leans gently towards the finger / cursor
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
   const sx = useSpring(mx, { stiffness: 50, damping: 14 });
   const sy = useSpring(my, { stiffness: 50, damping: 14 });
+  const farX = useTransform(sx, (v) => -v * 0.7);
+  const farY = useTransform(sy, (v) => -v * 0.7);
   const lean = (e: { clientX: number; clientY: number }) => {
     mx.set((e.clientX / window.innerWidth - 0.5) * 36);
     my.set((e.clientY / window.innerHeight - 0.5) * 36);
@@ -46,37 +67,34 @@ export default function Opening({ onStartMusic, onEnter, onDone }: Props) {
     return () => t.forEach((id) => window.clearTimeout(id));
   }, []);
 
-  // the sky is painted: start the story
-  const begin = () => {
-    const at = (sec: number, ph: Phase) => timers.current.push(window.setTimeout(() => setPhase(ph), sec * 1000));
-    at(1.2, 'l1');
-    at(4.6, 'gap1');
-    at(5.4, 'l2');
-    at(10.6, 'gap2');
-    at(11.4, 'orb');
-    at(READY_AT, 'ready');
-  };
-  // tapping early jumps straight to the landed light
-  const skipAhead = () => {
-    if (simple || lit || phase === 'build' || ready) return;
-    timers.current.forEach((id) => window.clearTimeout(id));
-    timers.current = [];
-    clock.current = performance.now() - (READY_AT + 0.3) * 1000;
-    setPhase('ready');
-  };
-
   const ignite = () => {
-    if (lit || !ready) return;
+    if (lit) return;
     onStartMusic();
+    const r = orbRef.current?.getBoundingClientRect();
+    const c = r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+    setCentre(c);
     setLit(true);
-    leave(simple ? 400 : 2500);
+    if (simple) {
+      leave(400);
+      return;
+    }
+    // the light gathers (0 – 1 s), then opens outwards like a dawn while the page rises beneath it
+    const reach = Math.hypot(Math.max(c.x, window.innerWidth - c.x), Math.max(c.y, window.innerHeight - c.y)) + EDGE + 40;
+    timers.current.push(
+      window.setTimeout(() => {
+        void animate(iris, reach, { duration: 2.8, ease: [0.45, 0, 0.2, 1] });
+        confetti({ x: c.x, y: c.y, count: 70 });
+        timers.current.push(window.setTimeout(onEnter, 500));
+        timers.current.push(window.setTimeout(onDone, 2800 + 200));
+      }, 1000),
+    );
   };
   const skip = () => {
     onStartMusic();
     leave(0);
   };
   // Cross-dissolve: the page starts appearing underneath while the golden overlay fades away on top of it.
-  const FADE = simple ? 0.4 : 2.2;
+  const FADE = simple ? 0.4 : 1.4;
   const leave = (after: number) => {
     timers.current.push(
       window.setTimeout(() => {
@@ -89,55 +107,59 @@ export default function Opening({ onStartMusic, onEnter, onDone }: Props) {
   };
 
   return (
+    <>
     <motion.div
       initial={{ opacity: 1 }}
       animate={{ opacity: leaving ? 0 : 1 }}
       transition={{ duration: FADE, ease: 'easeInOut' }}
-      style={{ pointerEvents: leaving ? 'none' : 'auto' }}
+      style={{ pointerEvents: leaving || lit ? 'none' : 'auto', maskImage, WebkitMaskImage: maskImage }}
       className="fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden bg-ocean"
       role="dialog"
       aria-label="Invitation introduction"
       onPointerMove={lean}
-      onPointerDown={skipAhead}
     >
-      {simple ? (
-        <div className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 46%, rgba(227,190,116,.10), rgba(11,16,14,0) 60%)' }} aria-hidden="true" />
-      ) : (
-        <>
-          <div className="pointer-events-none absolute inset-0 bg-[#02030a]" aria-hidden="true" />
-          <MilkyWay targetRef={orbRef} clock={clock} lit={lit} onBuilt={begin} />
-        </>
-      )}
+      <div className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 46%, rgba(227,190,116,.10), rgba(11,16,14,0) 60%)' }} aria-hidden="true" />
 
-      {/* the story, one line at a time */}
-      {!simple && (
-        <>
-          {[
-            { show: phase === 'l1', text: 'Beyond all the stars you know,' },
-            { show: phase === 'l2', text: 'one small light left the heart of the Milky Way…' },
-          ].map((l) => (
-            <motion.p key={l.text} aria-hidden="true" initial={false} animate={l.show ? { opacity: 1, y: 0, filter: 'blur(0px)' } : { opacity: 0, y: 16, filter: 'blur(12px)' }} transition={{ duration: 2, ease: [0.22, 1, 0.36, 1] }} className="pointer-events-none absolute top-[12%] px-8 text-center font-display text-3xl font-light italic text-ivory [text-shadow:0_2px_30px_rgba(0,0,0,.9)] sm:text-5xl">
-              {l.text}
-            </motion.p>
-          ))}
-        </>
-      )}
-      <motion.p initial={false} animate={ready && !lit ? { opacity: 1, y: 0, filter: 'blur(0px)' } : { opacity: 0, y: 18, filter: 'blur(10px)' }} transition={{ duration: 1.6, ease: [0.22, 1, 0.36, 1] }} className="pointer-events-none absolute top-[14%] px-8 text-center font-display text-3xl font-light italic text-ivory sm:text-5xl">
-        {['Something small', 'is on the way.'].map((line) => (
-          <span key={line} className="shimmer-text block">
+      {/* waiting-screen life: twinkling stars, rising gold dust, shooting stars, a breathing glow */}
+      <motion.div className="pointer-events-none absolute -inset-10" style={{ x: farX, y: farY }} aria-hidden="true">
+        <StarField count={46} />
+      </motion.div>
+      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+        <span className="ambient absolute -left-[25%] top-[8%] h-[70vmax] w-[70vmax] rounded-full opacity-[.16] blur-3xl" style={{ background: 'radial-gradient(circle, #7FB6E6, transparent 65%)', animation: 'aurora 16s ease-in-out infinite alternate' }} />
+        <span className="ambient absolute -right-[30%] top-[30%] h-[65vmax] w-[65vmax] rounded-full opacity-[.15] blur-3xl" style={{ background: 'radial-gradient(circle, #F2A6C0, transparent 65%)', animation: 'aurora 20s ease-in-out -6s infinite alternate-reverse' }} />
+        <span className="ambient absolute left-[10%] -bottom-[25%] h-[60vmax] w-[60vmax] rounded-full opacity-[.15] blur-3xl" style={{ background: 'radial-gradient(circle, #E3BE74, transparent 65%)', animation: 'aurora 18s ease-in-out -3s infinite alternate' }} />
+        {SPARKS.map((m, i) => (
+          <svg key={i} viewBox="0 0 24 24" className="ambient absolute opacity-0" style={{ left: `${m.left}%`, top: `${m.top}%`, width: m.size, height: m.size, animation: `twirl ${m.dur}s ease-in-out ${m.delay}s infinite` }}>
+            <path d="M12 0L14.6 9.4L24 12L14.6 14.6L12 24L9.4 14.6L0 12L9.4 9.4Z" fill="#F3DC9C" />
+          </svg>
+        ))}
+      </div>
+      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+        {MOTES.map((m, i) => (
+          <span key={i} className="ambient absolute bottom-0 rounded-full bg-[#F3DC9C]" style={{ left: `${m.left}%`, width: m.size, height: m.size, opacity: 0.6, boxShadow: '0 0 8px 2px rgba(227,190,116,.55)', ['--sway' as string]: `${m.sway}px`, animation: `riseUp ${m.dur}s linear ${m.delay}s infinite` }} />
+        ))}
+        {[{ t: 8, l: 78, d: 1.5, u: 7 }, { t: 24, l: 96, d: 4.5, u: 9 }].map((m, i) => (
+          <span key={i} className="ambient absolute block h-[2px] w-[130px] rounded-full opacity-0" style={{ top: `${m.t}%`, left: `${m.l}%`, background: 'linear-gradient(90deg,#FFF6D6,rgba(255,246,214,0))', boxShadow: '0 0 10px 2px rgba(255,236,160,.5)', animation: `shoot ${m.u}s linear ${m.d}s infinite` }} />
+        ))}
+        <span className="ambient absolute left-1/2 top-[46%] block h-[120vmin] w-[120vmin] -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ background: 'radial-gradient(circle, rgba(227,190,116,.16), transparent 62%)', animation: 'glowBreath 5s ease-in-out infinite' }} />
+      </div>
+
+      <motion.p animate={{ opacity: lit ? 0 : 1 }} transition={{ duration: 1.4 }} className="absolute top-[14%] px-8 text-center font-display text-3xl font-light italic text-ivory sm:text-5xl">
+        {['Something small', 'is on the way.'].map((line, i) => (
+          <motion.span key={line} className="shimmer-text block" initial={{ opacity: 0, y: 18, filter: 'blur(10px)' }} animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }} transition={{ duration: 1.5, delay: 0.5 + i * 0.7, ease: [0.22, 1, 0.36, 1] }}>
             {line}
-          </span>
+          </motion.span>
         ))}
       </motion.p>
 
-      <motion.div style={{ x: sx, y: sy }} className="relative" initial={false} animate={{ opacity: orbVisible ? 1 : 0, scale: orbVisible ? 1 : 0.5 }} transition={{ duration: simple ? 0 : 1.6, ease: [0.22, 1, 0.36, 1] }}>
+      <motion.div style={{ x: sx, y: sy }} className="relative">
       <button
         ref={orbRef}
         type="button"
         onClick={ignite}
-        disabled={lit || !ready}
+        disabled={lit}
         aria-label="Light the orb to open the invitation"
-        className={`group relative flex h-56 w-56 items-center justify-center rounded-full focus-visible:outline-4 focus-visible:outline-offset-8 focus-visible:outline-sun disabled:cursor-default sm:h-64 sm:w-64 ${ready ? '' : 'pointer-events-none'}`}
+        className="group relative flex h-56 w-56 items-center justify-center rounded-full focus-visible:outline-4 focus-visible:outline-offset-8 focus-visible:outline-sun disabled:cursor-default sm:h-64 sm:w-64"
       >
         {/* slowly turning dashed ring with a travelling light, and a second ripple */}
         {!lit && (
@@ -155,7 +177,7 @@ export default function Opening({ onStartMusic, onEnter, onDone }: Props) {
         <span className="ambient absolute inset-0 rounded-full border border-sun/50" style={{ animation: lit ? undefined : 'gatePulse 3s ease-in-out infinite' }} aria-hidden="true" />
         <span className="absolute inset-5 rounded-full border border-sun/20" aria-hidden="true" />
         {lit && <span className="absolute inset-0 rounded-full border border-sun" style={{ animation: 'ringPulse 1.6s ease-out forwards' }} aria-hidden="true" />}
-        <motion.div className="w-[46%]" animate={lit ? { scale: simple ? 1.6 : 7, opacity: simple ? 1 : 0.0 } : simple ? { scale: 1, opacity: 1 } : { scale: [1, 1.08, 1, 1.05, 1], opacity: 1 }} transition={lit ? { duration: simple ? 0.4 : 1.9, ease: [0.5, 0, 0.7, 0.3] } : simple ? { duration: 0.3 } : { duration: 2.6, repeat: Infinity, ease: 'easeInOut' }} whileTap={lit ? undefined : { scale: 0.92 }}>
+        <motion.div className="w-[46%]" animate={lit ? { scale: simple ? 1.6 : 2.6, opacity: simple ? 1 : 0.0 } : simple ? { scale: 1, opacity: 1 } : { scale: [1, 1.08, 1, 1.05, 1], opacity: 1 }} transition={lit ? { duration: simple ? 0.4 : 1.6, ease: [0.4, 0, 0.2, 1] } : simple ? { duration: 0.3 } : { duration: 2.6, repeat: Infinity, ease: 'easeInOut' }} whileTap={lit ? undefined : { scale: 0.92 }}>
           <OrbBody tone="gold" rings={false} />
         </motion.div>
       </button>
@@ -167,7 +189,7 @@ export default function Opening({ onStartMusic, onEnter, onDone }: Props) {
           <motion.div
             aria-hidden="true"
             className="pointer-events-none absolute left-1/2 top-1/2 h-[150vmax] w-[150vmax] -translate-x-1/2 -translate-y-1/2 rounded-full"
-            style={{ background: 'repeating-conic-gradient(from 0deg, rgba(255,233,168,.42) 0deg 5deg, transparent 5deg 20deg)', WebkitMaskImage: 'radial-gradient(circle, #000 0%, transparent 55%)', maskImage: 'radial-gradient(circle, #000 0%, transparent 55%)' }}
+            style={{ background: 'repeating-conic-gradient(from 0deg, rgba(255,233,168,.26) 0deg 5deg, transparent 5deg 20deg)', WebkitMaskImage: 'radial-gradient(circle, #000 0%, transparent 55%)', maskImage: 'radial-gradient(circle, #000 0%, transparent 55%)' }}
             initial={{ opacity: 0, rotate: 0, scale: 0.4 }}
             animate={{ opacity: [0, 0.9, 0.9], rotate: 70, scale: 1 }}
             transition={{ duration: 4.4, ease: 'easeOut', opacity: { duration: 2.4, times: [0, 0.4, 1] } }}
@@ -183,21 +205,9 @@ export default function Opening({ onStartMusic, onEnter, onDone }: Props) {
         </>
       )}
 
-      <motion.div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,#FFF1C8_0%,#E3BE74_40%,rgba(227,190,116,0)_75%)]" initial={{ opacity: 0 }} animate={{ opacity: lit ? 0.95 : 0 }} transition={{ duration: simple ? 0.3 : 1.5, delay: lit && !simple ? 0.5 : 0 }} aria-hidden="true" />
+      <motion.div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,#FFF1C8_0%,#E3BE74_40%,rgba(227,190,116,0)_75%)]" initial={{ opacity: 0 }} animate={simple ? { opacity: lit ? 0.95 : 0 } : { opacity: lit ? [0, 0.5, 0.18] : 0 }} transition={simple ? { duration: 0.3 } : { duration: 2.2, times: [0, 0.45, 1], ease: 'easeInOut' }} aria-hidden="true" />
 
-      {lit && !simple && (
-        <motion.p
-          aria-hidden="true"
-          className="pointer-events-none absolute px-8 text-center font-display text-6xl font-light italic text-ocean sm:text-8xl"
-          initial={{ opacity: 0, scale: 0.85, filter: 'blur(14px)' }}
-          animate={{ opacity: [0, 1, 1], scale: 1, filter: 'blur(0px)' }}
-          transition={{ duration: 1.6, delay: 1.1, ease: [0.22, 1, 0.36, 1] }}
-        >
-          Welcome
-        </motion.p>
-      )}
-
-      {!lit && ready && (
+      {!lit && (
         <div className="pointer-events-none absolute bottom-[calc(12%+64px)] flex flex-col items-center" aria-hidden="true">
           {[0, 1, 2].map((i) => (
             <svg key={i} viewBox="0 0 24 24" className="ambient -mb-3 h-6 w-6 opacity-0" style={{ animation: `chevUp 2s ease-in-out ${0.9 - i * 0.3 + 1.2}s infinite` }} fill="none" stroke="#E3BE74" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -207,7 +217,7 @@ export default function Opening({ onStartMusic, onEnter, onDone }: Props) {
         </div>
       )}
 
-      <motion.p initial={false} animate={{ opacity: ready && !lit ? 1 : 0 }} transition={{ delay: ready && !lit ? 0.9 : 0, duration: 0.8 }} className="absolute bottom-[12%] rounded-full border border-sun/50 px-6 py-3 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ivory">
+      <motion.p initial={{ opacity: 0 }} animate={{ opacity: lit ? 0 : 1 }} transition={{ delay: lit ? 0 : 1.2, duration: 0.8 }} className="absolute bottom-[12%] rounded-full border border-sun/50 px-6 py-3 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ivory">
         Tap the light to begin
       </motion.p>
 
@@ -215,5 +225,9 @@ export default function Opening({ onStartMusic, onEnter, onDone }: Props) {
         <SkipForward size={14} aria-hidden="true" /> Skip introduction
       </button>
     </motion.div>
+    {lit && !simple && (
+      <motion.div aria-hidden="true" className="pointer-events-none fixed z-[101] h-[200px] w-[200px] rounded-full" style={{ left: centre.x - 100, top: centre.y - 100, scale: ringScale, opacity: ringOpacity, border: '2px solid rgba(243,220,156,.6)', boxShadow: '0 0 50px 10px rgba(227,190,116,.4), inset 0 0 50px 8px rgba(227,190,116,.3)' }} />
+    )}
+    </>
   );
 }
