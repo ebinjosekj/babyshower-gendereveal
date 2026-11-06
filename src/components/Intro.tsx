@@ -11,10 +11,10 @@ export default function Intro({ entered }: { entered: boolean }) {
   return (
     <>
       <section id="top" aria-label="Welcome" className="relative flex min-h-[100svh] flex-col items-center justify-end px-5 pb-[9svh] text-center">
-        <motion.p initial={{ opacity: 0, y: -10 }} animate={entered ? { opacity: 1, y: 0 } : { opacity: 0, y: -10 }} transition={{ delay: entered ? 0.3 : 0, duration: entered ? 1.2 : 0.3 }} className="rounded-full border border-sun/50 bg-ocean/70 px-5 py-2.5 font-sans text-[11px] font-medium uppercase tracking-[0.4em] text-ivory shadow-[0_8px_30px_-8px_rgba(0,0,0,.8)] backdrop-blur-md [text-shadow:0_1px_6px_rgba(0,0,0,.9)] sm:text-xs">
+        <motion.p initial={{ opacity: 0, y: -10 }} animate={entered ? { opacity: 1, y: 0 } : { opacity: 0, y: -10 }} transition={{ delay: entered ? 0.3 : 0, duration: entered ? 1.2 : 0.3 }} className="rounded-full border border-sun/50 bg-ocean/70 px-5 py-2.5 font-sans text-[11px] font-medium uppercase tracking-[0.4em] text-ivory shadow-[0_8px_30px_-8px_rgba(0,0,0,.8)] [text-shadow:0_1px_6px_rgba(0,0,0,.9)] sm:text-xs">
           {EVENT.title}
         </motion.p>
-        <motion.h1 initial={{ opacity: 0, y: 26 }} animate={entered ? { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' } : { opacity: 0, y: 26, scale: 1.1, filter: 'blur(10px)' }} transition={{ delay: entered ? 0.5 : 0, duration: entered ? 1.6 : 0.3, ease: [0.22, 1, 0.36, 1] }} className="mt-5 font-display text-[15vw] font-light leading-[0.95] tracking-[-0.01em] text-ivory [text-shadow:0_4px_40px_rgba(0,0,0,.7)] sm:text-8xl">
+        <motion.h1 initial={{ opacity: 0, y: 26 }} animate={entered ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 26, scale: 1.1 }} transition={{ delay: entered ? 0.5 : 0, duration: entered ? 1.6 : 0.3, ease: [0.22, 1, 0.36, 1] }} className="mt-5 font-display text-[15vw] font-light leading-[0.95] tracking-[-0.01em] text-ivory [text-shadow:0_4px_40px_rgba(0,0,0,.7)] sm:text-8xl">
           Nikki
           <span className="gold-text ambient block italic [filter:drop-shadow(0_2px_14px_rgba(0,0,0,.85))]">&amp; Ebin</span>
         </motion.h1>
@@ -30,8 +30,8 @@ export default function Intro({ entered }: { entered: boolean }) {
         {LINES.map((l, i) => (
           <div key={l} className="flex min-h-[72svh] items-center justify-center px-6 text-center">
             <motion.p
-              initial={{ opacity: 0, y: 40, filter: 'blur(8px)' }}
-              whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: false, margin: '-30% 0px' }}
               transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
               className={`max-w-3xl font-display text-5xl font-light leading-[1.05] text-ivory [text-shadow:0_4px_40px_rgba(0,0,0,.85)] sm:text-8xl ${i === 1 ? 'italic text-sun' : ''}`}

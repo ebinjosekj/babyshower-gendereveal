@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { animate, motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { SkipForward } from 'lucide-react';
 import { useMotion } from '../context/MotionContext';
 import { OrbBody } from './Orb';
@@ -24,6 +24,11 @@ const SPARKS = Array.from({ length: 11 }, (_, i) => ({
   dur: 4 + rnd(i + 420) * 5,
   delay: -rnd(i + 460) * 8,
 }));
+const FIREFLIES = Array.from({ length: 16 }, (_, i) => {
+  const a = rnd(i + 700) * Math.PI * 2;
+  const d = 150 + rnd(i + 740) * 140;
+  return { sx: Math.cos(a) * d, sy: Math.sin(a) * d * 0.9, delay: rnd(i + 780) * 6, dur: 4 + rnd(i + 820) * 3, size: 3 + rnd(i + 860) * 3 };
+});
 const BURST = Array.from({ length: 30 }, (_, i) => {
   const a = (i / 30) * Math.PI * 2 + ((i * 7919) % 13) * 0.05;
   const d = 140 + ((i * 6151) % 17) * 22;
@@ -42,14 +47,6 @@ export default function Opening({ onStartMusic, onEnter, onDone }: Props) {
   const [lit, setLit] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const timers = useRef<number[]>([]);
-  const orbRef = useRef<HTMLButtonElement>(null);
-  // "iris" reveal: a circle of light opens from the orb and dissolves the dark screen away, revealing the page beneath
-  const [centre, setCentre] = useState({ x: 0, y: 0 });
-  const iris = useMotionValue(0);
-  const EDGE = 140;
-  const maskImage = useTransform(iris, (r) => (r <= 0 ? 'none' : `radial-gradient(circle at ${centre.x}px ${centre.y}px, transparent ${Math.max(0, r - EDGE)}px, #000 ${r}px)`));
-  const ringScale = useTransform(iris, (r) => Math.max(0.01, r / 100));
-  const ringOpacity = useTransform(iris, [0, 120, 500, 1300], [0, 0.9, 0.55, 0]);
   // the light leans gently towards the finger / cursor
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
@@ -70,36 +67,25 @@ export default function Opening({ onStartMusic, onEnter, onDone }: Props) {
   const ignite = () => {
     if (lit) return;
     onStartMusic();
-    const r = orbRef.current?.getBoundingClientRect();
-    const c = r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : { x: window.innerWidth / 2, y: window.innerHeight / 2 };
-    setCentre(c);
     setLit(true);
     if (simple) {
       leave(400);
       return;
     }
-    // the light gathers (0 – 1 s), then opens outwards like a dawn while the page rises beneath it
-    const reach = Math.hypot(Math.max(c.x, window.innerWidth - c.x), Math.max(c.y, window.innerHeight - c.y)) + EDGE + 40;
-    timers.current.push(
-      window.setTimeout(() => {
-        void animate(iris, reach, { duration: 2.8, ease: [0.45, 0, 0.2, 1] });
-        confetti({ x: c.x, y: c.y, count: 70 });
-        timers.current.push(window.setTimeout(onEnter, 500));
-        timers.current.push(window.setTimeout(onDone, 2800 + 200));
-      }, 1000),
-    );
+    // 0 – 1 s the light gathers; then the dark screen melts away (opacity only, so it stays smooth) while the page rises beneath
+    timers.current.push(window.setTimeout(() => leave(0), 1000));
   };
   const skip = () => {
     onStartMusic();
     leave(0);
   };
   // Cross-dissolve: the page starts appearing underneath while the golden overlay fades away on top of it.
-  const FADE = simple ? 0.4 : 1.4;
+  const FADE = simple ? 0.4 : 2.4;
   const leave = (after: number) => {
     timers.current.push(
       window.setTimeout(() => {
-        if (!simple) confetti({ x: window.innerWidth / 2, y: window.innerHeight / 2, count: 90 });
         onEnter();
+        if (!simple) timers.current.push(window.setTimeout(() => confetti({ x: window.innerWidth / 2, y: window.innerHeight * 0.45, count: 45 }), 500));
         setLeaving(true);
         timers.current.push(window.setTimeout(onDone, FADE * 1000 + 100));
       }, after),
@@ -107,13 +93,12 @@ export default function Opening({ onStartMusic, onEnter, onDone }: Props) {
   };
 
   return (
-    <>
     <motion.div
       initial={{ opacity: 1 }}
       animate={{ opacity: leaving ? 0 : 1 }}
       transition={{ duration: FADE, ease: 'easeInOut' }}
-      style={{ pointerEvents: leaving || lit ? 'none' : 'auto', maskImage, WebkitMaskImage: maskImage }}
-      className="fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden bg-ocean"
+      style={{ pointerEvents: leaving || lit ? 'none' : 'auto', willChange: 'opacity' }}
+      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden bg-ocean ${lit ? 'opening-lit' : ''}`}
       role="dialog"
       aria-label="Invitation introduction"
       onPointerMove={lean}
@@ -121,20 +106,23 @@ export default function Opening({ onStartMusic, onEnter, onDone }: Props) {
       <div className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 46%, rgba(227,190,116,.10), rgba(11,16,14,0) 60%)' }} aria-hidden="true" />
 
       {/* waiting-screen life: twinkling stars, rising gold dust, shooting stars, a breathing glow */}
-      <motion.div className="pointer-events-none absolute -inset-10" style={{ x: farX, y: farY }} aria-hidden="true">
+      <motion.div className="pointer-events-none absolute -inset-10" style={{ x: farX, y: farY }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 2.4 }} aria-hidden="true">
         <StarField count={46} />
       </motion.div>
-      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-        <span className="ambient absolute -left-[25%] top-[8%] h-[70vmax] w-[70vmax] rounded-full opacity-[.16] blur-3xl" style={{ background: 'radial-gradient(circle, #7FB6E6, transparent 65%)', animation: 'aurora 16s ease-in-out infinite alternate' }} />
-        <span className="ambient absolute -right-[30%] top-[30%] h-[65vmax] w-[65vmax] rounded-full opacity-[.15] blur-3xl" style={{ background: 'radial-gradient(circle, #F2A6C0, transparent 65%)', animation: 'aurora 20s ease-in-out -6s infinite alternate-reverse' }} />
-        <span className="ambient absolute left-[10%] -bottom-[25%] h-[60vmax] w-[60vmax] rounded-full opacity-[.15] blur-3xl" style={{ background: 'radial-gradient(circle, #E3BE74, transparent 65%)', animation: 'aurora 18s ease-in-out -3s infinite alternate' }} />
+      <motion.div className="pointer-events-none absolute inset-0 overflow-hidden" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 3.2, delay: 0.6 }} aria-hidden="true">
+        <span className="ambient absolute -left-[25%] top-[8%] h-[70vmax] w-[70vmax] rounded-full opacity-[.16]" style={{ background: 'radial-gradient(circle, #7FB6E6, transparent 65%)', animation: 'aurora 16s ease-in-out infinite alternate' }} />
+        <span className="ambient absolute -right-[30%] top-[30%] h-[65vmax] w-[65vmax] rounded-full opacity-[.15]" style={{ background: 'radial-gradient(circle, #F2A6C0, transparent 65%)', animation: 'aurora 20s ease-in-out -6s infinite alternate-reverse' }} />
+        <span className="ambient absolute left-[10%] -bottom-[25%] h-[60vmax] w-[60vmax] rounded-full opacity-[.15]" style={{ background: 'radial-gradient(circle, #E3BE74, transparent 65%)', animation: 'aurora 18s ease-in-out -3s infinite alternate' }} />
         {SPARKS.map((m, i) => (
           <svg key={i} viewBox="0 0 24 24" className="ambient absolute opacity-0" style={{ left: `${m.left}%`, top: `${m.top}%`, width: m.size, height: m.size, animation: `twirl ${m.dur}s ease-in-out ${m.delay}s infinite` }}>
             <path d="M12 0L14.6 9.4L24 12L14.6 14.6L12 24L9.4 14.6L0 12L9.4 9.4Z" fill="#F3DC9C" />
           </svg>
         ))}
-      </div>
+      </motion.div>
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+        {/* two slow searchlight beams and a warm horizon that breathes */}
+        <span className="ambient absolute -top-[10%] left-1/2 block h-[130%] w-[160%] -translate-x-1/2" style={{ background: 'conic-gradient(from 166deg at 50% 0%, transparent 0deg, rgba(255,233,168,.09) 5deg, transparent 11deg, transparent 17deg, rgba(255,233,168,.07) 22deg, transparent 28deg)', transformOrigin: '50% 0%', animation: 'beamSway 14s ease-in-out infinite alternate' }} />
+        <span className="ambient absolute bottom-0 left-0 block h-[42%] w-full" style={{ background: 'radial-gradient(ellipse at 50% 100%, rgba(227,190,116,.22), transparent 65%)', animation: 'horizon 6s ease-in-out infinite' }} />
         {MOTES.map((m, i) => (
           <span key={i} className="ambient absolute bottom-0 rounded-full bg-[#F3DC9C]" style={{ left: `${m.left}%`, width: m.size, height: m.size, opacity: 0.6, boxShadow: '0 0 8px 2px rgba(227,190,116,.55)', ['--sway' as string]: `${m.sway}px`, animation: `riseUp ${m.dur}s linear ${m.delay}s infinite` }} />
         ))}
@@ -152,9 +140,8 @@ export default function Opening({ onStartMusic, onEnter, onDone }: Props) {
         ))}
       </motion.p>
 
-      <motion.div style={{ x: sx, y: sy }} className="relative">
+      <motion.div style={{ x: sx, y: sy }} className="relative" initial={{ opacity: 0, scale: 0.55 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 2, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}>
       <button
-        ref={orbRef}
         type="button"
         onClick={ignite}
         disabled={lit}
@@ -171,6 +158,23 @@ export default function Opening({ onStartMusic, onEnter, onDone }: Props) {
               <span className="absolute bottom-[-3px] left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-blush" style={{ boxShadow: '0 0 10px 2px rgba(242,166,192,.7)' }} />
             </span>
             <span className="ambient absolute inset-0 rounded-full border border-sun/40" style={{ animation: 'ripple 3.4s ease-out 1.2s infinite' }} aria-hidden="true" />
+            {/* the orb breathes light in: a ring that contracts onto it */}
+            <span className="ambient absolute inset-0 rounded-full border border-sun/50" style={{ animation: 'inhale 3.4s ease-in 0s infinite' }} aria-hidden="true" />
+            {/* tilted orbits with little planets of light */}
+            <span className="absolute -inset-20" style={{ transform: 'rotate(-24deg) scaleY(.3)' }} aria-hidden="true">
+              <span className="ambient absolute inset-0 rounded-full border border-sun/25" style={{ animation: 'orbit 16s linear infinite' }}>
+                <span className="absolute left-1/2 top-[-5px] h-2.5 w-2.5 -translate-x-1/2 rounded-full bg-[#FFE9A8]" style={{ boxShadow: '0 0 14px 4px rgba(227,190,116,.85)' }} />
+              </span>
+            </span>
+            <span className="absolute -inset-24" style={{ transform: 'rotate(28deg) scaleY(.26)' }} aria-hidden="true">
+              <span className="ambient absolute inset-0 rounded-full border border-skyblue/20" style={{ animation: 'orbit 23s linear infinite reverse' }}>
+                <span className="absolute left-1/2 top-[-4px] h-2 w-2 -translate-x-1/2 rounded-full bg-skyblue" style={{ boxShadow: '0 0 12px 3px rgba(127,182,230,.8)' }} />
+              </span>
+            </span>
+            {/* fireflies of light drawn into the orb */}
+            {FIREFLIES.map((f, i) => (
+              <span key={i} className="ambient absolute left-1/2 top-1/2 rounded-full bg-[#FFE9A8] opacity-0" style={{ width: f.size, height: f.size, marginLeft: -f.size / 2, marginTop: -f.size / 2, boxShadow: '0 0 10px 3px rgba(255,224,140,.8)', ['--sx' as string]: `${f.sx}px`, ['--sy' as string]: `${f.sy}px`, animation: `converge ${f.dur}s ease-in ${f.delay}s infinite` }} aria-hidden="true" />
+            ))}
           </>
         )}
         {/* waiting ring */}
@@ -185,6 +189,8 @@ export default function Opening({ onStartMusic, onEnter, onDone }: Props) {
 
       {lit && !simple && (
         <>
+          {/* a big soft wave of light that spreads out of the orb (transform + opacity only: smooth on phones) */}
+          <span aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2 block h-[230vmax] w-[230vmax] rounded-full" style={{ marginLeft: '-115vmax', marginTop: '-115vmax', background: 'radial-gradient(circle, rgba(255,236,170,.6) 0%, rgba(227,190,116,.3) 22%, rgba(227,190,116,0) 55%)', willChange: 'transform, opacity', animation: 'lightWave 2.8s cubic-bezier(.3,0,.2,1) .7s both' }} />
           {/* slow turning rays of light */}
           <motion.div
             aria-hidden="true"
@@ -225,9 +231,5 @@ export default function Opening({ onStartMusic, onEnter, onDone }: Props) {
         <SkipForward size={14} aria-hidden="true" /> Skip introduction
       </button>
     </motion.div>
-    {lit && !simple && (
-      <motion.div aria-hidden="true" className="pointer-events-none fixed z-[101] h-[200px] w-[200px] rounded-full" style={{ left: centre.x - 100, top: centre.y - 100, scale: ringScale, opacity: ringOpacity, border: '2px solid rgba(243,220,156,.6)', boxShadow: '0 0 50px 10px rgba(227,190,116,.4), inset 0 0 50px 8px rgba(227,190,116,.3)' }} />
-    )}
-    </>
   );
 }

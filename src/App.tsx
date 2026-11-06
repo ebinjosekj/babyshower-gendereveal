@@ -22,6 +22,16 @@ function Experience() {
   const { simple } = useMotion();
   const [entered, setEntered] = useState(false);
   const [showOpening, setShowOpening] = useState(true);
+  // the heavy sparkle layer waits until the opening has finished fading, so the hand-over stays smooth
+  const [calm, setCalm] = useState(false);
+  useEffect(() => {
+    if (!entered) {
+      setCalm(false);
+      return;
+    }
+    const id = window.setTimeout(() => setCalm(true), 3200);
+    return () => window.clearTimeout(id);
+  }, [entered]);
   const music = useMusic();
   useSmoothScroll(entered, !simple);
 
@@ -35,7 +45,7 @@ function Experience() {
     <>
       {showOpening && <Opening onStartMusic={music.start} onEnter={() => setEntered(true)} onDone={() => setShowOpening(false)} />}
       {entered && <ScrollOrb />}
-      {entered && !simple && <Atmosphere />}
+      {entered && calm && !simple && <Atmosphere />}
       <Nav visible={entered} />
       <MusicPlayer music={music} visible={entered} />
 

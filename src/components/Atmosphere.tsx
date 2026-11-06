@@ -164,9 +164,9 @@ export default function Atmosphere() {
         ))}
       </div>
       <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-[1] overflow-hidden">
-        <motion.div className="absolute -left-[20%] top-[60%] h-[60vmax] w-[60vmax] rounded-full opacity-[.16] blur-3xl" style={{ y: cloudA, background: 'radial-gradient(circle, #7FB6E6, transparent 65%)' }} />
-        <motion.div className="absolute -right-[25%] top-[100%] h-[55vmax] w-[55vmax] rounded-full opacity-[.15] blur-3xl" style={{ y: cloudB, background: 'radial-gradient(circle, #F2A6C0, transparent 65%)' }} />
-        <motion.div className="absolute left-[10%] top-[170%] h-[50vmax] w-[50vmax] rounded-full opacity-[.14] blur-3xl" style={{ y: cloudC, background: 'radial-gradient(circle, #E3BE74, transparent 65%)' }} />
+        <motion.div className="absolute -left-[20%] top-[60%] h-[60vmax] w-[60vmax] rounded-full opacity-[.16]" style={{ y: cloudA, background: 'radial-gradient(circle, #7FB6E6, transparent 65%)' }} />
+        <motion.div className="absolute -right-[25%] top-[100%] h-[55vmax] w-[55vmax] rounded-full opacity-[.15]" style={{ y: cloudB, background: 'radial-gradient(circle, #F2A6C0, transparent 65%)' }} />
+        <motion.div className="absolute left-[10%] top-[170%] h-[50vmax] w-[50vmax] rounded-full opacity-[.14]" style={{ y: cloudC, background: 'radial-gradient(circle, #E3BE74, transparent 65%)' }} />
         <motion.div className="absolute left-1/2 top-1/2 -ml-[min(48vw,330px)] -mt-[min(48vw,330px)] h-[min(96vw,660px)] w-[min(96vw,660px)] rounded-full border border-sun/25" style={{ rotate: ringTurn, scale: ringScale }}>
           <span className="absolute -top-1 left-1/2 h-2 w-2 -translate-x-1/2 rounded-full bg-[#FFE9A8] shadow-[0_0_12px_3px_rgba(227,190,116,.8)]" />
           <span className="absolute -bottom-1 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-blush shadow-[0_0_10px_2px_rgba(242,166,192,.7)]" />

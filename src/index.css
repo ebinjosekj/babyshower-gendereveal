@@ -413,3 +413,29 @@ body {
   animation: textShine 5s linear infinite;
 }
 .simple .shimmer-text { animation: none; background: none; -webkit-text-fill-color: currentColor; color: #f6ecd0; }
+
+/* ---- opening: smooth hand-over to the page (opacity / transform only) ---- */
+@keyframes lightWave {
+  from { transform: scale(0.04); opacity: 0.95; }
+  to { transform: scale(1); opacity: 0; }
+}
+/* once the orb is tapped, stop the endless background loops so the phone's whole effort goes into the transition */
+.opening-lit .ambient:not(.keep) { animation-play-state: paused !important; }
+@keyframes beamSway {
+  from { transform: translateX(-50%) rotate(-7deg); }
+  to { transform: translateX(-50%) rotate(7deg); }
+}
+@keyframes horizon {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 1; }
+}
+@keyframes inhale {
+  0% { transform: scale(2.3); opacity: 0; }
+  55% { opacity: 0.55; }
+  100% { transform: scale(1); opacity: 0; }
+}
+@keyframes converge {
+  0% { transform: translate(var(--sx), var(--sy)) scale(0.5); opacity: 0; }
+  18% { opacity: 1; }
+  100% { transform: translate(0, 0) scale(0.1); opacity: 0; }
+}
