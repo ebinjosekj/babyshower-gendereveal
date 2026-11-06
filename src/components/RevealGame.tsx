@@ -71,7 +71,7 @@ export default function RevealGame() {
   const sameName = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
 
   // Move an existing name to another team (works from any phone: it is matched by name).
-  const changeByName = async (nm: string, team: Team): Promise<boolean> => {
+  const changeByName = async (nm: string, team: Team): Promise<boolean | 'gone'> => {
     setBusy(true);
     setError('');
     try {
@@ -82,7 +82,11 @@ export default function RevealGame() {
         confetti({ count: 120 });
         return true;
       }
-      setError(res === 'unavailable' ? UNAVAILABLE : res === 'not_found' ? NOT_FOUND : 'We couldn’t save that. Please try again in a moment.');
+      if (res === 'not_found') {
+        setError(NOT_FOUND);
+        return 'gone';
+      }
+      setError(res === 'unavailable' ? UNAVAILABLE : 'We couldn’t save that. Please try again in a moment.');
       return false;
     } catch {
       setError('Something went wrong. Please check your connection and try again.');
@@ -98,11 +102,24 @@ export default function RevealGame() {
       setChanging(false);
       return;
     }
-    if (await changeByName(saved.name, team)) {
+    const res = await changeByName(saved.name, team);
+    if (res === true) {
       const record: Saved = { ...saved, team };
       persist(record);
       setSaved(record);
       setChanging(false);
+    } else if (res === 'gone') {
+      // Our entry no longer exists on the server (e.g. it was removed): forget it here and let the guest join again.
+      try {
+        localStorage.removeItem(KEY);
+      } catch {
+        /* private mode */
+      }
+      setSaved(null);
+      setChanging(false);
+      setPick(team);
+      setName(saved.name);
+      setError('Your earlier pick was removed, so please join a team again.');
     }
   };
 
@@ -121,7 +138,7 @@ export default function RevealGame() {
   const claimName = async () => {
     if (!pick) return;
     const clean = cleanName(name);
-    if (await changeByName(clean, pick)) {
+    if ((await changeByName(clean, pick)) === true) {
       const record: Saved = { team: pick, name: clean };
       persist(record);
       setSaved(record);

@@ -48,7 +48,18 @@ export default function Rsvp() {
     try {
       const res = await changeReply('change_rsvp', { p_name: clean, p_status: status });
       if (res === 'updated') store({ name: clean, status });
-      else setError(res === 'unavailable' ? UNAVAILABLE : res === 'not_found' ? NOT_FOUND : 'We couldn’t save your reply. Please try again in a moment.');
+      else if (res === 'not_found' && done && done.name === clean) {
+        // Our earlier reply no longer exists on the server: forget it here and let the guest reply again.
+        try {
+          localStorage.removeItem(KEY);
+        } catch {
+          /* private mode */
+        }
+        setDone(null);
+        setEditing(false);
+        setName(clean);
+        setError('Your earlier reply was removed, so please send it again.');
+      } else setError(res === 'unavailable' ? UNAVAILABLE : res === 'not_found' ? NOT_FOUND : 'We couldn’t save your reply. Please try again in a moment.');
     } catch {
       setError('Something went wrong. Please check your connection and try again.');
     } finally {
