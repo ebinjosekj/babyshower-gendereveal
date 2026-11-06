@@ -14,75 +14,138 @@ html.lenis body {
 }
 
 body {
-  @apply bg-ivory font-sans text-cocoa antialiased;
+  @apply bg-ivory font-sans text-ink antialiased;
   overflow-x: clip;
-  background-image: radial-gradient(ellipse at 50% 0%, #fffdf8 0%, #f6eedf 55%, #efe3cb 100%);
-  background-attachment: fixed;
 }
 
 ::selection {
-  background: #e8d3a0;
-  color: #4a3626;
+  background: #ffc93c;
+  color: #2b1a57;
 }
 
 @layer components {
+  .title-grad {
+    background: linear-gradient(100deg, #ff9a3c 0%, #ff7a66 35%, #b8a6f0 70%, #27c4c4 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
   .gold-text {
-    background: linear-gradient(100deg, #8a6a2f 0%, #d8b469 25%, #f6e4b0 50%, #c9a24e 75%, #8a6a2f 100%);
+    background: linear-gradient(100deg, #9a7a2f 0%, #e8c877 30%, #fff1c0 50%, #c9a24e 75%, #9a7a2f 100%);
     background-size: 200% auto;
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
     -webkit-text-fill-color: transparent;
-    animation: shine 7s linear infinite;
+    animation: shimmer 7s linear infinite;
   }
   .glass {
-    background: linear-gradient(145deg, rgba(255, 253, 248, 0.86), rgba(246, 238, 223, 0.6));
-    -webkit-backdrop-filter: blur(14px);
-    backdrop-filter: blur(14px);
-    border: 1px solid rgba(201, 162, 78, 0.38);
-    box-shadow: 0 24px 60px -24px rgba(110, 86, 64, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.75);
+    background: linear-gradient(145deg, rgba(255, 252, 240, 0.9), rgba(255, 248, 234, 0.7));
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(232, 211, 160, 0.9);
+    box-shadow: 0 24px 50px -24px rgba(43, 26, 87, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.8);
   }
-  .btn-gold {
-    @apply inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full px-7 py-3 font-sans text-sm font-medium uppercase tracking-[0.18em] text-cocoa transition active:scale-[0.98] disabled:cursor-wait disabled:opacity-60;
-    background: linear-gradient(135deg, #f6e4b0 0%, #d8b469 45%, #b8903a 100%);
-    box-shadow: 0 10px 30px -10px rgba(154, 122, 47, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  .glass-dark {
+    background: linear-gradient(145deg, rgba(60, 36, 110, 0.7), rgba(43, 26, 87, 0.55));
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(184, 166, 240, 0.45);
+    box-shadow: 0 24px 50px -24px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.18);
   }
-  .btn-gold:hover {
-    filter: brightness(1.06);
+  .btn {
+    @apply inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full px-7 py-3 font-display text-sm font-medium uppercase tracking-[0.14em] transition active:scale-[0.97] disabled:cursor-wait disabled:opacity-60;
+  }
+  .btn-sun {
+    @apply btn text-plum;
+    background: linear-gradient(135deg, #ffe08a 0%, #ffc93c 45%, #ff9a3c 100%);
+    box-shadow: 0 12px 28px -10px rgba(255, 154, 60, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.65);
+  }
+  .btn-sun:hover {
+    filter: brightness(1.05);
+  }
+  .btn-mint {
+    @apply btn text-plum;
+    background: linear-gradient(135deg, #b9f3df 0%, #8ee3c2 45%, #27c4c4 100%);
+    box-shadow: 0 12px 28px -10px rgba(39, 196, 196, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.65);
   }
   .btn-ghost {
-    @apply inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full border border-gold/50 bg-ivory/60 px-6 py-3 font-sans text-xs font-medium uppercase tracking-[0.18em] text-mocha transition hover:bg-champagne/40 active:scale-[0.98];
+    @apply btn border-2 border-champagne bg-ivory/70 text-ink hover:bg-sun/25;
+  }
+  .btn-ghost-light {
+    @apply btn border-2 border-white/50 bg-white/10 text-ivory hover:bg-white/20;
   }
   .field {
-    @apply w-full rounded-xl border border-gold/40 bg-ivory/80 px-4 py-3 font-sans text-base text-cocoa placeholder:text-mocha/50 focus:border-gold focus:outline-none focus:ring-2 focus:ring-champagne;
+    @apply w-full rounded-2xl border-2 border-champagne bg-ivory/90 px-4 py-3 font-sans text-base font-medium text-ink placeholder:text-ink-soft/60 focus:border-tangerine focus:outline-none focus:ring-4 focus:ring-sun/40;
   }
   .kicker {
-    @apply font-sans text-[11px] font-medium uppercase tracking-[0.5em] text-gold-deep;
+    @apply font-display text-xs font-medium uppercase tracking-[0.4em] text-tangerine;
   }
 }
 
-@keyframes shine {
-  to {
-    background-position: 200% center;
-  }
+/* wings flap */
+.flap {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: flap 0.42s ease-in-out infinite alternate;
 }
-@keyframes drift {
+@keyframes flap {
   from {
-    transform: translate3d(-30vw, 0, 0);
+    transform: scaleX(1);
   }
   to {
-    transform: translate3d(130vw, 0, 0);
+    transform: scaleX(0.3);
   }
 }
-@keyframes twinkle {
-  0%,
-  100% {
-    opacity: 0.25;
-    transform: scale(0.8);
+
+/* butterflies flying across the viewport (wrapper must be position:absolute; left:0) */
+@keyframes flyAcross {
+  0% {
+    transform: translate(-15vw, 0);
+  }
+  25% {
+    transform: translate(20vw, -7vh);
   }
   50% {
-    opacity: 1;
-    transform: scale(1.15);
+    transform: translate(50vw, 5vh);
+  }
+  75% {
+    transform: translate(80vw, -9vh);
+  }
+  100% {
+    transform: translate(115vw, 2vh);
+  }
+}
+@keyframes flyBack {
+  0% {
+    transform: translate(115vw, 0) scaleX(-1);
+  }
+  25% {
+    transform: translate(78vw, 8vh) scaleX(-1);
+  }
+  50% {
+    transform: translate(45vw, -6vh) scaleX(-1);
+  }
+  75% {
+    transform: translate(18vw, 7vh) scaleX(-1);
+  }
+  100% {
+    transform: translate(-15vw, -2vh) scaleX(-1);
+  }
+}
+
+@keyframes drift {
+  from {
+    transform: translate3d(-35vw, 0, 0);
+  }
+  to {
+    transform: translate3d(135vw, 0, 0);
+  }
+}
+@keyframes shimmer {
+  to {
+    background-position: 200% center;
   }
 }
 
@@ -95,4 +158,38 @@ body {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* ---- extra motion helpers ---- */
+@keyframes riseUp {
+  0% {
+    transform: translate3d(0, 20vh, 0);
+  }
+  100% {
+    transform: translate3d(var(--sway, 0px), -135vh, 0);
+  }
+}
+@keyframes fall {
+  0% {
+    transform: translate3d(0, -10vh, 0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--sway, 0px), 110vh, 0) rotate(540deg);
+    opacity: 0.9;
+  }
+}
+
+/* Simplified animation mode: every decorative loop stops. */
+.simple .ambient {
+  animation: none !important;
+}
+.simple .hide-simple {
+  display: none !important;
+}
+.simple * {
+  scroll-behavior: auto !important;
 }

@@ -1,50 +1,74 @@
-import { lazy, Suspense, useState } from 'react';
-import { AnimatePresence } from 'framer-motion';
-import Envelope from './components/Envelope';
-import Particles from './components/Particles';
-import Hero from './components/Hero';
-import Story from './components/Story';
-import Countdown from './components/Countdown';
-import Details from './components/Details';
-import Closing from './components/Closing';
+import { lazy, Suspense, useEffect, useState } from 'react';
+import Opening from './components/Opening';
+import Nav from './components/Nav';
 import MusicPlayer from './components/MusicPlayer';
-import { GuestProvider } from './context/GuestContext';
-import { useSmoothScroll } from './hooks/useSmoothScroll';
+import Adventure from './components/Adventure';
+import Countdown from './components/Countdown';
+import { MotionProvider, useMotion } from './context/MotionContext';
 import { useMusic } from './hooks/useMusic';
+import { useSmoothScroll } from './hooks/useSmoothScroll';
 
-// Below-the-fold sections load on demand (keeps the first paint fast on mobile).
-const MapSection = lazy(() => import('./components/MapSection'));
-const Voting = lazy(() => import('./components/Voting'));
+// Everything below the fold loads on demand so the opening appears fast on phones.
+const WorldMap = lazy(() => import('./components/WorldMap'));
+const RevealGame = lazy(() => import('./components/RevealGame'));
+const EventDetails = lazy(() => import('./components/EventDetails'));
 const Rsvp = lazy(() => import('./components/Rsvp'));
 const Gallery = lazy(() => import('./components/Gallery'));
+const Finale = lazy(() => import('./components/Finale'));
+const AdminApp = lazy(() => import('./components/admin/AdminApp'));
 
-export default function App() {
-  const [opened, setOpened] = useState(false);
+function Experience() {
+  const { simple } = useMotion();
+  const [entered, setEntered] = useState(false);
   const music = useMusic();
-  useSmoothScroll(opened);
+  useSmoothScroll(entered, !simple);
+
+  const replay = () => {
+    window.scrollTo(0, 0);
+    setEntered(false);
+  };
 
   return (
-    <GuestProvider>
-      <Particles />
-      <AnimatePresence>
-        {!opened && <Envelope key="envelope" onSeal={music.start} onOpened={() => setOpened(true)} />}
-      </AnimatePresence>
+    <>
+      {!entered && <Opening onStartMusic={music.start} onEnter={() => setEntered(true)} />}
+      <Nav visible={entered} />
+      <MusicPlayer music={music} visible={entered} />
 
-      <main className="relative z-10">
-        <Hero active={opened} />
-        <Story />
+      <main>
+        <Adventure />
         <Countdown />
-        <Details />
-        <Suspense fallback={<div className="min-h-[60vh]" aria-hidden="true" />}>
-          <MapSection />
-          <Voting />
+        <Suspense fallback={<div className="min-h-[100svh]" aria-hidden="true" />}>
+          <WorldMap />
+          <RevealGame />
+          <EventDetails />
           <Rsvp />
           <Gallery />
+          <Finale onReplay={replay} />
         </Suspense>
-        <Closing />
       </main>
+    </>
+  );
+}
 
-      <MusicPlayer music={music} visible={opened} />
-    </GuestProvider>
+const isAdminHash = () => window.location.hash.startsWith('#/admin');
+
+export default function App() {
+  const [admin, setAdmin] = useState(isAdminHash);
+  useEffect(() => {
+    const on = () => setAdmin(isAdminHash());
+    window.addEventListener('hashchange', on);
+    return () => window.removeEventListener('hashchange', on);
+  }, []);
+
+  return (
+    <MotionProvider>
+      {admin ? (
+        <Suspense fallback={<div className="p-10 text-center font-display text-plum">Loading…</div>}>
+          <AdminApp />
+        </Suspense>
+      ) : (
+        <Experience />
+      )}
+    </MotionProvider>
   );
 }

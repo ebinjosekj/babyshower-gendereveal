@@ -1,45 +1,36 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import Lenis from 'lenis';
 import { gsap, ScrollTrigger } from '../lib/gsap';
 import { setLenis } from '../lib/scroll';
 
-// Smooth (inertial) scrolling wired into GSAP ScrollTrigger.
-// Scrolling is locked until the envelope has been opened.
-export function useSmoothScroll(enabled: boolean) {
-  const lenisRef = useRef<Lenis | null>(null);
+// Page scroll is locked until the opening sequence is finished.
+// Inertial smooth scrolling is used unless the simplified animation mode is on.
+export function useSmoothScroll(unlocked: boolean, smooth: boolean) {
+  useEffect(() => {
+    document.body.style.overflow = unlocked ? '' : 'hidden';
+    if (unlocked) {
+      window.scrollTo(0, 0);
+      requestAnimationFrame(() => ScrollTrigger.refresh());
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [unlocked]);
 
   useEffect(() => {
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const lenis = new Lenis({ duration: reduce ? 0.01 : 1.15, smoothWheel: !reduce });
-    lenisRef.current = lenis;
+    if (!unlocked || !smooth) return;
+    const lenis = new Lenis({ duration: 1.15 });
     setLenis(lenis);
-    lenis.stop();
-
     const onScroll = () => ScrollTrigger.update();
     lenis.on('scroll', onScroll);
     const tick = (time: number) => lenis.raf(time * 1000);
     gsap.ticker.add(tick);
     gsap.ticker.lagSmoothing(0);
-
     return () => {
       gsap.ticker.remove(tick);
       lenis.off('scroll', onScroll);
       lenis.destroy();
       setLenis(null);
-      lenisRef.current = null;
     };
-  }, []);
-
-  useEffect(() => {
-    const lenis = lenisRef.current;
-    document.body.style.overflow = enabled ? '' : 'hidden';
-    if (!lenis) return;
-    if (enabled) {
-      lenis.start();
-      window.scrollTo(0, 0);
-      ScrollTrigger.refresh();
-    } else {
-      lenis.stop();
-    }
-  }, [enabled]);
+  }, [unlocked, smooth]);
 }

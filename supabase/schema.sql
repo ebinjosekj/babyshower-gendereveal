@@ -1,57 +1,107 @@
--- Run this once in Supabase → SQL Editor.
--- Before using the site: Authentication → Sign In / Providers → enable "Allow anonymous sign-ins".
+-- Run once in Supabase → SQL Editor → New query → Run.
+--
+-- ⚠ This REPLACES the tables from the earlier version of the site (guests / rsvps / votes).
+--   It is safe if you only have test data; real guest replies in those tables would be deleted.
+--
+-- Anonymous sign-ins are NOT needed any more. Guests submit with the public anon key;
+-- Row Level Security below decides what that key may do.
 
--- 1) Guests: one row per person (names are shown publicly in the voting lists)
-create table if not exists public.guests (
-  user_id    uuid primary key default auth.uid(),
-  guest_name text not null check (char_length(guest_name) between 1 and 40),
-  name_key   text not null unique,           -- lower-cased, whitespace-collapsed → no duplicate names
-  created_at timestamptz not null default now()
+drop view  if exists public.rsvp_summary;
+drop table if exists public.votes       cascade;
+drop table if exists public.predictions cascade;
+drop table if exists public.rsvps       cascade;
+drop table if exists public.guests      cascade;
+drop table if exists public.admins      cascade;
+
+-- ───────────────────────── tables ─────────────────────────
+
+create table public.rsvps (
+  id                uuid primary key default gen_random_uuid(),
+  guest_name        text not null check (char_length(btrim(guest_name)) between 2 and 60),
+  email             text check (email is null or (char_length(email) <= 120 and email ~* '^[^@\s]+@[^@\s]+\.[^@\s]+$')),
+  attendees         int  not null default 1 check (attendees between 0 and 10),
+  attendance_status text not null check (attendance_status in ('attending', 'blessing', 'declined')),
+  wishes            text check (wishes is null or char_length(wishes) <= 600),
+  created_at        timestamptz not null default now(),
+  -- one reply per name ("Jane  DOE" and "jane doe" count as the same guest)
+  name_key          text generated always as (lower(regexp_replace(btrim(guest_name), '\s+', ' ', 'g'))) stored
+);
+create unique index rsvps_name_key_uq on public.rsvps (name_key);
+
+create table public.predictions (
+  id            uuid primary key default gen_random_uuid(),
+  guest_name    text not null check (char_length(btrim(guest_name)) between 2 and 60),
+  selected_team text not null check (selected_team in ('sunshine', 'nature')),
+  created_at    timestamptz not null default now(),
+  name_key      text generated always as (lower(regexp_replace(btrim(guest_name), '\s+', ' ', 'g'))) stored
+);
+create unique index predictions_name_key_uq on public.predictions (name_key);
+
+-- who may open the dashboard (nobody can read this table through the API)
+create table public.admins (
+  email text primary key
 );
 
--- 2) RSVPs: private (each guest can only see their own; you read them in the dashboard)
-create table if not exists public.rsvps (
-  user_id    uuid primary key references public.guests(user_id) on delete cascade,
-  status     text not null check (status in ('coming', 'blessing-online', 'cannot-attend')),
-  party_size int  not null default 1 check (party_size between 1 and 10),
-  message    text check (char_length(message) <= 500),
-  updated_at timestamptz not null default now()
-);
+-- ───────────────────────── helpers ─────────────────────────
 
--- 3) Votes: public (counts + names), one per guest, changeable
-create table if not exists public.votes (
-  user_id    uuid primary key references public.guests(user_id) on delete cascade,
-  team       text not null check (team in ('boy', 'girl')),
-  updated_at timestamptz not null default now()
-);
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.admins
+    where lower(email) = lower(coalesce(auth.jwt() ->> 'email', ''))
+  );
+$$;
 
-alter table public.guests enable row level security;
-alter table public.rsvps  enable row level security;
-alter table public.votes  enable row level security;
+-- Public scoreboard: only the two totals, never names.
+create or replace function public.prediction_counts()
+returns json
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select json_build_object(
+    'sunshine', count(*) filter (where selected_team = 'sunshine'),
+    'nature',   count(*) filter (where selected_team = 'nature')
+  )
+  from public.predictions;
+$$;
 
--- guests
-create policy "guests are public"   on public.guests for select to anon, authenticated using (true);
-create policy "guest inserts self"  on public.guests for insert to authenticated with check (user_id = (select auth.uid()));
-create policy "guest updates self"  on public.guests for update to authenticated
-  using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
+-- table permissions (RLS below still decides which rows)
+grant insert on public.rsvps, public.predictions to anon, authenticated;
+grant select, update, delete on public.rsvps       to authenticated;
+grant select, delete         on public.predictions to authenticated;
 
--- rsvps (private)
-create policy "rsvp read own"   on public.rsvps for select to authenticated using (user_id = (select auth.uid()));
-create policy "rsvp insert own" on public.rsvps for insert to authenticated with check (user_id = (select auth.uid()));
-create policy "rsvp update own" on public.rsvps for update to authenticated
-  using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
+grant execute on function public.is_admin()          to anon, authenticated;
+grant execute on function public.prediction_counts() to anon, authenticated;
 
--- votes (public read)
-create policy "votes are public" on public.votes for select to anon, authenticated using (true);
-create policy "vote insert own"  on public.votes for insert to authenticated with check (user_id = (select auth.uid()));
-create policy "vote update own"  on public.votes for update to authenticated
-  using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
+-- ───────────────────────── row level security ─────────────────────────
 
--- Live vote updates
-alter publication supabase_realtime add table public.votes;
+alter table public.rsvps       enable row level security;
+alter table public.predictions enable row level security;
+alter table public.admins      enable row level security;   -- no policies → API can't touch it
 
--- Handy host view (dashboard only): who is coming?
-create or replace view public.rsvp_summary with (security_invoker = true) as
-  select g.guest_name, r.status, r.party_size, r.message, r.updated_at
-  from public.rsvps r join public.guests g using (user_id)
-  order by r.updated_at desc;
+-- visitors may ADD a reply / prediction (the table constraints above validate it) …
+create policy "anyone can rsvp"       on public.rsvps       for insert to anon, authenticated with check (true);
+create policy "anyone can predict"    on public.predictions for insert to anon, authenticated with check (true);
+
+-- … but only admins can read, change or delete them.
+create policy "admins read rsvps"        on public.rsvps       for select to authenticated using (public.is_admin());
+create policy "admins update rsvps"      on public.rsvps       for update to authenticated using (public.is_admin()) with check (public.is_admin());
+create policy "admins delete rsvps"      on public.rsvps       for delete to authenticated using (public.is_admin());
+create policy "admins read predictions"  on public.predictions for select to authenticated using (public.is_admin());
+create policy "admins delete predictions" on public.predictions for delete to authenticated using (public.is_admin());
+
+-- ───────────────────────── make yourselves admins ─────────────────────────
+-- 1) Supabase → Authentication → Users → Add user → (email + password, tick "Auto confirm").
+-- 2) Replace the email below with that user's email and run this line:
+--
+-- insert into public.admins (email) values ('your-email@example.com');
+--
+-- 3) Recommended: Authentication → Sign In / Providers → Email → turn OFF "Allow new users to sign up".
+--    Then open  https://ebinjosekj.github.io/babyshower-gendereveal/#/admin

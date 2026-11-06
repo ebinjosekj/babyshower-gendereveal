@@ -5,35 +5,47 @@ export const EVENT = {
   parentOne: 'Nikhitha',
   parentTwo: 'Ebin',
   title: 'Baby Shower & Gender Reveal',
-  tagline: 'A little love is on the way',
-  // 6:00 PM Eastern (EST, UTC-5 on Nov 21). Used by countdown + calendar links.
+  heading: 'A Little Wonder Is On The Way!',
+  subtitle:
+    'Tiny hands, big dreams, endless possibilities. Join us as we celebrate the beginning of our greatest adventure.',
+  // 6:00 PM Eastern (EST, UTC-5 on Nov 21). Used by the countdown and calendar links.
   startISO: '2026-11-21T18:00:00-05:00',
   endISO: '2026-11-21T21:00:00-05:00',
   timeZone: 'America/Toronto',
-  dateLabel: 'Saturday, November 21, 2026',
+  dateLabel: 'November 21, 2026',
   timeLabel: '6:00 PM',
   venueName: 'Evoke',
   // TODO: replace with the venue's full street address for an exact pin
   // (e.g. 'Evoke, 123 Main St, Kitchener, ON'). Used by the map + directions.
   venueQuery: 'Evoke, Kitchener, ON',
-  venueAddressLine: '', // optional line shown under the venue name
-  dressCode: 'Brown, beige or gold are recommended.',
   contacts: [
     { name: 'Ebin', tel: '+15197816212', display: '519 781 6212' },
     { name: 'Nikhitha', tel: '+15197310349', display: '519 731 0349' },
   ],
 } as const;
 
-// Photos live in /public/gallery. Missing files are skipped automatically.
+export const TEAM_LABEL = { sunshine: 'Team Sunshine', nature: 'Team Nature' } as const;
+
+// Photos live in /public/photos. Missing files are skipped automatically.
+// "invitation.jpg" is the artwork from your original invitation site.
 export const GALLERY: { file: string; caption: string }[] = [
-  { file: '01.jpg', caption: 'Our story' },
-  { file: '02.jpg', caption: 'Together' },
-  { file: '03.jpg', caption: 'Little moments' },
-  { file: '04.jpg', caption: 'Waiting for you' },
-  { file: '05.jpg', caption: 'Growing love' },
-  { file: '06.jpg', caption: 'Almost here' },
-  { file: '07.jpg', caption: 'Our family' },
-  { file: '08.jpg', caption: 'Forever grateful' },
+  { file: 'invitation.jpg', caption: 'Our invitation' },
+  { file: '01.jpg', caption: 'Together' },
+  { file: '02.jpg', caption: 'Little moments' },
+  { file: '03.jpg', caption: 'Waiting for you' },
+  { file: '04.jpg', caption: 'Growing love' },
+  { file: '05.jpg', caption: 'Almost here' },
+  { file: '06.jpg', caption: 'Our family' },
+  { file: '07.jpg', caption: 'Forever grateful' },
 ];
 
-export const MUSIC_SRC = `${import.meta.env.BASE_URL}audio/lullaby.mp3`;
+// Optional framed couple photo in "Our Little Adventure": public/photos/couple.jpg
+export const COUPLE_PHOTO = 'couple.jpg';
+
+// Music: by default an original music-box lullaby is generated in the browser
+// (no file, no licensing). To use your own licensed track instead, put it at
+// public/audio/wonder.mp3 and set useFile to true.
+export const MUSIC = {
+  useFile: false,
+  src: `${import.meta.env.BASE_URL}audio/wonder.mp3`,
+};

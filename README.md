@@ -1,38 +1,50 @@
-# Nikhitha & Ebin — Baby Shower & Gender Reveal (cinematic invitation)
+# A Little Wonder Is On The Way — Nikhitha & Ebin
 
-React + TypeScript + Tailwind, animated with GSAP (scroll scenes, hero timeline) and Framer Motion
-(envelope, tilt, reveals). Supabase stores RSVPs and live Team Boy / Team Girl votes.
-The original single-file site in the repo root is untouched.
+Baby Shower & Gender Reveal · **November 21, 2026 · 6:00 PM · Evoke**
 
-## Run it
+A cinematic, story-style invitation: golden-door opening → floating-island adventure → crystal countdown →
+interactive wonder-world map → **Team Sunshine vs Team Nature** prediction game → event details & map → RSVP →
+photo gallery → fireworks finale. Plus a parents-only admin dashboard.
+
+React · TypeScript · Vite · Tailwind CSS · GSAP · Framer Motion · Supabase · Lucide icons.
+
+## Run locally
 
 ```bash
-
-cp .env.example .env     # add your Supabase URL + anon key (optional for a first look)
 npm install
+cp .env.example .env      # add your Supabase URL + anon key (optional — see "Preview mode")
 npm run dev
 ```
 
-Without `.env` the site runs in **preview mode** (everything works, nothing is saved).
+**Preview mode:** without `.env` everything works, but RSVPs / predictions are not saved or shared.
 
-## Before you share the link
+## One-time setup
 
-1. **Supabase**: create a project → SQL Editor → run `supabase/schema.sql` →
-   Authentication → Sign In / Providers → enable **Anonymous sign-ins**.
-2. **Venue**: set the full street address in `src/config.ts` → `venueQuery` (map + directions use it).
-   Currently `Evoke, Kitchener, ON` — a guess; please confirm.
-3. **Music**: add your own licensed track as `public/audio/lullaby.mp3` (button hides itself if missing).
-4. **Photos**: add `public/gallery/01.jpg … 08.jpg` (missing ones are skipped).
-5. Check names/phones in `src/config.ts` (copied from your existing site).
+1. **Supabase** → SQL Editor → run `supabase/schema.sql`
+   (⚠ it replaces the tables from the earlier version of this site — fine if they only hold test data).
+2. **Admin account:** Authentication → Users → *Add user* (email + password, auto-confirm). Then run in the SQL Editor:
+   `insert into public.admins (email) values ('your-email@example.com');`
+   and turn **off** "Allow new users to sign up" (Authentication → Sign In / Providers → Email).
+3. **GitHub** → Settings → Secrets and variables → Actions: add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`
+   (the *anon/public* key only — never a service-role key). Settings → Pages → Source: **GitHub Actions**.
+4. Push to `main` — the workflow builds and publishes automatically.
 
-## Deploy (GitHub Pages)
+Admin dashboard: `https://ebinjosekj.github.io/babyshower-gendereveal/#/admin`
+(totals, confirmed guests, declined, team counts, wishes, search/filter, CSV export).
 
-The workflow in `.github/workflows/deploy.yml` builds and publishes on every push to `main`. Add repo secrets
-`VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`, then Settings → Pages → Source → **GitHub Actions**.
+## Things to personalise (`src/config.ts`)
 
-## Notes
+- `venueQuery` — put Evoke's full street address for an exact map pin and directions.
+- `GALLERY` + `public/photos/` — add `01.jpg … 07.jpg`. `invitation.jpg` is your original invitation artwork.
+- `public/photos/couple.jpg` (optional) — appears framed in "Our Little Adventure".
+- Music — by default an **original music-box lullaby is generated in the browser** (no file, no licensing).
+  To use your own licensed track: save `public/audio/wonder.mp3` and set `MUSIC.useFile = true`.
 
-- Palette: champagne gold, ivory, beige, cocoa — no pink or blue. Teams use bronze vs pearl.
-- RSVPs are private (only you see them: Supabase → Table editor → `rsvp_summary`). Voter names are public.
-- Honors `prefers-reduced-motion`; particles pause when the tab is hidden; below-the-fold sections lazy-load.
-- Google's embedded map keeps its own pins; it is warm-tinted with a CSS filter to sit in the palette.
+## How it behaves
+
+- Music only starts after the visitor taps the door / enter / skip, and the floating control offers play, pause, mute and volume.
+- **Simplified animation mode** switches on automatically for reduced-motion, low-memory, low-core and data-saver devices
+  (and can be toggled in the menu). It stops decorative loops, scroll effects and fireworks.
+- Predictions and RSVPs: one per name (database-enforced) and one per device; the public scoreboard shows only totals.
+  RSVPs and names are readable only by admins (Row Level Security). The RSVP form has a hidden bot trap.
+- The baby's gender is not stored or shown anywhere.
