@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { motion, useScroll, useSpring, useTransform, useVelocity } from 'framer-motion';
+import { AnimatePresence, motion, useScroll, useSpring, useTransform, useVelocity } from 'framer-motion';
 import { confetti } from '../lib/confetti';
 
 const rnd = (n: number) => {
@@ -146,6 +146,7 @@ export default function Atmosphere() {
   return (
     <>
       <StarTracker />
+      <ScrollCue />
       <DawnGlow />
       <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-[1] overflow-hidden">
         {MOTES.map((m, i) => (
@@ -231,4 +232,52 @@ function DawnGlow() {
   const { scrollYProgress } = useScroll();
   const opacity = useTransform(scrollYProgress, [0, 0.55, 1], [0, 0.12, 0.6]);
   return <motion.div aria-hidden="true" className="pointer-events-none fixed inset-x-0 bottom-0 z-[1] h-[45vh]" style={{ opacity, background: 'radial-gradient(ellipse at 50% 100%, rgba(242,166,192,.28), rgba(227,190,116,.26) 38%, transparent 70%)' }} />;
+}
+
+// If the guest stops scrolling for a few seconds, a gentle cue reminds them to keep going.
+function ScrollCue() {
+  const { scrollYProgress } = useScroll();
+  const [idle, setIdle] = useState(false);
+  const [typing, setTyping] = useState(false);
+  const [more, setMore] = useState(true);
+  useEffect(() => scrollYProgress.on('change', (v) => setMore(v < 0.96)), [scrollYProgress]);
+  useEffect(() => {
+    let id = 0;
+    const arm = () => {
+      setIdle(false);
+      window.clearTimeout(id);
+      id = window.setTimeout(() => setIdle(true), 4500);
+    };
+    const inField = () => setTyping(['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName ?? ''));
+    arm();
+    window.addEventListener('scroll', arm, { passive: true });
+    window.addEventListener('touchmove', arm, { passive: true });
+    window.addEventListener('wheel', arm, { passive: true });
+    window.addEventListener('keydown', arm);
+    document.addEventListener('focusin', inField);
+    document.addEventListener('focusout', inField);
+    return () => {
+      window.clearTimeout(id);
+      window.removeEventListener('scroll', arm);
+      window.removeEventListener('touchmove', arm);
+      window.removeEventListener('wheel', arm);
+      window.removeEventListener('keydown', arm);
+      document.removeEventListener('focusin', inField);
+      document.removeEventListener('focusout', inField);
+    };
+  }, []);
+  return (
+    <AnimatePresence>
+      {idle && more && !typing && (
+        <motion.div aria-hidden="true" className="pointer-events-none fixed inset-x-0 z-[60] flex justify-center" style={{ bottom: 'max(18px, env(safe-area-inset-bottom, 0px))' }} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}>
+          <span className="flex flex-col items-center rounded-full border border-sun/50 bg-ocean/80 px-5 pb-1 pt-2.5 font-sans text-[11px] font-medium uppercase tracking-[0.3em] text-ivory shadow-[0_8px_30px_-8px_rgba(0,0,0,.8)]">
+            Keep scrolling
+            <span className="ambient mt-0.5 block text-sun" style={{ animation: 'bob 1.8s ease-in-out infinite' }}>
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+            </span>
+          </span>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
 }

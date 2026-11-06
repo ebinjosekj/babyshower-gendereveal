@@ -222,7 +222,11 @@ export default function RevealGame() {
           <span className="absolute inset-[22%] rounded-full" style={{ background: gold ? 'radial-gradient(circle at 35% 30%,#FFE8F1,#F2A6C0 55%,#5A1D36)' : 'radial-gradient(circle at 35% 30%,#E8F4FF,#7FB6E6 55%,#123454)', boxShadow: gold ? '0 0 40px rgba(242,166,192,.5)' : '0 0 40px rgba(127,182,230,.5)', animation: `floaty ${gold ? 4.6 : 5.4}s ease-in-out infinite` }} />
         </span>
         <span className="mt-4 font-display text-3xl font-light text-ivory sm:text-4xl">{TEAM_LABEL[team]}</span>
-        <span className="mt-1 text-xs font-medium uppercase tracking-[0.25em] text-sun">{saved ? `${members(team).length} on the team` : 'Tap to join'}</span>
+        {saved ? (
+          <span className="mt-1 text-xs font-medium uppercase tracking-[0.25em] text-sun">{`${members(team).length} on the team`}</span>
+        ) : (
+          <span className="ambient mt-2 rounded-full border border-sun/60 bg-sun/15 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-sun" style={{ animation: 'gatePulse 2.6s ease-in-out infinite' }}>Tap to join</span>
+        )}
         {active && (
           <span className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-sun text-ocean">
             <Check size={18} aria-hidden="true" />

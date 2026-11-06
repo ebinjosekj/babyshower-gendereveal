@@ -460,3 +460,28 @@ body {
   animation: heartRise 1.6s ease-out forwards;
 }
 .simple .tap-heart { display: none !important; }
+
+/* ---- instruction cues: tapping finger, swipe-up dot, scratch demo ---- */
+@keyframes tapHand {
+  0%, 100% { transform: translateY(10px) scale(1); }
+  35% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(3px) scale(0.9); }
+  65% { transform: translateY(0) scale(1); }
+}
+@keyframes tapRing {
+  0%, 40% { transform: scale(0.3); opacity: 0; }
+  50% { transform: scale(0.5); opacity: 0.9; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+@keyframes swipeDot {
+  0% { transform: translateY(22px); opacity: 0; }
+  25% { opacity: 1; }
+  80% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(-2px); opacity: 0; }
+}
+@keyframes scratchHint {
+  0%, 100% { transform: translate(-70px, 4px) rotate(-12deg); opacity: 0; }
+  12% { opacity: 1; }
+  50% { transform: translate(70px, -2px) rotate(12deg); opacity: 1; }
+  88% { opacity: 1; }
+}

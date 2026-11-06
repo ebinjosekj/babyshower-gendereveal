@@ -47,7 +47,8 @@ function paintFoil(c: HTMLCanvasElement, w: number, h: number) {
 }
 
 // One scratchable zone: the real text sits underneath (blurred until opened, always readable by screen readers).
-function ScratchZone({ open, onOpen, children }: { open: boolean; onOpen: (x: number, y: number) => void; children: ReactNode }) {
+function ScratchZone({ open, onOpen, children, hint = false }: { open: boolean; onOpen: (x: number, y: number) => void; children: ReactNode; hint?: boolean }) {
+  const [touched, setTouched] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
   const s = useRef({ down: false, lx: 0, ly: 0, moves: 0, w: 0, h: 0 });
@@ -148,6 +149,7 @@ function ScratchZone({ open, onOpen, children }: { open: boolean; onOpen: (x: nu
         className={`absolute inset-0 h-full w-full cursor-grab touch-none transition-opacity duration-700 ${open ? 'pointer-events-none opacity-0' : ''}`}
         onPointerDown={(e) => {
           const st = s.current;
+          setTouched(true);
           st.down = true;
           const [px, py] = pos(e);
           st.lx = px;
@@ -166,6 +168,13 @@ function ScratchZone({ open, onOpen, children }: { open: boolean; onOpen: (x: nu
           s.current.down = false;
         }}
       />
+      {hint && !open && !touched && (
+        <span className="pointer-events-none absolute inset-0 flex items-end justify-center pb-1" aria-hidden="true">
+          <svg viewBox="0 0 24 24" className="ambient h-12 w-12" style={{ animation: 'scratchHint 2.6s ease-in-out infinite', filter: 'drop-shadow(0 2px 6px rgba(60,40,10,.6))' }} fill="rgba(255,246,214,.9)" stroke="#5a3a14" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M22 14a8 8 0 0 1-8 8" /><path d="M18 11v-1a2 2 0 0 0-2-2a2 2 0 0 0-2 2" /><path d="M14 10V9a2 2 0 0 0-2-2a2 2 0 0 0-2 2v1" /><path d="M10 9.5V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v10" /><path d="M18 11a2 2 0 1 1 4 0v3a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15" />
+          </svg>
+        </span>
+      )}
     </div>
   );
 }
@@ -242,12 +251,12 @@ export default function EventDetails() {
 
           <p className="mx-auto mt-7 flex items-center justify-center gap-3 font-sans text-xs font-medium uppercase tracking-[0.28em] text-jade">
             <span className="h-px w-7 bg-champagne" aria-hidden="true" />
-            Scratch the gold to reveal
+            Scratch the gold with your finger
             <span className="h-px w-7 bg-champagne" aria-hidden="true" />
           </p>
 
           <div className="mt-4 grid gap-3">
-            <ScratchZone open={opened[0]} onOpen={(x, y) => openZone(0, x, y)}>
+            <ScratchZone hint open={opened[0]} onOpen={(x, y) => openZone(0, x, y)}>
               <Label>When</Label>
               <p className="mt-1 font-display text-3xl font-normal leading-tight text-ocean sm:text-4xl">{EVENT.dateLabel.replace('November', 'Saturday, November')}</p>
               <p className="font-sans text-base font-medium text-forest">{EVENT.timeLabel}</p>

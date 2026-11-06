@@ -21,9 +21,13 @@ export default function Intro({ entered }: { entered: boolean }) {
         <motion.div initial={{ opacity: 0, y: 14 }} animate={entered ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }} transition={{ delay: entered ? 1.1 : 0, duration: entered ? 1.2 : 0.3 }} className="mt-8">
           <TwinLights />
         </motion.div>
-        <button type="button" onClick={() => scrollToId('story')} aria-label="Scroll down" className="mt-8 flex h-12 w-12 items-center justify-center rounded-full border border-ivory/30 text-ivory">
-          <ChevronDown size={22} className="ambient" style={{ animation: 'bob 2.4s ease-in-out infinite' }} />
-        </button>
+        <motion.button type="button" onClick={() => scrollToId('story')} aria-label="Scroll down to continue" initial={{ opacity: 0 }} animate={entered ? { opacity: 1 } : { opacity: 0 }} transition={{ delay: entered ? 2 : 0, duration: 1.2 }} className="mt-7 flex flex-col items-center gap-2 text-ivory">
+          <span className="font-sans text-[11px] font-medium uppercase tracking-[0.34em] [text-shadow:0_1px_8px_rgba(0,0,0,.9)]">Swipe up to continue</span>
+          <span className="relative flex h-14 w-9 items-start justify-center rounded-full border border-ivory/40 pt-2" aria-hidden="true">
+            <span className="ambient block h-2.5 w-2.5 rounded-full bg-sun" style={{ animation: 'swipeDot 2s ease-in-out infinite', boxShadow: '0 0 10px 2px rgba(227,190,116,.8)' }} />
+          </span>
+          <ChevronDown size={20} className="ambient -mt-1" style={{ animation: 'bob 2s ease-in-out infinite' }} aria-hidden="true" />
+        </motion.button>
       </section>
 
       <section id="story" aria-label="Our story" className="relative">

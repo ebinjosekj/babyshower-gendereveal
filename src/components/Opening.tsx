@@ -102,6 +102,7 @@ export default function Opening({ onStartMusic, onEnter, onDone }: Props) {
       role="dialog"
       aria-label="Invitation introduction"
       onPointerMove={lean}
+      onClick={ignite}
     >
       <div className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 46%, rgba(227,190,116,.10), rgba(11,16,14,0) 60%)' }} aria-hidden="true" />
 
@@ -143,7 +144,7 @@ export default function Opening({ onStartMusic, onEnter, onDone }: Props) {
       <motion.div style={{ x: sx, y: sy }} className="relative" initial={{ opacity: 0, scale: 0.55 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 2, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}>
       <button
         type="button"
-        onClick={ignite}
+        onClick={(e) => { e.stopPropagation(); ignite(); }}
         disabled={lit}
         aria-label="Light the orb to open the invitation"
         className="group relative flex h-56 w-56 items-center justify-center rounded-full focus-visible:outline-4 focus-visible:outline-offset-8 focus-visible:outline-sun disabled:cursor-default sm:h-64 sm:w-64"
@@ -213,21 +214,18 @@ export default function Opening({ onStartMusic, onEnter, onDone }: Props) {
 
       <motion.div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,#FFF1C8_0%,#E3BE74_40%,rgba(227,190,116,0)_75%)]" initial={{ opacity: 0 }} animate={simple ? { opacity: lit ? 0.95 : 0 } : { opacity: lit ? [0, 0.5, 0.18] : 0 }} transition={simple ? { duration: 0.3 } : { duration: 2.2, times: [0, 0.45, 1], ease: 'easeInOut' }} aria-hidden="true" />
 
-      {!lit && (
-        <div className="pointer-events-none absolute bottom-[calc(12%+64px)] flex flex-col items-center" aria-hidden="true">
-          {[0, 1, 2].map((i) => (
-            <svg key={i} viewBox="0 0 24 24" className="ambient -mb-3 h-6 w-6 opacity-0" style={{ animation: `chevUp 2s ease-in-out ${0.9 - i * 0.3 + 1.2}s infinite` }} fill="none" stroke="#E3BE74" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M6 15l6-6 6 6" />
-            </svg>
-          ))}
-        </div>
-      )}
+      {/* a clear, animated "tap here" cue: a finger that presses, a ripple, and a plain instruction */}
+      <motion.div initial={false} animate={{ opacity: lit ? 0 : 1 }} transition={{ delay: lit ? 0 : 1.6, duration: 0.9 }} className="pointer-events-none absolute bottom-[10%] flex flex-col items-center gap-3 px-6 text-center" aria-hidden="true">
+        <span className="relative block h-14 w-14">
+          <span className="ambient absolute left-[26%] top-[8%] block h-6 w-6 rounded-full border-2 border-sun" style={{ animation: 'tapRing 2.4s ease-out infinite' }} />
+          <svg viewBox="0 0 24 24" className="ambient absolute inset-0 h-full w-full" style={{ animation: 'tapHand 2.4s ease-in-out infinite', filter: 'drop-shadow(0 0 8px rgba(227,190,116,.7))' }} fill="none" stroke="#FFE9A8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M22 14a8 8 0 0 1-8 8" /><path d="M18 11v-1a2 2 0 0 0-2-2a2 2 0 0 0-2 2" /><path d="M14 10V9a2 2 0 0 0-2-2a2 2 0 0 0-2 2v1" /><path d="M10 9.5V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v10" /><path d="M18 11a2 2 0 1 1 4 0v3a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15" />
+          </svg>
+        </span>
+        <span className="btn-sun !min-h-[48px] !px-7 !text-sm !tracking-[0.18em]">Tap the glowing light to open</span>
+      </motion.div>
 
-      <motion.p initial={{ opacity: 0 }} animate={{ opacity: lit ? 0 : 1 }} transition={{ delay: lit ? 0 : 1.2, duration: 0.8 }} className="absolute bottom-[12%] rounded-full border border-sun/50 px-6 py-3 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ivory">
-        Tap the light to begin
-      </motion.p>
-
-      <button type="button" onClick={skip} className="absolute right-3 top-3 z-10 inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-ivory/30 px-4 text-xs font-medium uppercase tracking-[0.18em] text-ivory hover:bg-white/10">
+      <button type="button" onClick={(e) => { e.stopPropagation(); skip(); }} className="absolute right-3 top-3 z-10 inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-ivory/30 px-4 text-xs font-medium uppercase tracking-[0.18em] text-ivory hover:bg-white/10">
         <SkipForward size={14} aria-hidden="true" /> Skip introduction
       </button>
     </motion.div>
