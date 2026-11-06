@@ -58,7 +58,7 @@ body {
     @apply inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full px-7 py-3 font-display text-sm font-medium uppercase tracking-[0.14em] transition active:scale-[0.97] disabled:cursor-wait disabled:opacity-60;
   }
   .btn-sun {
-    @apply btn text-plum;
+    @apply btn relative overflow-hidden text-plum;
     background: linear-gradient(135deg, #f1d89a 0%, #e3be74 55%, #b89a5e 100%);
     box-shadow: 0 12px 28px -10px rgba(227, 190, 116, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.65);
   }
@@ -261,4 +261,36 @@ body {
 @keyframes ringPulse {
   from { transform: scale(.6); opacity: .9; }
   to { transform: scale(2.4); opacity: 0; }
+}
+
+/* ---- more motion: heartbeat line, button shine ---- */
+@keyframes beatline {
+  from { stroke-dashoffset: 0.22; }
+  to { stroke-dashoffset: -0.78; }
+}
+@keyframes heartThump {
+  0%, 100% { transform: rotate(45deg) scale(1); opacity: .8; }
+  12% { transform: rotate(45deg) scale(1.9); opacity: 1; }
+  24% { transform: rotate(45deg) scale(1.2); }
+  36% { transform: rotate(45deg) scale(1.7); }
+  55% { transform: rotate(45deg) scale(1); }
+}
+@keyframes shine {
+  0%, 62% { transform: translateX(-130%) skewX(-18deg); }
+  100% { transform: translateX(330%) skewX(-18deg); }
+}
+.btn-sun::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 38%;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+  animation: shine 4.6s ease-in-out infinite;
+}
+.simple .btn-sun::after {
+  animation: none;
+  display: none;
 }

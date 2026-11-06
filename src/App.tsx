@@ -5,6 +5,7 @@ import MusicPlayer from './components/MusicPlayer';
 import Intro from './components/Intro';
 import { ScrollOrb } from './components/Orb';
 import Countdown from './components/Countdown';
+import Atmosphere from './components/Atmosphere';
 import { MotionProvider, useMotion } from './context/MotionContext';
 import { useMusic } from './hooks/useMusic';
 import { useSmoothScroll } from './hooks/useSmoothScroll';
@@ -31,6 +32,7 @@ function Experience() {
     <>
       {!entered && <Opening onStartMusic={music.start} onEnter={() => setEntered(true)} />}
       {entered && <ScrollOrb />}
+      {entered && !simple && <Atmosphere />}
       <Nav visible={entered} />
       <MusicPlayer music={music} visible={entered} />
 

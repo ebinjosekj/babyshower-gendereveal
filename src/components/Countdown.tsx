@@ -54,9 +54,14 @@ export default function Countdown() {
             ))}
           </div>
         )}
-        <p className="mt-10 text-center font-sans text-xs font-medium uppercase tracking-[0.35em] text-champagne">
-          {EVENT.dateLabel} · {EVENT.timeLabel} · {EVENT.venueName}
-        </p>
+        <div className="mt-14 flex flex-col items-center text-center" aria-hidden="false">
+          <svg viewBox="0 0 300 60" className="w-72 max-w-full overflow-visible sm:w-96" fill="none" aria-hidden="true">
+            <path d="M0 30H88L100 30L112 8L128 52L141 16L152 30H300" stroke="#E3BE74" strokeOpacity=".2" strokeWidth="1.2" strokeLinejoin="round" />
+            <path className="ambient" pathLength={1} d="M0 30H88L100 30L112 8L128 52L141 16L152 30H300" stroke="#FFE9A8" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ strokeDasharray: '0.22 0.78', filter: 'drop-shadow(0 0 5px #E3BE74)', animation: 'beatline 3.2s linear infinite' }} />
+          </svg>
+          <p className="mt-6 font-display text-3xl font-light italic text-ivory sm:text-4xl">Counting every heartbeat until we meet you</p>
+          <span className="ambient mt-4 block h-2 w-2 rotate-45 bg-sun" style={{ animation: 'heartThump 1.6s ease-in-out infinite' }} aria-hidden="true" />
+        </div>
       </Reveal>
     </section>
   );
