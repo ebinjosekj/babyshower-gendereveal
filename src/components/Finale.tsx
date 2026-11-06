@@ -66,7 +66,7 @@ export default function Finale({ onReplay }: { onReplay: () => void }) {
       </div>
 
       {/* 2 · through colourful clouds, then the message */}
-      <div className="relative flex min-h-[100svh] flex-col items-center justify-center overflow-hidden px-5 pb-16 pt-24 text-center" style={{ background: 'linear-gradient(180deg,#263B42 0%,#347D76 22%,#77B7B0 48%,#F0D9A0 78%,#F0B94B 100%)' }}>
+      <div className="relative flex min-h-[100svh] flex-col items-center justify-center overflow-hidden px-5 pb-16 pt-24 text-center" style={{ background: 'linear-gradient(180deg,#0F2A35 0%,#1D5560 30%,#5E6B4C 65%,#C98F4A 100%)' }}>
         <CloudLayer count={4} seed={171} depth={0.5} top={[0, 60]} />
         <Balloon className="ambient absolute left-[8%] bottom-[12%] w-14 sm:w-20" colors={['#E98C56', '#F1E8D6']} style={{ animation: 'bob 10s ease-in-out infinite' }} />
         <Balloon className="ambient absolute right-[8%] bottom-[22%] w-12 sm:w-16" colors={['#8974BD', '#F0B94B']} style={{ animation: 'bob 12s ease-in-out -3s infinite' }} />
@@ -82,10 +82,10 @@ export default function Finale({ onReplay }: { onReplay: () => void }) {
           </h2>
           <motion.div initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-15%' }} transition={{ duration: 1, delay: 1.8 * d }}>
             <Spark className="mx-auto mt-8 w-6" />
-            <p className="mx-auto mt-5 max-w-md font-display text-2xl italic text-ocean sm:text-3xl">We cannot wait to celebrate with you.</p>
-            <p className="mt-6 font-display text-xl font-medium text-ocean sm:text-2xl">With love,</p>
-            <p className="font-display text-4xl font-semibold italic text-ocean sm:text-6xl">{EVENT.parents}</p>
-            <p className="mt-6 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ocean/85">
+            <p className="mx-auto mt-5 max-w-md font-display text-2xl italic text-ivory [text-shadow:0_2px_16px_rgba(10,35,45,.6)] sm:text-3xl">We cannot wait to celebrate with you.</p>
+            <p className="mt-6 font-display text-xl font-medium text-ivory [text-shadow:0_2px_16px_rgba(10,35,45,.6)] sm:text-2xl">With love,</p>
+            <p className="font-display text-4xl font-semibold italic text-ivory [text-shadow:0_2px_16px_rgba(10,35,45,.6)] sm:text-6xl">{EVENT.parents}</p>
+            <p className="mt-6 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ivory/90">
               {EVENT.dateLabel} · {EVENT.timeLabel} · {EVENT.venueName}
             </p>
             <button type="button" onClick={onReplay} className="btn-sun mt-9">

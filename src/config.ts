@@ -16,16 +16,14 @@ export const EVENT = {
   dateLabel: 'November 21, 2026',
   timeLabel: '6:00 PM',
   venueName: 'Evoke',
-  // Put the venue's real street address here (e.g. 'Evoke, 123 Main St, Kitchener, ON').
-  // While it is empty, the Directions button and map are hidden — no address is invented.
-  venueAddress: '',
+  venueAddress: '239 Eden Oak Trail, Kitchener, ON N2A 0L5',
   contacts: [
     { name: 'Ebin', tel: '+15197816212', display: '519 781 6212' },
     { name: 'Nikhitha', tel: '+15197310349', display: '519 731 0349' },
   ],
 } as const;
 
-export const TEAM_LABEL = { sunshine: 'Team Sunshine', wonder: 'Team Wonder' } as const;
+export const TEAM_LABEL = { boy: 'Team Boy', girl: 'Team Girl' } as const;
 
 // Photos live in /public/photos. Missing files are skipped automatically.
 // "invitation.jpg" is the artwork from your original invitation site.

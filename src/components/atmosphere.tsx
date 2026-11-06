@@ -9,11 +9,11 @@ const rnd = (n: number) => {
 
 // Sky gradients used by the different parts of the journey.
 export const SKY = {
-  dawn: 'linear-gradient(180deg,#183D4B 0%,#2A6A72 30%,#77B7B0 62%,#F3D9A0 100%)',
-  day: 'linear-gradient(180deg,#2A7F86 0%,#5FB0AB 40%,#A9D6CC 75%,#F1E8D6 100%)',
-  golden: 'linear-gradient(180deg,#2A6A72 0%,#77B7B0 35%,#F0D9A0 72%,#F0B94B 100%)',
-  dusk: 'linear-gradient(180deg,#14303C 0%,#183D4B 35%,#2E6A6B 70%,#B8A16A 130%)',
-  night: 'linear-gradient(180deg,#0E2530 0%,#183D4B 55%,#263B42 100%)',
+  dawn: 'linear-gradient(180deg,#0B1F29 0%,#14414A 32%,#2C7377 62%,#C98F4A 100%)',
+  day: 'linear-gradient(180deg,#0E2530 0%,#18444F 40%,#256A68 78%,#3B7B6C 100%)',
+  golden: 'linear-gradient(180deg,#10293A 0%,#1D5560 38%,#7E6A44 82%,#D79A44 100%)',
+  dusk: 'linear-gradient(180deg,#0C1F2A 0%,#14333F 40%,#1F4F53 75%,#4F6A52 100%)',
+  night: 'linear-gradient(180deg,#08161E 0%,#0F2A35 55%,#183D4B 100%)',
 } as const;
 
 // Drifting volumetric clouds; speed differs by depth (far = slow, small, pale).

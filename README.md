@@ -2,9 +2,9 @@
 
 Baby Shower & Gender Reveal · **November 21, 2026 · 6:00 PM · Evoke**
 
-**Little Wonderland** — a cinematic invitation set in a layered fantasy world: skippable cloud-and-island opening →
+**Little Wonderland** — a cinematic invitation set in a layered fantasy world: an interactive storybook gate that opens into the world →
 hero world → our story (your real photos) → the little explorer → golden countdown rings → scroll-driven rainbow
-journey (Garden of Love → Dream Bridge → Golden Destination) → **Team Sunshine vs Team Wonder** prediction →
+journey (Garden of Love → Dream Bridge → Golden Destination) → **Team Boy vs Team Girl (join a team + public team list)** prediction →
 celebration details → RSVP → gallery → constellation finale. Plus a parents-only admin dashboard.
 Scenery is drawn as inline SVG/CSS (no image downloads, no licensing issues).
 
@@ -36,7 +36,7 @@ Admin dashboard: `https://ebinjosekj.github.io/babyshower-gendereveal/#/admin`
 
 ## Things to personalise (`src/config.ts`)
 
-- `venueAddress` — empty on purpose (no address was provided). Fill in Evoke's full street address to switch on the Directions button, the map and the calendar location.
+- `venueAddress` — set to 239 Eden Oak Trail, Kitchener, ON N2A 0L5 (drives Directions, the map and the calendar location).
 - `GALLERY` + `public/photos/` — add `01.jpg … 07.jpg`. `invitation.jpg` is your original invitation artwork.
 - `public/photos/couple.jpg` (+ optional `01.jpg`, `02.jpg`) — appear in arched golden frames in "Our little story". Without them an illustrated island is shown instead.
 - Music — by default an **original music-box lullaby is generated in the browser** (no file, no licensing).
@@ -47,6 +47,6 @@ Admin dashboard: `https://ebinjosekj.github.io/babyshower-gendereveal/#/admin`
 - Music only starts after the visitor taps the door / enter / skip, and the floating control offers play, pause, mute and volume.
 - **Simplified animation mode** switches on automatically for reduced-motion, low-memory, low-core and data-saver devices
   (and can be toggled in the menu). It stops decorative loops, scroll effects and fireworks.
-- Predictions and RSVPs: one per name (database-enforced) and one per device; the public scoreboard shows only totals.
-  RSVPs and names are readable only by admins (Row Level Security). The RSVP form has a hidden bot trap.
+- Team joins and RSVPs: one per name (database-enforced). The public team list shows only the names guests typed and their team (via a restricted database function);
+  RSVPs are readable only by admins (Row Level Security). RSVP asks only for a name and "See you!" / "Sending blessings". The RSVP form has a hidden bot trap.
 - The baby's gender is not stored or shown anywhere.

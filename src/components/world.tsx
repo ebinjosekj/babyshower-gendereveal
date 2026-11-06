@@ -33,13 +33,13 @@ export function Cumulus({ className, style, warm = true }: P & { warm?: boolean 
     <svg viewBox="0 0 250 140" className={className} style={style} aria-hidden="true">
       <defs>
         <linearGradient id={`cb${id}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#FFF7E4" />
-          <stop offset=".55" stopColor="#E7E4D6" />
-          <stop offset="1" stopColor="#A9C6C4" />
+          <stop offset="0" stopColor="#F6D9A4" />
+          <stop offset=".5" stopColor="#A9B8B2" />
+          <stop offset="1" stopColor="#4F7C80" />
         </linearGradient>
         <radialGradient id={`cl${id}`} cx=".3" cy=".25" r=".8">
-          <stop offset="0" stopColor={warm ? '#FFE6A6' : '#FFFFFF'} stopOpacity=".95" />
-          <stop offset="1" stopColor="#FFF7E4" stopOpacity="0" />
+          <stop offset="0" stopColor={warm ? '#FFD98A' : '#FFFFFF'} stopOpacity=".9" />
+          <stop offset="1" stopColor="#F6D9A4" stopOpacity="0" />
         </radialGradient>
         <filter id={`cf${id}`} x="-10%" y="-10%" width="120%" height="130%">
           <feGaussianBlur stdDeviation="1.6" />
@@ -52,7 +52,7 @@ export function Cumulus({ className, style, warm = true }: P & { warm?: boolean 
         {puffs.slice(0, 5).map(([x, y, r], i) => (
           <circle key={`l${i}`} cx={x - r * 0.18} cy={y - r * 0.22} r={r * 0.78} fill={`url(#cl${id})`} />
         ))}
-        <rect x="14" y="108" width="226" height="26" rx="13" fill="#B7CFCB" opacity=".55" />
+        <rect x="14" y="108" width="226" height="26" rx="13" fill="#3F6D72" opacity=".5" />
       </g>
     </svg>
   );
@@ -64,9 +64,9 @@ export function Mist({ className, style }: P) {
     <svg viewBox="0 0 400 100" className={className} style={style} aria-hidden="true" preserveAspectRatio="none">
       <defs>
         <linearGradient id={`m${id}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#F1E8D6" stopOpacity="0" />
-          <stop offset=".6" stopColor="#F1E8D6" stopOpacity=".55" />
-          <stop offset="1" stopColor="#F1E8D6" stopOpacity=".9" />
+          <stop offset="0" stopColor="#8DB8B2" stopOpacity="0" />
+          <stop offset=".6" stopColor="#7FAAA6" stopOpacity=".5" />
+          <stop offset="1" stopColor="#5E8E8C" stopOpacity=".85" />
         </linearGradient>
       </defs>
       <path d="M0 60Q40 20 90 46T200 40T310 48T400 30V100H0Z" fill={`url(#m${id})`} />
@@ -187,7 +187,12 @@ export function Castle({ x, y, s = 1 }: G) {
       <path d={`M${cx - w / 2 - 2} ${-h}L${cx} ${-h - roof}L${cx + w / 2 + 2} ${-h}Z`} fill={`url(#rf${id})`} />
       <path d={`M${cx} ${-h - roof}V${-h - roof - 8}`} stroke="#B8A16A" strokeWidth="1" />
       <path d={`M${cx} ${-h - roof - 8}l7 2.5l-7 2.5Z`} fill="#E98C56" />
-      {win && <rect x={cx - 1.6} y={-h + 7} width="3.2" height="6" rx="1.6" fill="#F7D774" />}
+      {win && (
+        <>
+          <circle cx={cx} cy={-h + 10} r="6" fill="#F0B94B" opacity=".35" />
+          <rect x={cx - 1.6} y={-h + 7} width="3.2" height="6" rx="1.6" fill="#FFE08A" />
+        </>
+      )}
     </g>
   );
   return (
@@ -215,6 +220,24 @@ export function Castle({ x, y, s = 1 }: G) {
       {tower(0, 18, 86, 32)}
       <rect x="-18" y="-24" width="3" height="6" rx="1.5" fill="#F7D774" />
       <rect x="15" y="-24" width="3" height="6" rx="1.5" fill="#F7D774" />
+    </g>
+  );
+}
+
+export function Lantern({ x, y, s = 1, hang = 12 }: G & { hang?: number }) {
+  const id = uid(useId());
+  return (
+    <g transform={place({ x, y, s })}>
+      <defs>
+        <radialGradient id={`lg${id}`}>
+          <stop offset="0" stopColor="#FFD98A" stopOpacity=".9" />
+          <stop offset="1" stopColor="#F0B94B" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+      <path d={`M0 ${-hang}V0`} stroke="#3C2F22" strokeWidth=".8" />
+      <circle cx="0" cy="6" r="15" fill={`url(#lg${id})`} className="ambient" style={{ animation: 'flicker 2.8s ease-in-out infinite' }} />
+      <rect x="-3" y="1" width="6" height="9" rx="1.6" fill="#FFE2A0" stroke="#3C2F22" strokeWidth=".9" />
+      <path d="M-3.5 1h7L0 -2.5Z" fill="#3C2F22" />
     </g>
   );
 }
@@ -580,6 +603,8 @@ export function HeroIsland({ className, style }: P) {
       <Gazebo x={150} y={122} s={0.85} />
       <Tree x={246} y={120} s={0.8} tone={0} />
       <Tree x={338} y={128} s={0.7} tone={2} blossom />
+      <Lantern x={104} y={72} s={1.1} hang={24} />
+      <Lantern x={24} y={66} s={1} hang={20} />
       <Flowers x={110} y={134} w={60} n={8} seed={3} />
       <Flowers x={210} y={132} w={70} n={9} seed={11} />
       <Flowers x={300} y={134} w={50} n={7} seed={21} />

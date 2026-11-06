@@ -20,6 +20,7 @@ create table public.rsvps (
   guest_name        text not null check (char_length(btrim(guest_name)) between 2 and 60),
   email             text check (email is null or (char_length(email) <= 120 and email ~* '^[^@\s]+@[^@\s]+\.[^@\s]+$')),
   attendees         int  not null default 1 check (attendees between 0 and 10),
+  -- "See you!" = attending, "Sending blessings" = blessing  (email / attendees / wishes are no longer collected)
   attendance_status text not null check (attendance_status in ('attending', 'blessing', 'declined')),
   wishes            text check (wishes is null or char_length(wishes) <= 600),
   created_at        timestamptz not null default now(),
@@ -31,7 +32,7 @@ create unique index rsvps_name_key_uq on public.rsvps (name_key);
 create table public.predictions (
   id            uuid primary key default gen_random_uuid(),
   guest_name    text not null check (char_length(btrim(guest_name)) between 2 and 60),
-  selected_team text not null check (selected_team in ('sunshine', 'wonder')),
+  selected_team text not null check (selected_team in ('boy', 'girl')),
   created_at    timestamptz not null default now(),
   name_key      text generated always as (lower(regexp_replace(btrim(guest_name), '\s+', ' ', 'g'))) stored
 );
@@ -66,11 +67,24 @@ security definer
 set search_path = public
 as $$
   select json_build_object(
-    'sunshine', count(*) filter (where selected_team = 'sunshine'),
-    'wonder',   count(*) filter (where selected_team = 'wonder')
+    'boy',  count(*) filter (where selected_team = 'boy'),
+    'girl', count(*) filter (where selected_team = 'girl')
   )
   from public.predictions;
 $$;
+
+-- Public team list: names + team only (no ids, no timestamps), as requested for the "Join a team" section.
+create or replace function public.team_roster()
+returns json
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select coalesce(json_agg(json_build_object('name', guest_name, 'team', selected_team) order by created_at), '[]'::json)
+  from public.predictions;
+$$;
+grant execute on function public.team_roster() to anon, authenticated;
 
 -- table permissions (RLS below still decides which rows)
 grant insert on public.rsvps, public.predictions to anon, authenticated;

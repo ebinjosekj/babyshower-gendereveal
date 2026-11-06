@@ -10,7 +10,7 @@ export const supabase: SupabaseClient | null =
 
 export const isConfigured = supabase !== null;
 
-export type Team = 'sunshine' | 'wonder';
+export type Team = 'boy' | 'girl';
 export type Attendance = 'attending' | 'blessing' | 'declined';
 
 export interface RsvpRow {

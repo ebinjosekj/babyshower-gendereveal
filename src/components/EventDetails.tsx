@@ -8,7 +8,7 @@ import { CloudLayer, Meadow, Motes, SKY } from './atmosphere';
 import { Balloon, Spark } from './world';
 import { Reveal } from './ui';
 
-const hasAddress: boolean = EVENT.venueAddress.length > 0;
+const hasAddress: boolean = EVENT.venueAddress.length > 0; // directions + map need a real address
 
 export default function EventDetails() {
   const [calOpen, setCalOpen] = useState(false);
@@ -38,6 +38,7 @@ export default function EventDetails() {
             <p className="font-display text-3xl font-semibold text-plum sm:text-4xl">{EVENT.dateLabel}</p>
             <p className="font-display text-2xl font-medium text-coral sm:text-3xl">{EVENT.timeLabel}</p>
             <p className="mt-2 font-display text-3xl font-semibold uppercase tracking-[0.3em] text-jade sm:text-4xl">{EVENT.venueName}</p>
+            <p className="font-sans text-base font-medium text-forest sm:text-lg">{EVENT.venueAddress}</p>
           </div>
 
           <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center">

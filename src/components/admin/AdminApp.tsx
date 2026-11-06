@@ -112,8 +112,8 @@ export default function AdminApp() {
       confirmed: attending.reduce((n, r) => n + r.attendees, 0),
       declined: rsvps.filter((r) => r.attendance_status === 'declined').length,
       blessing: rsvps.filter((r) => r.attendance_status === 'blessing').length,
-      sunshine: preds.filter((p) => p.selected_team === 'sunshine').length,
-      wonder: preds.filter((p) => p.selected_team === 'wonder').length,
+      boy: preds.filter((p) => p.selected_team === 'boy').length,
+      girl: preds.filter((p) => p.selected_team === 'girl').length,
     };
   }, [rsvps, preds]);
 
@@ -184,8 +184,8 @@ export default function AdminApp() {
         {tile('Confirmed guests', stats.confirmed, 'text-emerald')}
         {tile('Declined', stats.declined, 'text-coral')}
         {tile('Blessings', stats.blessing, 'text-[#8974BD]')}
-        {tile(TEAM_LABEL.sunshine, stats.sunshine, 'text-tangerine')}
-        {tile(TEAM_LABEL.wonder, stats.wonder, 'text-emerald')}
+        {tile(TEAM_LABEL.boy, stats.boy, 'text-tangerine')}
+        {tile(TEAM_LABEL.girl, stats.girl, 'text-emerald')}
       </section>
 
       <div className="mt-8 flex flex-wrap items-center gap-3">
