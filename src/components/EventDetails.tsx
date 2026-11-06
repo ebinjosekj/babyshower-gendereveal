@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { CalendarPlus, Heart, MapPin } from 'lucide-react';
 import { EVENT } from '../config';
 import { confetti } from '../lib/confetti';
-import { appleMapsUrl, directionsUrl, downloadIcs, googleCalendarUrl, mapEmbedUrl } from '../lib/calendar';
+import { appleMapsUrl, directionsUrl, downloadIcs, googleCalendarUrl } from '../lib/calendar';
 import { scrollToId } from '../lib/scroll';
 import { Reveal } from './ui';
 
@@ -380,20 +380,6 @@ export default function EventDetails() {
       </Reveal>
 
       <Reveal delay={0.1} className="relative z-10 mx-auto mt-12 max-w-3xl">
-        {hasAddress && all && (
-          <motion.div initial={{ opacity: 0, y: 30, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.9, delay: 0.6 }} className="rounded-[30px] bg-gradient-to-br from-sun via-coral to-turquoise p-[4px] shadow-[0_30px_60px_-28px_rgba(43,26,87,.55)]">
-            <div className="overflow-hidden rounded-[26px] bg-ivory">
-              <iframe
-                title={`Map showing ${EVENT.venueName}`}
-                src={mapEmbedUrl()}
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                allowFullScreen
-                className="block h-[300px] w-full border-0 [filter:grayscale(1)_contrast(.95)_brightness(.85)] sm:h-[400px]"
-              />
-            </div>
-          </motion.div>
-        )}
         <p className="mt-4 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-center text-sm font-medium text-ivory">
           Questions? Call{' '}
           {EVENT.contacts.map((c, i) => (

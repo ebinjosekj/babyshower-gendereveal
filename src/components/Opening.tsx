@@ -1,10 +1,22 @@
 import { useEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useMotionValue, useSpring } from 'framer-motion';
 import { SkipForward } from 'lucide-react';
 import { useMotion } from '../context/MotionContext';
 import { OrbBody } from './Orb';
 import { confetti } from '../lib/confetti';
+import { StarField } from './ui';
 
+const rnd = (n: number) => {
+  const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
+  return x - Math.floor(x);
+};
+const MOTES = Array.from({ length: 18 }, (_, i) => ({
+  left: rnd(i + 10) * 100,
+  size: 2 + rnd(i + 50) * 3,
+  dur: 12 + rnd(i + 90) * 14,
+  delay: -rnd(i + 130) * 24,
+  sway: (rnd(i + 170) - 0.5) * 100,
+}));
 const BURST = Array.from({ length: 30 }, (_, i) => {
   const a = (i / 30) * Math.PI * 2 + ((i * 7919) % 13) * 0.05;
   const d = 140 + ((i * 6151) % 17) * 22;
@@ -23,6 +35,15 @@ export default function Opening({ onStartMusic, onEnter, onDone }: Props) {
   const [lit, setLit] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const timers = useRef<number[]>([]);
+  // the light leans gently towards the finger / cursor
+  const mx = useMotionValue(0);
+  const my = useMotionValue(0);
+  const sx = useSpring(mx, { stiffness: 50, damping: 14 });
+  const sy = useSpring(my, { stiffness: 50, damping: 14 });
+  const lean = (e: { clientX: number; clientY: number }) => {
+    mx.set((e.clientX / window.innerWidth - 0.5) * 36);
+    my.set((e.clientY / window.innerHeight - 0.5) * 36);
+  };
 
   useEffect(() => {
     const t = timers.current;
@@ -61,15 +82,31 @@ export default function Opening({ onStartMusic, onEnter, onDone }: Props) {
       className="fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden bg-ocean"
       role="dialog"
       aria-label="Invitation introduction"
+      onPointerMove={lean}
     >
       <div className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 46%, rgba(227,190,116,.10), rgba(11,16,14,0) 60%)' }} aria-hidden="true" />
 
-      <motion.p initial={{ opacity: 0 }} animate={{ opacity: lit ? 0 : 1 }} transition={{ duration: 1.4, delay: lit ? 0 : 0.4 }} className="absolute top-[14%] px-8 text-center font-display text-3xl font-light italic text-ivory sm:text-5xl">
-        Something small
-        <br />
-        is on the way.
+      {/* waiting-screen life: twinkling stars, rising gold dust, shooting stars, a breathing glow */}
+      <StarField count={46} />
+      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+        {MOTES.map((m, i) => (
+          <span key={i} className="ambient absolute bottom-0 rounded-full bg-[#F3DC9C]" style={{ left: `${m.left}%`, width: m.size, height: m.size, opacity: 0.6, boxShadow: '0 0 8px 2px rgba(227,190,116,.55)', ['--sway' as string]: `${m.sway}px`, animation: `riseUp ${m.dur}s linear ${m.delay}s infinite` }} />
+        ))}
+        {[{ t: 8, l: 78, d: 1.5, u: 7 }, { t: 24, l: 96, d: 4.5, u: 9 }].map((m, i) => (
+          <span key={i} className="ambient absolute block h-[2px] w-[130px] rounded-full opacity-0" style={{ top: `${m.t}%`, left: `${m.l}%`, background: 'linear-gradient(90deg,#FFF6D6,rgba(255,246,214,0))', boxShadow: '0 0 10px 2px rgba(255,236,160,.5)', animation: `shoot ${m.u}s linear ${m.d}s infinite` }} />
+        ))}
+        <span className="ambient absolute left-1/2 top-[46%] block h-[120vmin] w-[120vmin] -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ background: 'radial-gradient(circle, rgba(227,190,116,.16), transparent 62%)', animation: 'glowBreath 5s ease-in-out infinite' }} />
+      </div>
+
+      <motion.p animate={{ opacity: lit ? 0 : 1 }} transition={{ duration: 1.4 }} className="absolute top-[14%] px-8 text-center font-display text-3xl font-light italic text-ivory sm:text-5xl">
+        {['Something small', 'is on the way.'].map((line, i) => (
+          <motion.span key={line} className="block" initial={{ opacity: 0, y: 18, filter: 'blur(10px)' }} animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }} transition={{ duration: 1.5, delay: 0.5 + i * 0.7, ease: [0.22, 1, 0.36, 1] }}>
+            {line}
+          </motion.span>
+        ))}
       </motion.p>
 
+      <motion.div style={{ x: sx, y: sy }} className="relative">
       <button
         type="button"
         onClick={ignite}
@@ -77,6 +114,18 @@ export default function Opening({ onStartMusic, onEnter, onDone }: Props) {
         aria-label="Light the orb to open the invitation"
         className="group relative flex h-56 w-56 items-center justify-center rounded-full focus-visible:outline-4 focus-visible:outline-offset-8 focus-visible:outline-sun disabled:cursor-default sm:h-64 sm:w-64"
       >
+        {/* slowly turning dashed ring with a travelling light, and a second ripple */}
+        {!lit && (
+          <>
+            <span className="ambient absolute -inset-9 rounded-full border border-dashed border-sun/25" style={{ animation: 'orbit 60s linear infinite' }} aria-hidden="true">
+              <span className="absolute left-1/2 top-[-4px] h-2 w-2 -translate-x-1/2 rounded-full bg-[#FFE9A8]" style={{ boxShadow: '0 0 12px 3px rgba(227,190,116,.8)' }} />
+            </span>
+            <span className="ambient absolute -inset-16 rounded-full border border-sun/15" style={{ animation: 'orbit 90s linear infinite reverse' }} aria-hidden="true">
+              <span className="absolute bottom-[-3px] left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-blush" style={{ boxShadow: '0 0 10px 2px rgba(242,166,192,.7)' }} />
+            </span>
+            <span className="ambient absolute inset-0 rounded-full border border-sun/40" style={{ animation: 'ripple 3.4s ease-out 1.2s infinite' }} aria-hidden="true" />
+          </>
+        )}
         {/* waiting ring */}
         <span className="ambient absolute inset-0 rounded-full border border-sun/50" style={{ animation: lit ? undefined : 'gatePulse 3s ease-in-out infinite' }} aria-hidden="true" />
         <span className="absolute inset-5 rounded-full border border-sun/20" aria-hidden="true" />
@@ -85,6 +134,7 @@ export default function Opening({ onStartMusic, onEnter, onDone }: Props) {
           <OrbBody tone="gold" rings={false} />
         </motion.div>
       </button>
+      </motion.div>
 
       {lit && !simple && (
         <>
