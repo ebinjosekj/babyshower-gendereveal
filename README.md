@@ -30,7 +30,7 @@ npm run dev
    (the *anon/public* key only — never a service-role key). Settings → Pages → Source: **GitHub Actions**.
 4. Push to `main` — the workflow builds and publishes automatically.
 
-Admin dashboard: `https://ebinjosekj.github.io/babyshower-gendereveal/#/admin`
+Admin dashboard: `https://ebinjosekj.github.io/babyshower_genderreveal/#/admin`
 (totals, confirmed guests, declined, team counts, wishes, search/filter, CSV export).
 
 ## Things to personalise (`src/config.ts`)

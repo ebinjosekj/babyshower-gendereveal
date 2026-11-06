@@ -118,4 +118,4 @@ create policy "admins delete predictions" on public.predictions for delete to au
 -- insert into public.admins (email) values ('your-email@example.com');
 --
 -- 3) Recommended: Authentication → Sign In / Providers → Email → turn OFF "Allow new users to sign up".
---    Then open  https://ebinjosekj.github.io/babyshower-gendereveal/#/admin
+--    Then open  https://ebinjosekj.github.io/babyshower_genderreveal/#/admin
