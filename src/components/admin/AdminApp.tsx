@@ -8,11 +8,11 @@ import { isConfigured, supabase, type Attendance, type PredictionRow, type RsvpR
 // public.admins table, so even a hand-crafted API call cannot read guest data.
 
 type Phase = 'loading' | 'signedOut' | 'denied' | 'ready';
-type Tab = 'rsvps' | 'predictions' | 'wishes';
+type Tab = 'rsvps' | 'predictions';
 
 const STATUS_LABEL: Record<Attendance, string> = {
-  attending: 'Attending',
-  blessing: 'Sending blessings',
+  attending: 'Count me in',
+  blessing: 'Cheering from afar',
   declined: 'Declined',
 };
 
@@ -109,7 +109,7 @@ export default function AdminApp() {
     const attending = rsvps.filter((r) => r.attendance_status === 'attending');
     return {
       total: rsvps.length,
-      confirmed: attending.reduce((n, r) => n + r.attendees, 0),
+      confirmed: attending.length,
       declined: rsvps.filter((r) => r.attendance_status === 'declined').length,
       blessing: rsvps.filter((r) => r.attendance_status === 'blessing').length,
       boy: preds.filter((p) => p.selected_team === 'boy').length,
@@ -121,10 +121,9 @@ export default function AdminApp() {
   const rsvpRows = rsvps.filter(
     (r) =>
       (filter === 'all' || r.attendance_status === filter) &&
-      (!needle || `${r.guest_name} ${r.email ?? ''} ${r.wishes ?? ''}`.toLowerCase().includes(needle)),
+      (!needle || r.guest_name.toLowerCase().includes(needle)),
   );
   const predRows = preds.filter((p) => !needle || p.guest_name.toLowerCase().includes(needle));
-  const wishRows = rsvps.filter((r) => r.wishes && (!needle || `${r.guest_name} ${r.wishes}`.toLowerCase().includes(needle)));
 
   if (!isConfigured) {
     return (
@@ -162,7 +161,7 @@ export default function AdminApp() {
 
   const tile = (label: string, value: number | string, tone: string) => (
     <div className="glass rounded-2xl p-4 text-center">
-      <p className={`font-display text-3xl font-semibold sm:text-4xl ${tone}`}>{value}</p>
+      <p className={`font-sans text-3xl font-semibold sm:text-4xl ${tone}`}>{value}</p>
       <p className="mt-1 text-[11px] font-bold uppercase tracking-[0.15em] text-ink-soft">{label}</p>
     </div>
   );
@@ -181,16 +180,16 @@ export default function AdminApp() {
 
       <section className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6" aria-label="Summary">
         {tile('RSVP responses', stats.total, 'text-plum')}
-        {tile('Confirmed guests', stats.confirmed, 'text-emerald')}
+        {tile('Count me in', stats.confirmed, 'text-emerald')}
         {tile('Declined', stats.declined, 'text-coral')}
-        {tile('Blessings', stats.blessing, 'text-[#8974BD]')}
+        {tile('Cheering from afar', stats.blessing, 'text-[#8974BD]')}
         {tile(TEAM_LABEL.boy, stats.boy, 'text-tangerine')}
         {tile(TEAM_LABEL.girl, stats.girl, 'text-emerald')}
       </section>
 
       <div className="mt-8 flex flex-wrap items-center gap-3">
         <div role="tablist" aria-label="Data" className="flex gap-1 rounded-full bg-champagne/50 p-1">
-          {(['rsvps', 'predictions', 'wishes'] as const).map((t) => (
+          {(['rsvps', 'predictions'] as const).map((t) => (
             <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)} className={`rounded-full px-4 py-2 font-display text-sm capitalize ${tab === t ? 'bg-plum text-ivory' : 'text-plum'}`}>
               {t === 'rsvps' ? 'RSVPs' : t}
             </button>
@@ -203,8 +202,8 @@ export default function AdminApp() {
         {tab === 'rsvps' && (
           <select aria-label="Filter by attendance" className="field !w-auto" value={filter} onChange={(e) => setFilter(e.target.value as 'all' | Attendance)}>
             <option value="all">All replies</option>
-            <option value="attending">Attending</option>
-            <option value="blessing">Sending blessings</option>
+            <option value="attending">Count me in</option>
+            <option value="blessing">Cheering from afar</option>
             <option value="declined">Declined</option>
           </select>
         )}
@@ -215,8 +214,8 @@ export default function AdminApp() {
             tab === 'predictions'
               ? download('predictions.csv', [['Name', 'Team', 'Submitted'], ...predRows.map((p) => [p.guest_name, TEAM_LABEL[p.selected_team], p.created_at])])
               : download('guest-list.csv', [
-                  ['Name', 'Email', 'Attendance', 'Attendees', 'Wishes', 'Submitted'],
-                  ...rsvpRows.map((r) => [r.guest_name, r.email, STATUS_LABEL[r.attendance_status], r.attendees, r.wishes, r.created_at]),
+                  ['Name', 'Reply', 'Submitted'],
+                  ...rsvpRows.map((r) => [r.guest_name, STATUS_LABEL[r.attendance_status], r.created_at]),
                 ])
           }
         >
@@ -227,21 +226,19 @@ export default function AdminApp() {
       <div className="mt-5">
         {tab === 'rsvps' && (
           <div className="glass overflow-x-auto rounded-3xl">
-            <table className="w-full min-w-[640px] text-left text-sm">
+            <table className="w-full min-w-[360px] text-left text-sm">
               <thead className="font-display text-xs uppercase tracking-[0.2em] text-ink-soft">
-                <tr><th className="p-4">Name</th><th className="p-4">Reply</th><th className="p-4">Guests</th><th className="p-4">Email</th><th className="p-4">Received</th></tr>
+                <tr><th className="p-4">Name</th><th className="p-4">Reply</th><th className="p-4">Received</th></tr>
               </thead>
               <tbody>
                 {rsvpRows.map((r) => (
                   <tr key={r.id} className="border-t border-champagne/60">
                     <td className="p-4 font-semibold text-plum">{r.guest_name}</td>
                     <td className="p-4">{STATUS_LABEL[r.attendance_status]}</td>
-                    <td className="p-4">{r.attendance_status === 'attending' ? r.attendees : '—'}</td>
-                    <td className="p-4">{r.email ?? '—'}</td>
                     <td className="p-4 text-ink-soft">{fmt(r.created_at)}</td>
                   </tr>
                 ))}
-                {rsvpRows.length === 0 && <tr><td colSpan={5} className="p-8 text-center italic text-ink-soft">No RSVPs match.</td></tr>}
+                {rsvpRows.length === 0 && <tr><td colSpan={3} className="p-8 text-center italic text-ink-soft">No RSVPs match.</td></tr>}
               </tbody>
             </table>
           </div>
@@ -264,18 +261,6 @@ export default function AdminApp() {
               </tbody>
             </table>
           </div>
-        )}
-        {tab === 'wishes' && (
-          <ul className="grid gap-3 sm:grid-cols-2">
-            {wishRows.map((r) => (
-              <li key={r.id} className="glass rounded-3xl p-5">
-                <p className="font-display text-lg font-semibold text-plum">{r.guest_name}</p>
-                <p className="mt-2 whitespace-pre-wrap text-ink">{r.wishes}</p>
-                <p className="mt-3 text-xs text-ink-soft">{fmt(r.created_at)}</p>
-              </li>
-            ))}
-            {wishRows.length === 0 && <li className="col-span-full p-8 text-center italic text-ink-soft">No wishes yet.</li>}
-          </ul>
         )}
       </div>
     </Shell>
