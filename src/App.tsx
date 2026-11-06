@@ -6,6 +6,7 @@ import Intro from './components/Intro';
 import { ScrollOrb } from './components/Orb';
 import Countdown from './components/Countdown';
 import Atmosphere from './components/Atmosphere';
+import { Divider } from './components/ui';
 import { MotionProvider, useMotion } from './context/MotionContext';
 import { useMusic } from './hooks/useMusic';
 import { useSmoothScroll } from './hooks/useSmoothScroll';
@@ -42,8 +43,11 @@ function Experience() {
         <Intro entered={entered} />
         <Countdown />
         <Suspense fallback={<div className="min-h-[100svh]" aria-hidden="true" />}>
+          <Divider />
           <RevealGame />
+          <Divider />
           <EventDetails />
+          <Divider />
           <Rsvp />
           <Finale onReplay={replay} />
         </Suspense>

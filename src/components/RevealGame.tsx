@@ -213,6 +213,9 @@ export default function RevealGame() {
       >
         <span className="relative block h-24 w-24 sm:h-32 sm:w-32" aria-hidden="true">
           <span className="absolute inset-0 rounded-full border border-white/15" />
+          {[0, 1.5].map((d) => (
+            <span key={d} className="ambient absolute inset-[22%] rounded-full border" style={{ borderColor: gold ? 'rgba(242,166,192,.6)' : 'rgba(127,182,230,.6)', animation: `ripple 3.2s ease-out ${d}s infinite` }} />
+          ))}
           <span className="ambient absolute inset-0" style={{ animation: `orbit ${gold ? 14 : 18}s linear infinite` }}>
             <span className="absolute left-1/2 top-[-4px] h-2 w-2 -translate-x-1/2 rounded-full" style={{ background: gold ? '#FFD3E3' : '#BFE0FF', boxShadow: `0 0 12px 3px ${gold ? 'rgba(242,166,192,.8)' : 'rgba(127,182,230,.8)'}` }} />
           </span>
@@ -284,9 +287,9 @@ export default function RevealGame() {
                   {list.length ? (
                     <ul className="mt-3 max-h-56 space-y-1 overflow-y-auto pr-1 text-base" data-lenis-prevent>
                       {list.map((m, i) => (
-                        <li key={`${m.name}-${i}`} className="flex items-center gap-2">
+                        <motion.li key={`${m.name}-${i}`} className="flex items-center gap-2" initial={{ opacity: 0, x: -14 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: Math.min(i * 0.05, 0.5), ease: [0.22, 1, 0.36, 1] }}>
                           <span className={`h-1.5 w-1.5 shrink-0 rotate-45 ${t === 'girl' ? 'bg-blush' : 'bg-skyblue'}`} /> {m.name}
-                        </li>
+                        </motion.li>
                       ))}
                     </ul>
                   ) : (

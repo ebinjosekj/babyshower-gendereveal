@@ -36,7 +36,21 @@ export default function Intro({ entered }: { entered: boolean }) {
               transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
               className={`max-w-3xl font-display text-5xl font-light leading-[1.05] text-ivory [text-shadow:0_4px_40px_rgba(0,0,0,.85)] sm:text-8xl ${i === 1 ? 'italic text-sun' : ''}`}
             >
-              {l}
+              {i === 1 ? (
+                <span className="relative inline-block">
+                  {l}
+                  <motion.span
+                    aria-hidden="true"
+                    className="absolute -bottom-2 left-0 block h-[3px] w-full origin-left rounded-full bg-gradient-to-r from-transparent via-sun to-transparent"
+                    initial={{ scaleX: 0 }}
+                    whileInView={{ scaleX: 1 }}
+                    viewport={{ once: false, margin: '-30% 0px' }}
+                    transition={{ duration: 1.2, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                  />
+                </span>
+              ) : (
+                l
+              )}
             </motion.p>
           </div>
         ))}

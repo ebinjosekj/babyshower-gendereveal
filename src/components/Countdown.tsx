@@ -22,6 +22,7 @@ function Ring({ value, max, label }: { value: number; max: number; label: string
         <circle cx="50" cy="50" r="46" stroke="#E3BE74" strokeWidth="1" strokeDasharray={2 * Math.PI * 46} strokeDashoffset={2 * Math.PI * 46 * (1 - frac)} transform="rotate(-90 50 50)" style={{ transition: 'stroke-dashoffset .9s ease' }} />
         <circle cx={50 + Math.cos(a) * 46} cy={50 + Math.sin(a) * 46} r="2.2" fill="#FFE9A8" style={{ filter: 'drop-shadow(0 0 3px #E3BE74)', transition: 'all .9s ease' }} />
       </svg>
+      {label === 'Seconds' && <span key={v} className="ambient pointer-events-none absolute inset-[6%] rounded-full border border-sun/50" style={{ animation: 'tickRing .9s ease-out' }} aria-hidden="true" />}
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <div className="relative h-[1.05em] overflow-hidden font-display text-4xl font-light text-ivory sm:text-5xl">
           <AnimatePresence mode="popLayout" initial={false}>

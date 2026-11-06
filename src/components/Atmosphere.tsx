@@ -24,6 +24,19 @@ const BITS = Array.from({ length: 16 }, (_, i) => ({
   color: ['#F2A6C0', '#7FB6E6', '#E3BE74', '#F6ECD0'][i % 4],
 }));
 
+const SHOOTERS = [
+  { top: 6, left: 70, delay: 2, dur: 9 },
+  { top: 22, left: 92, delay: 6, dur: 11 },
+  { top: 12, left: 48, delay: 10, dur: 13 },
+];
+const SPARKLES = Array.from({ length: 12 }, (_, i) => ({
+  left: 4 + rnd(i + 600) * 92,
+  top: 6 + rnd(i + 640) * 88,
+  size: 10 + rnd(i + 680) * 16,
+  dur: 4 + rnd(i + 720) * 5,
+  delay: -rnd(i + 760) * 8,
+}));
+
 // Gold progress line, drifting gold dust and a soft light that follows the cursor.
 export default function Atmosphere() {
   const { scrollYProgress } = useScroll();
@@ -50,10 +63,21 @@ export default function Atmosphere() {
       el.style.transform = `translate3d(${gx}px, ${gy}px, 0)`;
       raf = requestAnimationFrame(tick);
     };
+    // a gold ring ripples out wherever the page is tapped or clicked
+    const ripple = (e: PointerEvent) => {
+      const r = document.createElement('span');
+      r.className = 'click-ripple';
+      r.style.left = `${e.clientX}px`;
+      r.style.top = `${e.clientY}px`;
+      r.addEventListener('animationend', () => r.remove());
+      document.body.appendChild(r);
+    };
     window.addEventListener('pointermove', move);
+    window.addEventListener('pointerdown', ripple);
     raf = requestAnimationFrame(tick);
     return () => {
       window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerdown', ripple);
       cancelAnimationFrame(raf);
     };
   }, []);
@@ -85,6 +109,16 @@ export default function Atmosphere() {
             className="ambient absolute top-0 rounded-[2px]"
             style={{ left: `${b.left}%`, width: b.w, height: b.h, background: b.color, opacity: 0.5, ['--sway' as string]: `${b.sway}px`, animation: `fall ${b.dur}s linear ${b.delay}s infinite` }}
           />
+        ))}
+      </div>
+      <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-[1] overflow-hidden">
+        {SHOOTERS.map((m, i) => (
+          <span key={i} className="ambient absolute block h-[2px] w-[130px] rounded-full opacity-0" style={{ top: `${m.top}%`, left: `${m.left}%`, background: 'linear-gradient(90deg,#FFF6D6,rgba(255,246,214,0))', boxShadow: '0 0 10px 2px rgba(255,236,160,.5)', animation: `shoot ${m.dur}s linear ${m.delay}s infinite` }} />
+        ))}
+        {SPARKLES.map((m, i) => (
+          <svg key={i} viewBox="0 0 24 24" className="ambient absolute opacity-0" style={{ left: `${m.left}%`, top: `${m.top}%`, width: m.size, height: m.size, animation: `twirl ${m.dur}s ease-in-out ${m.delay}s infinite` }}>
+            <path d="M12 0L14.6 9.4L24 12L14.6 14.6L12 24L9.4 14.6L0 12L9.4 9.4Z" fill="#F3DC9C" />
+          </svg>
         ))}
       </div>
       <div ref={glow} aria-hidden="true" className="pointer-events-none fixed left-0 top-0 z-[2] -ml-[190px] -mt-[190px] h-[380px] w-[380px] rounded-full opacity-0 transition-opacity duration-700" style={{ background: 'radial-gradient(circle, rgba(243,220,156,.14), transparent 65%)' }} />

@@ -99,6 +99,22 @@ function ScratchZone({ open, onOpen, children }: { open: boolean; onOpen: (x: nu
     onOpen(r ? r.left + r.width / 2 : window.innerWidth / 2, r ? r.top + r.height / 2 : window.innerHeight / 2);
   }, [onOpen]);
 
+  // little gold sparks that fly off the foil while scratching
+  const spark = (px: number, py: number) => {
+    const el = wrap.current;
+    if (!el || el.closest('.simple')) return;
+    for (let i = 0; i < 2; i++) {
+      const sp = document.createElement('span');
+      sp.className = 'spark';
+      sp.style.left = `${px}px`;
+      sp.style.top = `${py}px`;
+      sp.style.setProperty('--dx', `${(Math.random() - 0.5) * 70}px`);
+      sp.style.setProperty('--dy', `${-10 - Math.random() * 46}px`);
+      sp.addEventListener('animationend', () => sp.remove());
+      el.appendChild(sp);
+    }
+  };
+
   const pos = (e: ReactPointerEvent<HTMLCanvasElement>): [number, number] => {
     const r = e.currentTarget.getBoundingClientRect();
     return [e.clientX - r.left, e.clientY - r.top];
@@ -119,6 +135,7 @@ function ScratchZone({ open, onOpen, children }: { open: boolean; onOpen: (x: nu
     st.lx = px;
     st.ly = py;
     st.moves++;
+    if (st.moves % 2 === 0) spark(px, py);
     if (st.moves % 6 === 0 && cleared() > 0.5) finish();
   };
 
@@ -209,6 +226,9 @@ export default function EventDetails() {
       <Reveal className="relative z-10 mx-auto max-w-2xl">
         <div className="glass relative rounded-[36px] px-5 py-12 text-center sm:px-14 sm:py-16">
           <span className="absolute -top-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 bg-sun" aria-hidden="true" />
+          <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-[36px]" aria-hidden="true">
+            <span className="sheen" />
+          </span>
           <p className="kicker">The celebration</p>
           <p className="mt-5 font-display text-sm font-medium uppercase tracking-[0.3em] text-ink-soft">
             <span className="text-jade">{EVENT.parents}</span> invite you
@@ -272,14 +292,8 @@ export default function EventDetails() {
             )}
           </div>
 
-          <motion.div
-            className="mt-7 grid justify-items-center gap-5"
-            initial={false}
-            animate={all ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-            transition={{ duration: 0.9, delay: all ? 0.4 : 0 }}
-            aria-hidden={!all}
-            style={{ pointerEvents: all ? 'auto' : 'none', visibility: all ? 'visible' : 'hidden' }}
-          >
+          {all && (
+          <motion.div className="mt-7 grid justify-items-center gap-5" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}>
             <div className="flex items-center gap-4 text-left">
               <MapPin size={36} className="shrink-0 text-jade" aria-hidden="true" />
               <p className="font-display text-2xl leading-tight text-ocean">
@@ -361,6 +375,7 @@ export default function EventDetails() {
               </button>
             </div>
           </motion.div>
+          )}
         </div>
       </Reveal>
 
