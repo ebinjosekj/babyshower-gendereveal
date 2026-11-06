@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react';
-import { motion, useScroll, useSpring, useTransform } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
+import { motion, useScroll, useSpring, useTransform, useVelocity } from 'framer-motion';
 import { confetti } from '../lib/confetti';
 
 const rnd = (n: number) => {
@@ -41,7 +41,6 @@ const SPARKLES = Array.from({ length: 12 }, (_, i) => ({
 // Gold progress line, drifting gold dust and a soft light that follows the cursor.
 export default function Atmosphere() {
   const { scrollYProgress } = useScroll();
-  const x = useSpring(scrollYProgress, { stiffness: 120, damping: 24, mass: 0.4 });
   const glow = useRef<HTMLDivElement>(null);
   // scroll-linked layers: soft colour clouds drift at different speeds, a thin gold ring turns as you scroll
   const { scrollY } = useScroll();
@@ -100,6 +99,16 @@ export default function Atmosphere() {
       r.addEventListener('animationend', () => r.remove());
       document.body.appendChild(r);
       window.dispatchEvent(new Event('wonder-tap'));
+      if (Math.random() < 0.22 && !document.querySelector('.simple')) {
+        const h = document.createElement('span');
+        h.className = 'tap-heart';
+        h.textContent = '♥';
+        h.style.left = `${e.clientX}px`;
+        h.style.top = `${e.clientY}px`;
+        h.style.setProperty('--hx', `${(Math.random() - 0.5) * 70}px`);
+        h.addEventListener('animationend', () => h.remove());
+        document.body.appendChild(h);
+      }
       if (!document.documentElement.classList.contains('simple') && !document.querySelector('.simple')) {
         for (let i = 0; i < 7; i++) {
           const sp = document.createElement('span');
@@ -136,7 +145,8 @@ export default function Atmosphere() {
 
   return (
     <>
-      <motion.div aria-hidden="true" className="fixed left-0 right-0 top-0 z-[70] h-[3px] origin-left bg-gradient-to-r from-champagne via-sun to-[#FFE9A8] shadow-[0_0_12px_rgba(227,190,116,.7)]" style={{ scaleX: x }} />
+      <StarTracker />
+      <DawnGlow />
       <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-[1] overflow-hidden">
         {MOTES.map((m, i) => (
           <span
@@ -183,4 +193,42 @@ export default function Atmosphere() {
       <div ref={glow} aria-hidden="true" className="pointer-events-none fixed left-0 top-0 z-[2] -ml-[190px] -mt-[190px] h-[380px] w-[380px] rounded-full opacity-0 transition-opacity duration-700" style={{ background: 'radial-gradient(circle, rgba(243,220,156,.14), transparent 65%)' }} />
     </>
   );
+}
+
+// A shooting star that travels down the right edge as you scroll: its tail stretches and brightens with your speed.
+function StarTracker() {
+  const { scrollY, scrollYProgress } = useScroll();
+  const p = useSpring(scrollYProgress, { stiffness: 90, damping: 22, mass: 0.5 });
+  const vel = useSpring(useVelocity(scrollY), { stiffness: 120, damping: 30 });
+  const [vh, setVh] = useState(() => window.innerHeight);
+  useEffect(() => {
+    const on = () => setVh(window.innerHeight);
+    window.addEventListener('resize', on);
+    return () => window.removeEventListener('resize', on);
+  }, []);
+  const y = useTransform(p, (v) => 30 + v * Math.max(0, vh - 100));
+  const tail = useTransform(vel, (v) => 0.45 + Math.min(Math.abs(v) / 2500, 1) * 1.55);
+  const power = useTransform(vel, (v) => 0.6 + Math.min(Math.abs(v) / 2500, 1) * 0.4);
+  return (
+    <div aria-hidden="true" className="pointer-events-none fixed bottom-0 top-0 z-[70] w-6" style={{ right: 'max(8px, env(safe-area-inset-right, 0px))' }}>
+      <span className="absolute bottom-[60px] left-1/2 top-[30px] w-px bg-gradient-to-b from-transparent via-sun/25 to-transparent" />
+      <motion.div className="absolute left-0 top-0 h-0 w-6" style={{ y, opacity: power }}>
+        <motion.span className="absolute bottom-0 left-1/2 -ml-px block h-[170px] w-[2px] origin-bottom rounded-full" style={{ scaleY: tail, background: 'linear-gradient(to top, rgba(255,246,214,.95), rgba(227,190,116,.45) 45%, rgba(227,190,116,0))' }} />
+        {[0, 1, 2, 3].map((i) => (
+          <span key={i} className="ambient absolute left-1/2 top-0 block h-[3px] w-[3px] rounded-full bg-[#FFE9A8]" style={{ ['--dx' as string]: `${i % 2 ? 9 : -9}px`, animation: `shedUp 1.8s ease-out ${i * 0.45}s infinite`, boxShadow: '0 0 6px 1px rgba(255,224,140,.8)' }} />
+        ))}
+        <span className="ambient absolute left-1/2 top-0 -ml-3 -mt-3 block h-6 w-6 rounded-full border border-sun/50" style={{ animation: 'ripple 2.4s ease-out infinite' }} />
+        <svg viewBox="0 0 24 24" className="ambient absolute left-1/2 top-0 -ml-[11px] -mt-[11px] h-[22px] w-[22px]" style={{ animation: 'spin 7s linear infinite', filter: 'drop-shadow(0 0 6px rgba(255,224,140,.9))' }}>
+          <path d="M12 0L13.6 10.4L24 12L13.6 13.6L12 24L10.4 13.6L0 12L10.4 10.4Z" fill="#FFF6D6" />
+        </svg>
+      </motion.div>
+    </div>
+  );
+}
+
+// Towards the end of the page a warm dawn light rises from the bottom of the screen.
+function DawnGlow() {
+  const { scrollYProgress } = useScroll();
+  const opacity = useTransform(scrollYProgress, [0, 0.55, 1], [0, 0.12, 0.6]);
+  return <motion.div aria-hidden="true" className="pointer-events-none fixed inset-x-0 bottom-0 z-[1] h-[45vh]" style={{ opacity, background: 'radial-gradient(ellipse at 50% 100%, rgba(242,166,192,.28), rgba(227,190,116,.26) 38%, transparent 70%)' }} />;
 }

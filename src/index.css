@@ -439,3 +439,24 @@ body {
   18% { opacity: 1; }
   100% { transform: translate(0, 0) scale(0.1); opacity: 0; }
 }
+
+/* ---- shooting-star scroll companion, tap hearts ---- */
+@keyframes shedUp {
+  0% { transform: translate(-50%, 0) scale(1); opacity: 0.9; }
+  100% { transform: translate(calc(-50% + var(--dx)), -64px) scale(0.2); opacity: 0; }
+}
+@keyframes heartRise {
+  from { transform: translate(-50%, -50%) scale(0.6); opacity: 0.95; }
+  to { transform: translate(calc(-50% + var(--hx)), -150px) scale(1.4); opacity: 0; }
+}
+.tap-heart {
+  position: fixed;
+  z-index: 151;
+  pointer-events: none;
+  font-size: 20px;
+  line-height: 1;
+  color: #f2a6c0;
+  text-shadow: 0 0 12px rgba(242, 166, 192, 0.8);
+  animation: heartRise 1.6s ease-out forwards;
+}
+.simple .tap-heart { display: none !important; }

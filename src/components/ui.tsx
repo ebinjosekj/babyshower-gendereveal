@@ -129,6 +129,7 @@ export const base = import.meta.env.BASE_URL;
 export function Divider() {
   return (
     <div className="relative mx-auto flex w-full max-w-md items-center justify-center px-6" aria-hidden="true">
+      <motion.span className="absolute left-1/2 top-1/2 -ml-3 -mt-3 block h-6 w-6 rounded-full border border-sun/70" initial={{ scale: 0, opacity: 0 }} whileInView={{ scale: [0.2, 3.4], opacity: [0.9, 0] }} viewport={{ once: true, margin: '-5%' }} transition={{ duration: 1.5, delay: 0.45, ease: 'easeOut' }} />
       <motion.span className="h-px flex-1 origin-right bg-gradient-to-l from-sun/70 to-transparent" initial={{ scaleX: 0 }} whileInView={{ scaleX: 1 }} viewport={{ once: true, margin: '-5%' }} transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }} />
       <motion.span className="mx-3 block h-2.5 w-2.5 rotate-45 bg-sun shadow-[0_0_14px_#E3BE74]" initial={{ scale: 0, rotate: 0 }} whileInView={{ scale: 1, rotate: 45 }} viewport={{ once: true, margin: '-5%' }} transition={{ type: 'spring', damping: 10, stiffness: 120, delay: 0.3 }} />
       <motion.span className="h-px flex-1 origin-left bg-gradient-to-r from-sun/70 to-transparent" initial={{ scaleX: 0 }} whileInView={{ scaleX: 1 }} viewport={{ once: true, margin: '-5%' }} transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }} />
