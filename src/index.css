@@ -1,0 +1,98 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+body {
+  @apply bg-ivory font-sans text-cocoa antialiased;
+  overflow-x: clip;
+  background-image: radial-gradient(ellipse at 50% 0%, #fffdf8 0%, #f6eedf 55%, #efe3cb 100%);
+  background-attachment: fixed;
+}
+
+::selection {
+  background: #e8d3a0;
+  color: #4a3626;
+}
+
+@layer components {
+  .gold-text {
+    background: linear-gradient(100deg, #8a6a2f 0%, #d8b469 25%, #f6e4b0 50%, #c9a24e 75%, #8a6a2f 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    animation: shine 7s linear infinite;
+  }
+  .glass {
+    background: linear-gradient(145deg, rgba(255, 253, 248, 0.86), rgba(246, 238, 223, 0.6));
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(201, 162, 78, 0.38);
+    box-shadow: 0 24px 60px -24px rgba(110, 86, 64, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.75);
+  }
+  .btn-gold {
+    @apply inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full px-7 py-3 font-sans text-sm font-medium uppercase tracking-[0.18em] text-cocoa transition active:scale-[0.98] disabled:cursor-wait disabled:opacity-60;
+    background: linear-gradient(135deg, #f6e4b0 0%, #d8b469 45%, #b8903a 100%);
+    box-shadow: 0 10px 30px -10px rgba(154, 122, 47, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  }
+  .btn-gold:hover {
+    filter: brightness(1.06);
+  }
+  .btn-ghost {
+    @apply inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full border border-gold/50 bg-ivory/60 px-6 py-3 font-sans text-xs font-medium uppercase tracking-[0.18em] text-mocha transition hover:bg-champagne/40 active:scale-[0.98];
+  }
+  .field {
+    @apply w-full rounded-xl border border-gold/40 bg-ivory/80 px-4 py-3 font-sans text-base text-cocoa placeholder:text-mocha/50 focus:border-gold focus:outline-none focus:ring-2 focus:ring-champagne;
+  }
+  .kicker {
+    @apply font-sans text-[11px] font-medium uppercase tracking-[0.5em] text-gold-deep;
+  }
+}
+
+@keyframes shine {
+  to {
+    background-position: 200% center;
+  }
+}
+@keyframes drift {
+  from {
+    transform: translate3d(-30vw, 0, 0);
+  }
+  to {
+    transform: translate3d(130vw, 0, 0);
+  }
+}
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
