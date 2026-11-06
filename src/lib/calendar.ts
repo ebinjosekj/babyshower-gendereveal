@@ -26,7 +26,7 @@ export const downloadIcs = () => {
   const ics = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Nikhitha and Ebin//Baby Shower//EN',
+    'PRODID:-//Nikki and Ebin//Baby Shower//EN',
     'CALSCALE:GREGORIAN',
     'BEGIN:VEVENT',
     'UID:baby-shower-nikhitha-ebin-20261121@invitation',

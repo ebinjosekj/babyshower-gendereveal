@@ -1,4 +1,4 @@
-# A Little Wonder Is On The Way — Nikhitha & Ebin
+# A Little Wonder Is On The Way — Nikki & Ebin
 
 Baby Shower & Gender Reveal · **November 21, 2026 · 6:00 PM · Evoke**
 

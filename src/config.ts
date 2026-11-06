@@ -1,8 +1,8 @@
 // Everything you might want to edit lives here.
 
 export const EVENT = {
-  parents: 'Nikhitha & Ebin',
-  parentOne: 'Nikhitha',
+  parents: 'Nikki & Ebin',
+  parentOne: 'Nikki',
   parentTwo: 'Ebin',
   title: 'Baby Shower & Gender Reveal',
   heading: 'A Little Wonder Is On The Way!',
@@ -21,7 +21,7 @@ export const EVENT = {
   dressColours: 'Brown · Beige · Gold',
   contacts: [
     { name: 'Ebin', tel: '+15197816212', display: '519 781 6212' },
-    { name: 'Nikhitha', tel: '+15197310349', display: '519 731 0349' },
+    { name: 'Nikki', tel: '+15197310349', display: '519 731 0349' },
   ],
 } as const;
 

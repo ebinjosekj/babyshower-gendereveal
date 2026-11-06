@@ -19,4 +19,4 @@ export const SAME_NAME_TEAM =
 export const SAME_NAME_RSVP =
   'Someone with the same name has already replied. Please enter your full name (first and last) so we can tell you apart. If that reply was yours, tap “That’s me” to update it.';
 export const NOT_FOUND = 'We couldn’t find that name. Please check the spelling and try again.';
-export const UNAVAILABLE = 'Changing is not switched on yet. Please call Ebin or Nikhitha and they will change it for you.';
+export const UNAVAILABLE = 'Changing is not switched on yet. Please call Ebin or Nikki and they will change it for you.';

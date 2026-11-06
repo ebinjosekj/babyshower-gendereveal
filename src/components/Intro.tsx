@@ -15,7 +15,7 @@ export default function Intro() {
           {EVENT.title}
         </motion.p>
         <motion.h1 initial={{ opacity: 0, y: 26 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 1.3, ease: [0.22, 1, 0.36, 1] }} className="mt-5 font-display text-[15vw] font-light leading-[0.95] tracking-[-0.01em] text-ivory [text-shadow:0_4px_40px_rgba(0,0,0,.7)] sm:text-8xl">
-          Nikhitha
+          Nikki
           <span className="gold-text ambient block italic [filter:drop-shadow(0_2px_14px_rgba(0,0,0,.85))]">&amp; Ebin</span>
         </motion.h1>
         <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.1, duration: 1.2 }} className="mt-8">
