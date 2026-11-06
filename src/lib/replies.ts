@@ -1,42 +1,22 @@
 import { supabase } from './supabase';
 
-// A random private key, kept only in this browser. It proves "this is the same guest" when they change their mind.
-export const makeKey = (): string => {
-  try {
-    return crypto.randomUUID().replace(/-/g, '') + Math.random().toString(36).slice(2);
-  } catch {
-    return Array.from({ length: 4 }, () => Math.random().toString(36).slice(2)).join('');
-  }
-};
+export type ChangeResult = 'updated' | 'not_found' | 'unavailable' | 'error';
 
-export type Outcome = { ok: true; key?: string } | { ok: false; message: string };
-
-export const CALL_US = 'please call Ebin or Nikhitha and they will change it for you';
-
-// Calls a save_* function in the database: creates the reply, or updates it when the key matches.
-// If the database has not been updated yet (function missing), falls back to the plain insert.
-export async function saveReply(
-  fn: 'save_prediction' | 'save_rsvp',
-  args: Record<string, string>,
-  fallback: () => PromiseLike<{ error: { code?: string; message: string } | null }>,
-  texts: { taken: string; changeFailed: string; generic: string },
-  changing: boolean,
-  key: string,
-): Promise<Outcome> {
-  if (!supabase) return { ok: true, key };
-  const { data, error } = await supabase.rpc(fn, { ...args, p_key: key });
+// Changes an existing team pick / RSVP by the guest's name (works from any phone or browser).
+export async function changeReply(fn: 'change_team' | 'change_rsvp', args: Record<string, string>): Promise<ChangeResult> {
+  if (!supabase) return 'updated'; // preview mode: the caller updates its own copy
+  const { data, error } = await supabase.rpc(fn, args);
   if (error) {
-    if (error.code === 'PGRST202' || error.code === '42883') {
-      if (changing) return { ok: false, message: texts.changeFailed };
-      const r = await fallback();
-      if (!r.error) return { ok: true };
-      if (r.error.code === '23505') return { ok: false, message: texts.taken };
-      console.error(fn, r.error);
-      return { ok: false, message: `${texts.generic} (${r.error.code || r.error.message})` };
-    }
+    if (error.code === 'PGRST202' || error.code === '42883') return 'unavailable'; // database not updated yet
     console.error(fn, error);
-    return { ok: false, message: `${texts.generic} (${error.code || error.message})` };
+    return 'error';
   }
-  if (data === 'name_taken') return { ok: false, message: changing ? texts.changeFailed : texts.taken };
-  return { ok: true, key };
+  return data === 'updated' ? 'updated' : 'not_found';
 }
+
+export const SAME_NAME_TEAM =
+  'Someone with the same name has already voted. Please enter your full name (first and last) so we can tell you apart. If that vote was yours, tap “That’s me” to change it.';
+export const SAME_NAME_RSVP =
+  'Someone with the same name has already replied. Please enter your full name (first and last) so we can tell you apart. If that reply was yours, tap “That’s me” to update it.';
+export const NOT_FOUND = 'We couldn’t find that name. Please check the spelling and try again.';
+export const UNAVAILABLE = 'Changing is not switched on yet. Please call Ebin or Nikhitha and they will change it for you.';

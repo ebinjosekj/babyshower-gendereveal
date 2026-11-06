@@ -4,7 +4,7 @@ import { Check } from 'lucide-react';
 import { TEAM_LABEL } from '../config';
 import { confetti } from '../lib/confetti';
 import { cleanName, isConfigured, supabase, type Team } from '../lib/supabase';
-import { CALL_US, makeKey, saveReply } from '../lib/replies';
+import { changeReply, NOT_FOUND, SAME_NAME_TEAM, UNAVAILABLE } from '../lib/replies';
 import { Reveal, SectionHead } from './ui';
 
 const KEY = 'wonder-team';
@@ -13,7 +13,6 @@ const TEAMS: Team[] = ['boy', 'girl'];
 interface Saved {
   team: Team;
   name: string;
-  key?: string;
 }
 interface Member {
   name: string;
@@ -40,6 +39,7 @@ export default function RevealGame() {
   const [error, setError] = useState('');
   const [roster, setRoster] = useState<Member[]>([]);
   const [loadError, setLoadError] = useState(false);
+  const [taken, setTaken] = useState(false);
   const [changing, setChanging] = useState(false);
 
   const refresh = useCallback(async () => {
@@ -61,11 +61,6 @@ export default function RevealGame() {
     return () => window.clearInterval(id);
   }, [refresh]);
 
-  const TEXTS = {
-    taken: 'That name has already joined a team. If you are someone different, please add your last initial. If you joined from another phone, ' + CALL_US + '.',
-    changeFailed: 'We couldn’t change your team from this phone. Please call Ebin or Nikhitha and they will switch it for you.',
-    generic: 'We couldn’t save that. Please try again in a moment.',
-  };
   const persist = (record: Saved) => {
     try {
       localStorage.setItem(KEY, JSON.stringify(record));
@@ -73,33 +68,41 @@ export default function RevealGame() {
       /* private mode */
     }
   };
+  const sameName = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
 
-  // Changed their mind: same name + the private key from this phone moves them to the other team.
+  // Move an existing name to another team (works from any phone: it is matched by name).
+  const changeByName = async (nm: string, team: Team): Promise<boolean> => {
+    setBusy(true);
+    setError('');
+    try {
+      const res = await changeReply('change_team', { p_name: nm, p_team: team });
+      if (res === 'updated') {
+        if (supabase) void refresh();
+        else setRoster((list) => list.map((m) => (sameName(m.name, nm) ? { ...m, team } : m)));
+        confetti({ count: 120 });
+        return true;
+      }
+      setError(res === 'unavailable' ? UNAVAILABLE : res === 'not_found' ? NOT_FOUND : 'We couldn’t save that. Please try again in a moment.');
+      return false;
+    } catch {
+      setError('Something went wrong. Please check your connection and try again.');
+      return false;
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const switchTeam = async (team: Team) => {
     if (!saved) return;
     if (team === saved.team) {
       setChanging(false);
       return;
     }
-    setBusy(true);
-    setError('');
-    try {
-      const out = await saveReply('save_prediction', { p_name: saved.name, p_team: team }, () => Promise.resolve({ error: null }), TEXTS, true, saved.key ?? '');
-      if (!out.ok) {
-        setError(out.message);
-        return;
-      }
+    if (await changeByName(saved.name, team)) {
       const record: Saved = { ...saved, team };
       persist(record);
       setSaved(record);
       setChanging(false);
-      if (supabase) void refresh();
-      else setRoster((r) => r.map((m) => (m.name === saved.name ? { ...m, team } : m)));
-      confetti({ count: 120 });
-    } catch {
-      setError('Something went wrong. Please check your connection and try again.');
-    } finally {
-      setBusy(false);
     }
   };
 
@@ -110,7 +113,21 @@ export default function RevealGame() {
     }
     setPick(team);
     setError('');
+    setTaken(false);
     confetti({ x: e.clientX, y: e.clientY, count: 70 });
+  };
+
+  // "That's me": the name was already used, and this guest says it is theirs.
+  const claimName = async () => {
+    if (!pick) return;
+    const clean = cleanName(name);
+    if (await changeByName(clean, pick)) {
+      const record: Saved = { team: pick, name: clean };
+      persist(record);
+      setSaved(record);
+      setPick(null);
+      setTaken(false);
+    }
   };
 
   const submit = async (e: FormEvent) => {
@@ -122,23 +139,30 @@ export default function RevealGame() {
 
     setBusy(true);
     setError('');
+    setTaken(false);
     try {
-      const key = makeKey();
-      const out = await saveReply(
-        'save_prediction',
-        { p_name: clean, p_team: pick },
-        () => supabase!.from('predictions').insert({ guest_name: clean, selected_team: pick }),
-        TEXTS,
-        false,
-        key,
-      );
-      if (!out.ok) {
-        setError(out.message);
-        return;
+      if (supabase) {
+        const { error: err } = await supabase.from('predictions').insert({ guest_name: clean, selected_team: pick });
+        if (err) {
+          if (err.code === '23505') {
+            setTaken(true);
+            setError(SAME_NAME_TEAM);
+          } else {
+            console.error('Join team failed', err);
+            setError(`We couldn’t save that. Please try again in a moment. (${err.code || err.message})`);
+          }
+          return;
+        }
+        void refresh();
+      } else {
+        if (roster.some((m) => sameName(m.name, clean))) {
+          setTaken(true);
+          setError(SAME_NAME_TEAM);
+          return;
+        }
+        setRoster((r) => [...r, { name: clean, team: pick }]); // this device only
       }
-      if (supabase) void refresh();
-      else setRoster((r) => [...r, { name: clean, team: pick }]); // this device only
-      const record: Saved = { team: pick, name: clean, key: out.key };
+      const record: Saved = { team: pick, name: clean };
       persist(record);
       setSaved(record);
       setPick(null);
@@ -204,21 +228,17 @@ export default function RevealGame() {
           )}
           {saved && (
             <div className="mt-4 text-center">
-              {saved.key || !supabase ? (
-                changing ? (
-                  <>
-                    <p className="font-display text-2xl italic text-ivory">Tap the team you want to switch to.</p>
-                    <button type="button" className="mt-2 text-sm font-medium text-sun underline underline-offset-4" onClick={() => { setChanging(false); setError(''); }}>
-                      Cancel
-                    </button>
-                  </>
-                ) : (
-                  <button type="button" className="btn-ghost-light" onClick={() => { setChanging(true); setError(''); }}>
-                    Changed your mind? Switch teams
+              {changing ? (
+                <>
+                  <p className="font-display text-2xl italic text-ivory">Tap the team you want to switch to.</p>
+                  <button type="button" className="mt-2 text-sm font-medium text-sun underline underline-offset-4" onClick={() => { setChanging(false); setError(''); }}>
+                    Cancel
                   </button>
-                )
+                </>
               ) : (
-                <p className="text-sm italic text-ivory/80">To change your team, please call Ebin or Nikhitha.</p>
+                <button type="button" className="btn-ghost-light" onClick={() => { setChanging(true); setError(''); }}>
+                  Changed your mind? Switch teams
+                </button>
               )}
               {error && (
                 <p className="mx-auto mt-3 max-w-md text-sm font-semibold text-[#F0B49A]" role="alert">
@@ -226,6 +246,9 @@ export default function RevealGame() {
                 </p>
               )}
             </div>
+          )}
+          {!saved && !pick && (
+            <p className="mt-5 text-center text-sm italic text-ivory/80">Already voted on another phone? Pick your team again with the same name and tap “That’s me” to change it.</p>
           )}
         </div>
 
@@ -291,12 +314,17 @@ export default function RevealGame() {
               <label htmlFor="predict-name" className="sr-only">
                 Your name
               </label>
-              <input id="predict-name" className="field mt-4" placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} maxLength={60} autoComplete="name" autoFocus aria-invalid={!!error} aria-describedby="predict-error" />
+              <input id="predict-name" className="field mt-4" placeholder="Your name" value={name} onChange={(e) => { setName(e.target.value); setTaken(false); }} maxLength={60} autoComplete="name" autoFocus aria-invalid={!!error} aria-describedby="predict-error" />
               <p id="predict-error" className="mt-2 min-h-[1.25rem] text-sm font-semibold text-[#B5412C]" role="alert">
                 {error}
               </p>
+              {taken && (
+                <button type="button" className="btn-mint mt-2 w-full" disabled={busy} onClick={() => void claimName()}>
+                  {busy ? 'Changing…' : `That’s me — move me to ${TEAM_LABEL[pick]}`}
+                </button>
+              )}
               <div className="mt-3 flex gap-3">
-                <button type="button" className="btn-ghost flex-1" onClick={() => { setPick(null); setError(''); }}>
+                <button type="button" className="btn-ghost flex-1" onClick={() => { setPick(null); setError(''); setTaken(false); }}>
                   Back
                 </button>
                 <button type="submit" className="btn-sun flex-[2]" disabled={busy}>
