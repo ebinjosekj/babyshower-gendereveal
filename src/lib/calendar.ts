@@ -57,5 +57,8 @@ export const downloadIcs = () => {
 export const directionsUrl = () =>
   `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(EVENT.venueAddress)}`;
 
+export const appleMapsUrl = () =>
+  `https://maps.apple.com/?daddr=${encodeURIComponent(`${EVENT.venueName}, ${EVENT.venueAddress}`)}&dirflg=d`;
+
 export const mapEmbedUrl = () =>
   `https://www.google.com/maps?q=${encodeURIComponent(EVENT.venueAddress)}&output=embed`;

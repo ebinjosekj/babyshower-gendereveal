@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { CalendarPlus, Heart, MapPin } from 'lucide-react';
 import { EVENT } from '../config';
 import { confetti } from '../lib/confetti';
-import { directionsUrl, downloadIcs, googleCalendarUrl, mapEmbedUrl } from '../lib/calendar';
+import { appleMapsUrl, directionsUrl, downloadIcs, googleCalendarUrl, mapEmbedUrl } from '../lib/calendar';
 import { scrollToId } from '../lib/scroll';
 import { Reveal } from './ui';
 
@@ -159,6 +159,8 @@ const Label = ({ children }: { children: ReactNode }) => <small className="font-
 export default function EventDetails() {
   const [calOpen, setCalOpen] = useState(false);
   const calRef = useRef<HTMLDivElement>(null);
+  const [mapOpen, setMapOpen] = useState(false);
+  const mapRef = useRef<HTMLDivElement>(null);
   const [opened, setOpened] = useState<boolean[]>(() => {
     try {
       return localStorage.getItem(SEEN_KEY) === '1' ? [true, true, true] : [false, false, false];
@@ -191,6 +193,20 @@ export default function EventDetails() {
       document.removeEventListener('keydown', esc);
     };
   }, [calOpen]);
+
+  useEffect(() => {
+    if (!mapOpen) return;
+    const away = (e: MouseEvent) => {
+      if (mapRef.current && !mapRef.current.contains(e.target as Node)) setMapOpen(false);
+    };
+    const esc = (e: KeyboardEvent) => e.key === 'Escape' && setMapOpen(false);
+    document.addEventListener('mousedown', away);
+    document.addEventListener('keydown', esc);
+    return () => {
+      document.removeEventListener('mousedown', away);
+      document.removeEventListener('keydown', esc);
+    };
+  }, [mapOpen]);
 
   const openZone = useCallback((i: number, x?: number, y?: number, small = false) => {
     setOpened((o) => (o[i] ? o : o.map((v, k) => (k === i ? true : v))));
@@ -331,9 +347,29 @@ export default function EventDetails() {
                 </AnimatePresence>
               </div>
               {hasAddress && (
-                <a className="btn-mint" href={directionsUrl()} target="_blank" rel="noopener noreferrer">
-                  <MapPin size={18} aria-hidden="true" /> Directions
-                </a>
+                <div className="relative" ref={mapRef}>
+                  <button type="button" className="btn-mint w-full" aria-expanded={mapOpen} aria-haspopup="menu" onClick={() => setMapOpen((o) => !o)}>
+                    <MapPin size={18} aria-hidden="true" /> Directions
+                  </button>
+                  <AnimatePresence>
+                    {mapOpen && (
+                      <motion.div
+                        role="menu"
+                        initial={{ opacity: 0, y: -6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        className="absolute left-1/2 top-full z-20 mt-2 w-60 -translate-x-1/2 rounded-2xl border-2 border-champagne bg-ivory p-2 text-left shadow-xl"
+                      >
+                        <a role="menuitem" className="block rounded-xl px-4 py-3 font-display text-lg text-plum hover:bg-sun/30" href={directionsUrl()} target="_blank" rel="noopener noreferrer" onClick={() => setMapOpen(false)}>
+                          Google Maps
+                        </a>
+                        <a role="menuitem" className="block rounded-xl px-4 py-3 font-display text-lg text-plum hover:bg-sun/30" href={appleMapsUrl()} target="_blank" rel="noopener noreferrer" onClick={() => setMapOpen(false)}>
+                          Apple Maps
+                        </a>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               )}
               <button type="button" className="btn-ghost" onClick={() => scrollToId('rsvp')}>
                 <Heart size={18} aria-hidden="true" /> RSVP
