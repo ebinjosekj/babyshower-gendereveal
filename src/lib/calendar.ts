@@ -4,8 +4,10 @@ import { EVENT } from '../config';
 const START_LOCAL = '20261121T180000';
 const END_LOCAL = '20261121T210000';
 
-const venue: string = EVENT.venueAddress || EVENT.venueName;
-const details = `Join ${EVENT.parents} for their ${EVENT.title}!`;
+const venue: string = `${EVENT.venueName} - ${EVENT.venueRoom}, ${EVENT.venueAddress}`;
+const details = `Join ${EVENT.parents} for their ${EVENT.title}! Guest recommended dress colours: ${EVENT.dressColours.replace(/ · /g, ', ')}.`;
+
+const utc = (iso: string) => new Date(iso).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
 
 export const googleCalendarUrl = () => {
   const p = new URLSearchParams({
@@ -29,11 +31,16 @@ export const downloadIcs = () => {
     'BEGIN:VEVENT',
     'UID:baby-shower-nikhitha-ebin-20261121@invitation',
     `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z`,
-    `DTSTART;TZID=${EVENT.timeZone}:${START_LOCAL}`,
-    `DTEND;TZID=${EVENT.timeZone}:${END_LOCAL}`,
+    `DTSTART:${utc(EVENT.startISO)}`,
+    `DTEND:${utc(EVENT.endISO)}`,
     `SUMMARY:${esc(`${EVENT.title} — ${EVENT.parents}`)}`,
     `DESCRIPTION:${esc(details)}`,
     `LOCATION:${esc(venue)}`,
+    'BEGIN:VALARM',
+    'TRIGGER:-P1D',
+    'ACTION:DISPLAY',
+    'DESCRIPTION:The baby shower is tomorrow',
+    'END:VALARM',
     'END:VEVENT',
     'END:VCALENDAR',
   ].join('\r\n');

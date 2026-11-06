@@ -16,7 +16,9 @@ export const EVENT = {
   dateLabel: 'November 21, 2026',
   timeLabel: '6:00 PM',
   venueName: 'Evoke',
+  venueRoom: 'Social Room, First Floor',
   venueAddress: '239 Eden Oak Trail, Kitchener, ON N2A 0L5',
+  dressColours: 'Brown · Beige · Gold',
   contacts: [
     { name: 'Ebin', tel: '+15197816212', display: '519 781 6212' },
     { name: 'Nikhitha', tel: '+15197310349', display: '519 731 0349' },

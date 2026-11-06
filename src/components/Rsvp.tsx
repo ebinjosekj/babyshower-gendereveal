@@ -7,8 +7,8 @@ import { Reveal, SectionHead } from './ui';
 const KEY = 'wonder-rsvp';
 
 const OPTIONS: { value: Exclude<Attendance, 'declined'>; title: string }[] = [
-  { value: 'attending', title: 'See you!' },
-  { value: 'blessing', title: 'Sending blessings' },
+  { value: 'attending', title: 'Count me in' },
+  { value: 'blessing', title: 'Cheering from afar' },
 ];
 
 export default function Rsvp() {
@@ -72,7 +72,7 @@ export default function Rsvp() {
 
   return (
     <section id="rsvp" aria-label="RSVP" className="relative px-4 py-28 sm:py-36">
-      <SectionHead dark kicker="Kindly reply" title="Will you join us?" sub="Let us know you’re coming — or send your blessings." />
+      <SectionHead dark kicker="Kindly reply" title="Will you join us?" sub="Let us know you’re coming, or cheer us on from afar." />
 
       <Reveal delay={0.1} className="mx-auto mt-12 max-w-xl">
         <AnimatePresence mode="wait">
@@ -81,7 +81,7 @@ export default function Rsvp() {
               <span className="mx-auto block h-3 w-3 rotate-45 bg-sun" aria-hidden="true" />
               <p className="mt-4 font-display text-5xl font-semibold italic text-ocean sm:text-6xl">Thank you, {done.name.split(' ')[0]}!</p>
               <p className="mx-auto mt-5 max-w-sm font-display text-xl text-forest sm:text-2xl">
-                {done.status === 'attending' ? 'We’ll see you at the celebration.' : 'Your blessings mean the world to us.'}
+                {done.status === 'attending' ? 'See you at the celebration!' : 'Your love will be with us on the day.'}
               </p>
               {!isConfigured && <p className="mt-4 text-xs italic text-ink-soft">Preview mode — this reply was not saved.</p>}
             </motion.div>
