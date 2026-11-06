@@ -8,7 +8,6 @@ import { scrollToId } from '../lib/scroll';
 import { Reveal } from './ui';
 
 const hasAddress: boolean = EVENT.venueAddress.length > 0; // directions + map need a real address
-const SEEN_KEY = 'wonder-details-revealed';
 
 // Paint the gold foil: a brushed-metal gradient with speckle and a hint. Afterwards strokes erase it.
 function paintFoil(c: HTMLCanvasElement, w: number, h: number) {
@@ -161,24 +160,10 @@ export default function EventDetails() {
   const calRef = useRef<HTMLDivElement>(null);
   const [mapOpen, setMapOpen] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
-  const [opened, setOpened] = useState<boolean[]>(() => {
-    try {
-      return localStorage.getItem(SEEN_KEY) === '1' ? [true, true, true] : [false, false, false];
-    } catch {
-      return [false, false, false];
-    }
-  });
+  // Always starts covered: every visit gets to scratch the foil again.
+  const [opened, setOpened] = useState<boolean[]>([false, false, false]);
   const found = opened.filter(Boolean).length;
   const all = found === 3;
-
-  useEffect(() => {
-    if (!all) return;
-    try {
-      localStorage.setItem(SEEN_KEY, '1');
-    } catch {
-      /* private mode */
-    }
-  }, [all]);
 
   useEffect(() => {
     if (!calOpen) return;
