@@ -119,3 +119,6 @@ create policy "admins delete predictions" on public.predictions for delete to au
 --
 -- 3) Recommended: Authentication → Sign In / Providers → Email → turn OFF "Allow new users to sign up".
 --    Then open  https://ebinjosekj.github.io/babyshower_genderreveal/#/admin
+
+-- ───────────────────────── change my reply (added later) ─────────────────────────
+-- After running this file, also run  supabase/update-change-replies.sql  so guests can change their team / RSVP.

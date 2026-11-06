@@ -4,6 +4,7 @@ import { Check } from 'lucide-react';
 import { TEAM_LABEL } from '../config';
 import { confetti } from '../lib/confetti';
 import { cleanName, isConfigured, supabase, type Team } from '../lib/supabase';
+import { CALL_US, makeKey, saveReply } from '../lib/replies';
 import { Reveal, SectionHead } from './ui';
 
 const KEY = 'wonder-team';
@@ -12,6 +13,7 @@ const TEAMS: Team[] = ['boy', 'girl'];
 interface Saved {
   team: Team;
   name: string;
+  key?: string;
 }
 interface Member {
   name: string;
@@ -38,6 +40,7 @@ export default function RevealGame() {
   const [error, setError] = useState('');
   const [roster, setRoster] = useState<Member[]>([]);
   const [loadError, setLoadError] = useState(false);
+  const [changing, setChanging] = useState(false);
 
   const refresh = useCallback(async () => {
     if (!supabase) return;
@@ -58,8 +61,53 @@ export default function RevealGame() {
     return () => window.clearInterval(id);
   }, [refresh]);
 
+  const TEXTS = {
+    taken: 'That name has already joined a team. If you are someone different, please add your last initial. If you joined from another phone, ' + CALL_US + '.',
+    changeFailed: 'We couldn’t change your team from this phone. Please call Ebin or Nikhitha and they will switch it for you.',
+    generic: 'We couldn’t save that. Please try again in a moment.',
+  };
+  const persist = (record: Saved) => {
+    try {
+      localStorage.setItem(KEY, JSON.stringify(record));
+    } catch {
+      /* private mode */
+    }
+  };
+
+  // Changed their mind: same name + the private key from this phone moves them to the other team.
+  const switchTeam = async (team: Team) => {
+    if (!saved) return;
+    if (team === saved.team) {
+      setChanging(false);
+      return;
+    }
+    setBusy(true);
+    setError('');
+    try {
+      const out = await saveReply('save_prediction', { p_name: saved.name, p_team: team }, () => Promise.resolve({ error: null }), TEXTS, true, saved.key ?? '');
+      if (!out.ok) {
+        setError(out.message);
+        return;
+      }
+      const record: Saved = { ...saved, team };
+      persist(record);
+      setSaved(record);
+      setChanging(false);
+      if (supabase) void refresh();
+      else setRoster((r) => r.map((m) => (m.name === saved.name ? { ...m, team } : m)));
+      confetti({ count: 120 });
+    } catch {
+      setError('Something went wrong. Please check your connection and try again.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const choose = (team: Team, e: MouseEvent) => {
-    if (saved) return;
+    if (saved) {
+      if (changing && !busy) void switchTeam(team);
+      return;
+    }
     setPick(team);
     setError('');
     confetti({ x: e.clientX, y: e.clientY, count: 70 });
@@ -75,27 +123,23 @@ export default function RevealGame() {
     setBusy(true);
     setError('');
     try {
-      if (supabase) {
-        const { error: err } = await supabase.from('predictions').insert({ guest_name: clean, selected_team: pick });
-        if (err) {
-          console.error('Join team failed', err);
-          setError(
-            err.code === '23505'
-              ? 'That name has already joined a team. If you are someone different, please add your last initial.'
-              : `We couldn’t save that. Please try again in a moment. (${err.code || err.message})`,
-          );
-          return;
-        }
-        void refresh();
-      } else {
-        setRoster((r) => [...r, { name: clean, team: pick }]); // this device only
+      const key = makeKey();
+      const out = await saveReply(
+        'save_prediction',
+        { p_name: clean, p_team: pick },
+        () => supabase!.from('predictions').insert({ guest_name: clean, selected_team: pick }),
+        TEXTS,
+        false,
+        key,
+      );
+      if (!out.ok) {
+        setError(out.message);
+        return;
       }
-      const record: Saved = { team: pick, name: clean };
-      try {
-        localStorage.setItem(KEY, JSON.stringify(record));
-      } catch {
-        /* private mode */
-      }
+      if (supabase) void refresh();
+      else setRoster((r) => [...r, { name: clean, team: pick }]); // this device only
+      const record: Saved = { team: pick, name: clean, key: out.key };
+      persist(record);
       setSaved(record);
       setPick(null);
       confetti({ count: 140 });
@@ -117,14 +161,14 @@ export default function RevealGame() {
         key={team}
         type="button"
         onClick={(e) => choose(team, e)}
-        disabled={!!saved}
+        disabled={!!saved && !changing}
         aria-pressed={active}
-        whileHover={saved ? undefined : { y: -8 }}
-        whileTap={saved ? undefined : { scale: 0.96 }}
+        whileHover={saved && !changing ? undefined : { y: -8 }}
+        whileTap={saved && !changing ? undefined : { scale: 0.96 }}
         animate={active ? { scale: 1.04 } : { scale: 1 }}
         className={`glass-dark relative flex flex-col items-center overflow-hidden rounded-[30px] border px-3 pb-6 pt-8 text-center transition-shadow disabled:cursor-default sm:pb-8 sm:pt-10 ${
           active ? (gold ? 'border-blush shadow-[0_0_60px_-8px_rgba(242,166,192,.6)]' : 'border-skyblue shadow-[0_0_60px_-8px_rgba(127,182,230,.6)]') : gold ? 'border-blush/25' : 'border-skyblue/25'
-        } ${saved && !active ? 'opacity-50' : ''}`}
+        } ${saved && !changing && !active ? 'opacity-50' : ''}`}
       >
         <span className="relative block h-24 w-24 sm:h-32 sm:w-32" aria-hidden="true">
           <span className="absolute inset-0 rounded-full border border-white/15" />
@@ -157,6 +201,31 @@ export default function RevealGame() {
             <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass mt-6 rounded-2xl px-5 py-4 text-center font-display text-xl text-ocean" role="status">
               Welcome, {saved.name}! You joined <strong>{TEAM_LABEL[saved.team]}</strong>.
             </motion.p>
+          )}
+          {saved && (
+            <div className="mt-4 text-center">
+              {saved.key || !supabase ? (
+                changing ? (
+                  <>
+                    <p className="font-display text-2xl italic text-ivory">Tap the team you want to switch to.</p>
+                    <button type="button" className="mt-2 text-sm font-medium text-sun underline underline-offset-4" onClick={() => { setChanging(false); setError(''); }}>
+                      Cancel
+                    </button>
+                  </>
+                ) : (
+                  <button type="button" className="btn-ghost-light" onClick={() => { setChanging(true); setError(''); }}>
+                    Changed your mind? Switch teams
+                  </button>
+                )
+              ) : (
+                <p className="text-sm italic text-ivory/80">To change your team, please call Ebin or Nikhitha.</p>
+              )}
+              {error && (
+                <p className="mx-auto mt-3 max-w-md text-sm font-semibold text-[#F0B49A]" role="alert">
+                  {error}
+                </p>
+              )}
+            </div>
           )}
         </div>
 
