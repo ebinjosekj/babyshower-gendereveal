@@ -2,14 +2,15 @@ import { useCallback, useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { GALLERY } from '../config';
-import { Star } from './art';
+import { CloudLayer, Meadow, SKY } from './atmosphere';
+import { Spark } from './world';
 import { base, Reveal, SectionHead } from './ui';
 
 const FRAMES = [
-  'from-sun via-tangerine to-coral',
-  'from-mint via-turquoise to-emerald',
-  'from-lavender via-[#8E74E0] to-turquoise',
-  'from-champagne via-sun to-tangerine',
+  'from-sun via-champagne to-coral',
+  'from-turquoise via-jade to-champagne',
+  'from-champagne via-sun to-lavender',
+  'from-jade via-turquoise to-sun',
 ];
 
 export default function Gallery() {
@@ -52,14 +53,16 @@ export default function Gallery() {
     <section
       id="memories"
       aria-label="Our little memories"
-      className="relative overflow-hidden bg-[linear-gradient(180deg,#B8A6F0_0%,#FFE2A8_20%,#FFF1C9_100%)] px-4 pb-28 pt-24 sm:pt-32"
+      className="relative overflow-hidden px-4 pb-32 pt-24 sm:pt-32"
+      style={{ background: SKY.day }}
     >
-      <SectionHead kicker="Our little memories" title="Moments We Treasure" sub="A few favourite memories on the way to meeting you." />
+      <CloudLayer count={3} seed={161} depth={0.3} top={[0, 30]} />
+      <SectionHead dark kicker="Our little memories" title="Moments We Treasure" sub="A few favourite memories on the way to meeting you." />
 
       {items.length === 0 ? (
         <Reveal className="mx-auto mt-12 max-w-md text-center">
-          <Star className="mx-auto h-6 w-6" />
-          <p className="mt-4 font-display text-2xl italic text-ink">Our favourite photos are coming soon.</p>
+          <Spark className="mx-auto h-6 w-6" />
+          <p className="mt-4 font-display text-2xl italic text-ivory">Our favourite photos are coming soon.</p>
         </Reveal>
       ) : (
         <div className="mx-auto mt-14 flex max-w-5xl flex-wrap justify-center gap-6 sm:gap-8">
@@ -75,15 +78,15 @@ export default function Gallery() {
                 whileHover={{ y: -8, rotate: i % 2 ? 1.2 : -1.2, scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 aria-label={`Open photo: ${g.caption}`}
-                className={`group relative block w-full rounded-[28px] bg-gradient-to-br p-[6px] shadow-[0_28px_44px_-24px_rgba(43,26,87,.6)] ${FRAMES[i % FRAMES.length]}`}
+                className={`group relative block w-full rounded-[28px] bg-gradient-to-br p-[6px] shadow-[0_28px_44px_-24px_rgba(10,35,45,.6)] ${FRAMES[i % FRAMES.length]}`}
                 style={{ rotate: single ? 0 : i % 2 ? 1 : -1 }}
               >
                 <span className="block rounded-[22px] bg-ivory p-2">
                   <img src={`${base}photos/${g.file}`} alt={g.caption} loading="lazy" decoding="async" className="block w-full rounded-2xl" />
                 </span>
-                <Star className="absolute -left-2 -top-2 w-6" />
-                <Star className="absolute -bottom-2 -right-2 w-6" />
-                <span className="pointer-events-none absolute inset-x-[10px] bottom-[10px] rounded-b-2xl bg-gradient-to-t from-plum/70 to-transparent px-4 pb-3 pt-10 text-left font-display text-base text-ivory opacity-0 transition group-hover:opacity-100 group-focus-visible:opacity-100">
+                <Spark className="absolute -left-2 -top-2 w-6" />
+                <Spark className="absolute -bottom-2 -right-2 w-6" />
+                <span className="pointer-events-none absolute inset-x-[10px] bottom-[10px] rounded-b-2xl bg-gradient-to-t from-ocean/80 to-transparent px-4 pb-3 pt-10 text-left font-display text-base text-ivory opacity-0 transition group-hover:opacity-100 group-focus-visible:opacity-100">
                   {g.caption}
                 </span>
               </motion.button>
@@ -96,7 +99,7 @@ export default function Gallery() {
         {open !== null && items[open] && (
           <motion.div
             data-lenis-prevent
-            className="fixed inset-0 z-[160] flex items-center justify-center bg-plum/90 p-4 backdrop-blur-sm"
+            className="fixed inset-0 z-[160] flex items-center justify-center bg-ocean/95 p-4 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -142,6 +145,7 @@ export default function Gallery() {
           </motion.div>
         )}
       </AnimatePresence>
+      <Meadow className="pointer-events-none absolute inset-x-0 bottom-0 h-[8%] w-full" />
     </section>
   );
 }

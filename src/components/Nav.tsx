@@ -5,11 +5,13 @@ import { useMotion } from '../context/MotionContext';
 import { scrollToId } from '../lib/scroll';
 
 const LINKS: [string, string][] = [
-  ['adventure', 'Our Adventure'],
+  ['top', 'Welcome'],
+  ['story', 'Our Story'],
+  ['explorer', 'Little Explorer'],
   ['countdown', 'Countdown'],
-  ['world', 'Wonder World'],
+  ['journey', 'Rainbow Journey'],
   ['reveal', 'Make a Prediction'],
-  ['details', 'Event Details'],
+  ['details', 'Celebration Details'],
   ['rsvp', 'RSVP'],
   ['memories', 'Memories'],
 ];

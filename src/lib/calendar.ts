@@ -4,6 +4,7 @@ import { EVENT } from '../config';
 const START_LOCAL = '20261121T180000';
 const END_LOCAL = '20261121T210000';
 
+const venue: string = EVENT.venueAddress || EVENT.venueName;
 const details = `Join ${EVENT.parents} for their ${EVENT.title}!`;
 
 export const googleCalendarUrl = () => {
@@ -13,7 +14,7 @@ export const googleCalendarUrl = () => {
     dates: `${START_LOCAL}/${END_LOCAL}`,
     ctz: EVENT.timeZone,
     details,
-    location: EVENT.venueQuery,
+    location: venue,
   });
   return `https://calendar.google.com/calendar/render?${p.toString()}`;
 };
@@ -32,7 +33,7 @@ export const downloadIcs = () => {
     `DTEND;TZID=${EVENT.timeZone}:${END_LOCAL}`,
     `SUMMARY:${esc(`${EVENT.title} — ${EVENT.parents}`)}`,
     `DESCRIPTION:${esc(details)}`,
-    `LOCATION:${esc(EVENT.venueQuery)}`,
+    `LOCATION:${esc(venue)}`,
     'END:VEVENT',
     'END:VCALENDAR',
   ].join('\r\n');
@@ -47,7 +48,7 @@ export const downloadIcs = () => {
 };
 
 export const directionsUrl = () =>
-  `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(EVENT.venueQuery)}`;
+  `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(EVENT.venueAddress)}`;
 
 export const mapEmbedUrl = () =>
-  `https://www.google.com/maps?q=${encodeURIComponent(EVENT.venueQuery)}&output=embed`;
+  `https://www.google.com/maps?q=${encodeURIComponent(EVENT.venueAddress)}&output=embed`;

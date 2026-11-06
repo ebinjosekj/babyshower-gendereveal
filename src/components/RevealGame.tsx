@@ -4,7 +4,8 @@ import { Check } from 'lucide-react';
 import { TEAM_LABEL } from '../config';
 import { confetti } from '../lib/confetti';
 import { cleanName, isConfigured, supabase, type Team } from '../lib/supabase';
-import { Chest, Flower, Star, Sun, Tree } from './art';
+import { CloudLayer, Motes, SKY } from './atmosphere';
+import { Spark, StarSculpture, SunSculpture } from './world';
 import { Reveal, SectionHead } from './ui';
 
 const KEY = 'wonder-prediction';
@@ -14,7 +15,7 @@ interface Saved {
 }
 interface Counts {
   sunshine: number;
-  nature: number;
+  wonder: number;
 }
 
 const readSaved = (): Saved | null => {
@@ -32,10 +33,9 @@ export default function RevealGame() {
   const [name, setName] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const [counts, setCounts] = useState<Counts>({ sunshine: 0, nature: 0 });
+  const [counts, setCounts] = useState<Counts>({ sunshine: 0, wonder: 0 });
   const [loadError, setLoadError] = useState(false);
-  const [chestTapped, setChestTapped] = useState(0);
-
+  
   const refresh = useCallback(async () => {
     if (!supabase) return;
     const { data, error: err } = await supabase.rpc('prediction_counts');
@@ -45,7 +45,7 @@ export default function RevealGame() {
     }
     setLoadError(false);
     const d = data as Partial<Counts>;
-    setCounts({ sunshine: Number(d.sunshine ?? 0), nature: Number(d.nature ?? 0) });
+    setCounts({ sunshine: Number(d.sunshine ?? 0), wonder: Number(d.wonder ?? 0) });
   }, []);
 
   useEffect(() => {
@@ -103,7 +103,7 @@ export default function RevealGame() {
     }
   };
 
-  const total = counts.sunshine + counts.nature;
+  const total = counts.sunshine + counts.wonder;
   const sunPct = total ? Math.round((counts.sunshine / total) * 100) : 50;
 
   // A plain render function (not a nested component) so the cards keep their animation state.
@@ -125,29 +125,21 @@ export default function RevealGame() {
         } ${saved && !active ? 'opacity-60 saturate-50' : ''}`}
         style={{
           background: sun
-            ? 'linear-gradient(160deg,#FFF4B8 0%,#FFC93C 50%,#FF9A3C 100%)'
-            : 'linear-gradient(160deg,#C9F7E6 0%,#8EE3C2 45%,#27C4C4 100%)',
-          borderColor: sun ? '#FFE08A' : '#B9F3DF',
+            ? 'linear-gradient(160deg,#F7E3A6 0%,#F0B94B 50%,#E98C56 100%)'
+            : 'linear-gradient(160deg,#A9D6D1 0%,#347D76 55%,#183D4B 100%)',
+          borderColor: sun ? '#F7E3A6' : '#77B7B0',
         }}
       >
-        {sun ? (
-          <Sun className="ambient h-24 w-24 animate-spin-slow sm:h-32 sm:w-32" />
-        ) : (
-          <div className="flex h-24 items-end gap-1 sm:h-32">
-            <Tree className="w-12 sm:w-16" c1="#1FA67A" c2="#8EE3C2" />
-            <Flower className="w-8 sm:w-10" color="#FFC93C" />
-            <Tree className="w-10 sm:w-14" c1="#27C4C4" c2="#C9F7E6" />
-          </div>
-        )}
-        <span className="mt-3 font-display text-2xl font-semibold text-plum sm:text-4xl">{TEAM_LABEL[team]}</span>
-        <span className="mt-1 text-xs font-bold uppercase tracking-[0.2em] text-plum/70">{sun ? 'Warm & golden' : 'Fresh & green'}</span>
-        <span className="mt-3 font-display text-4xl font-semibold tabular-nums text-plum sm:text-5xl">
-          <motion.span key={sun ? counts.sunshine : counts.nature} initial={{ scale: 1.5, opacity: 0.4 }} animate={{ scale: 1, opacity: 1 }} className="inline-block">
-            {sun ? counts.sunshine : counts.nature}
+        {sun ? <SunSculpture className="h-28 w-28 sm:h-36 sm:w-36" /> : <StarSculpture className="h-28 w-28 sm:h-36 sm:w-36" />}
+        <span className={`mt-3 font-display text-2xl font-semibold sm:text-4xl ${sun ? 'text-ocean' : 'text-ivory'}`}>{TEAM_LABEL[team]}</span>
+        <span className={`mt-1 text-xs font-medium uppercase tracking-[0.2em] ${sun ? 'text-ocean/80' : 'text-ivory/80'}`}>{sun ? 'Warm & golden' : 'Deep & dreamy'}</span>
+        <span className={`mt-3 font-display text-4xl font-semibold tabular-nums sm:text-5xl ${sun ? 'text-ocean' : 'text-ivory'}`}>
+          <motion.span key={sun ? counts.sunshine : counts.wonder} initial={{ scale: 1.5, opacity: 0.4 }} animate={{ scale: 1, opacity: 1 }} className="inline-block">
+            {sun ? counts.sunshine : counts.wonder}
           </motion.span>
         </span>
         {active && (
-          <span className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-plum text-sun">
+          <span className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-ocean text-sun">
             <Check size={18} aria-hidden="true" />
           </span>
         )}
@@ -159,21 +151,22 @@ export default function RevealGame() {
     <section
       id="reveal"
       aria-label="Gender reveal prediction game"
-      className="relative overflow-hidden bg-[linear-gradient(180deg,#FFF1C9_0%,#FFE08A_40%,#FFD6A8_75%,#D9F5E8_100%)] px-4 pb-28 pt-28 sm:pt-36"
+      className="relative overflow-hidden px-4 pb-28 pt-28 sm:pt-36"
+      style={{ background: SKY.golden }}
     >
-      <Star className="ambient absolute left-[8%] top-[10%] w-5" style={{ animation: 'twinkle 3s ease-in-out infinite' }} />
-      <Star className="ambient absolute right-[10%] top-[18%] w-7" style={{ animation: 'twinkle 3.6s ease-in-out .8s infinite' }} />
+      <CloudLayer count={3} seed={131} depth={0.3} top={[2, 30]} />
+      <Motes count={14} seed={23} />
 
-      <SectionHead kicker="The big gender reveal game" title="Who Will Our Little Star Be?" sub="Make your prediction before the big surprise!" />
+      <SectionHead dark kicker="Make a prediction" title="Who Will Our Little Wonder Be?" sub="Make your prediction before the big surprise!" />
 
       <Reveal delay={0.1} className="mx-auto mt-12 max-w-3xl">
-        <p className="mx-auto mb-6 max-w-md text-center text-sm font-bold uppercase tracking-[0.18em] text-ink-soft">
-          These are just friendly prediction teams, not clues!
+        <p className="mx-auto mb-6 max-w-md text-center text-sm font-medium uppercase tracking-[0.18em] text-ivory [text-shadow:0_2px_10px_rgba(10,35,45,.6)]">
+          Just two friendly prediction teams — neither is a clue!
         </p>
 
         <div className="grid grid-cols-2 gap-3 sm:gap-8">
           {renderTeam('sunshine')}
-          {renderTeam('nature')}
+          {renderTeam('wonder')}
         </div>
 
         {/* live scoreboard */}
@@ -189,42 +182,27 @@ export default function RevealGame() {
               <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-ink-soft sm:text-xs">Total predictions</p>
             </div>
             <div>
-              <p className="font-display text-3xl font-semibold text-emerald sm:text-4xl">{counts.nature}</p>
-              <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-ink-soft sm:text-xs">Team Nature</p>
+              <p className="font-display text-3xl font-semibold text-jade sm:text-4xl">{counts.wonder}</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-ink-soft sm:text-xs">Team Wonder</p>
             </div>
           </div>
-          <div className="mt-5 h-4 overflow-hidden rounded-full bg-turquoise/30" aria-hidden="true">
-            <motion.div className="h-full rounded-full bg-gradient-to-r from-sun to-tangerine" animate={{ width: `${sunPct}%` }} transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }} />
+          <div className="mt-5 h-4 overflow-hidden rounded-full bg-jade/25" aria-hidden="true">
+            <motion.div className="h-full rounded-full bg-gradient-to-r from-sun to-coral" animate={{ width: `${sunPct}%` }} transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }} />
           </div>
           {!isConfigured && <p className="mt-3 text-center text-xs italic text-ink-soft">Preview mode — predictions are not shared yet.</p>}
           {loadError && <p className="mt-3 text-center text-xs italic text-ink-soft">The scoreboard will refresh when we’re back online.</p>}
         </div>
 
         {saved && (
-          <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-6 text-center font-display text-xl text-plum" role="status">
-            Thank you, {saved.name}! You’re on <strong>{TEAM_LABEL[saved.team]}</strong>. Your prediction is locked in. ✨
+          <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-6 text-center font-display text-xl text-ivory [text-shadow:0_2px_10px_rgba(10,35,45,.6)]" role="status">
+            Thank you, {saved.name}! You’re on <strong>{TEAM_LABEL[saved.team]}</strong>. Your prediction is locked in.
           </motion.p>
         )}
 
-        {/* the mysterious treasure chest */}
         <div className="mt-14 text-center">
-          <motion.button
-            type="button"
-            aria-label="Shake the treasure chest"
-            onClick={(e) => {
-              setChestTapped((n) => n + 1);
-              confetti({ x: e.clientX, y: e.clientY, count: 50 });
-            }}
-            animate={chestTapped ? { rotate: [0, -6, 6, -4, 4, 0] } : {}}
-            transition={{ duration: 0.6 }}
-            key={chestTapped}
-            className="relative mx-auto block w-40 sm:w-52"
-          >
-            <span className="absolute inset-0 -z-10 rounded-full bg-[radial-gradient(circle,rgba(255,201,60,.8)_0%,rgba(255,201,60,0)_65%)] blur-md" aria-hidden="true" />
-            <Chest className="ambient animate-floaty w-full" />
-          </motion.button>
-          <p className="mx-auto mt-5 max-w-sm font-display text-2xl font-semibold text-plum sm:text-3xl">
-            The biggest surprise will be revealed on November 21!
+          <Spark className="ambient mx-auto w-8" style={{ animation: 'twinkle 3s ease-in-out infinite' }} />
+          <p className="mx-auto mt-4 max-w-sm font-display text-2xl font-semibold text-ivory [text-shadow:0_2px_14px_rgba(10,35,45,.6)] sm:text-3xl">
+            The big surprise will be revealed at the celebration.
           </p>
         </div>
       </Reveal>
@@ -233,7 +211,7 @@ export default function RevealGame() {
       <AnimatePresence>
         {pick && !saved && (
           <motion.div
-            className="fixed inset-0 z-[140] flex items-end justify-center bg-plum/60 p-3 backdrop-blur-sm sm:items-center"
+            className="fixed inset-0 z-[140] flex items-end justify-center bg-ocean/70 p-3 backdrop-blur-sm sm:items-center"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

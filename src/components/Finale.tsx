@@ -1,188 +1,99 @@
-import { useEffect, useLayoutEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
 import { RotateCcw } from 'lucide-react';
 import { EVENT } from '../config';
 import { useMotion } from '../context/MotionContext';
-import { gsap } from '../lib/gsap';
-import { Butterfly, HotAirBalloon, Island, Rainbow, Star, Tree, Elephant, Rabbit, Deer } from './art';
-import { Reveal, StarField, Words } from './ui';
+import { CloudLayer, Motes, SKY } from './atmosphere';
+import { Balloon, Mist, Spark } from './world';
 
-const SPARK = ['#FFC93C', '#FF9A3C', '#FF7A66', '#8EE3C2', '#27C4C4', '#B8A6F0', '#FFF8EA'];
+// A single light, then a constellation, then a glide through colourful clouds.
+const PTS: [number, number][] = [
+  [50, 46], [34, 32], [20, 40], [14, 58], [30, 66], [48, 72], [66, 66], [82, 58], [86, 40], [72, 30], [58, 20],
+];
+const LINKS = PTS.slice(0, -1).map((p, i) => [p, PTS[i + 1]] as const);
 
-// Fireworks light up the clouds while the finale is on screen.
-function Fireworks() {
-  const ref = useRef<HTMLCanvasElement>(null);
-  const { simple } = useMotion();
-
-  useEffect(() => {
-    const canvas = ref.current;
-    if (!canvas || simple) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    interface Spark {
-      x: number;
-      y: number;
-      vx: number;
-      vy: number;
-      life: number;
-      color: string;
-    }
-    let sparks: Spark[] = [];
-    let w = 0;
-    let h = 0;
-    let raf = 0;
-    let last = 0;
-    let visible = false;
-
-    const resize = () => {
-      const r = canvas.getBoundingClientRect();
-      w = canvas.width = Math.round(r.width);
-      h = canvas.height = Math.round(r.height);
-    };
-    const burst = () => {
-      const x = w * (0.12 + Math.random() * 0.76);
-      const y = h * (0.1 + Math.random() * 0.4);
-      const color = SPARK[Math.floor(Math.random() * SPARK.length)];
-      const n = w < 500 ? 34 : 56;
-      for (let i = 0; i < n; i++) {
-        const a = (i / n) * Math.PI * 2;
-        const s = 1.4 + Math.random() * 2.6;
-        sparks.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: 60 + Math.random() * 30, color });
-      }
-    };
-    const frame = (t: number) => {
-      raf = requestAnimationFrame(frame);
-      if (!visible) return;
-      if (t - last > 950) {
-        burst();
-        last = t;
-      }
-      ctx.globalCompositeOperation = 'destination-out';
-      ctx.fillStyle = 'rgba(0,0,0,.18)';
-      ctx.fillRect(0, 0, w, h);
-      ctx.globalCompositeOperation = 'lighter';
-      sparks = sparks.filter((s) => s.life > 0);
-      for (const s of sparks) {
-        s.vy += 0.03;
-        s.x += s.vx;
-        s.y += s.vy;
-        s.vx *= 0.985;
-        s.life -= 1;
-        ctx.globalAlpha = Math.max(0, s.life / 70);
-        ctx.fillStyle = s.color;
-        ctx.beginPath();
-        ctx.arc(s.x, s.y, 2.2, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.globalAlpha = 1;
-    };
-
-    const io = new IntersectionObserver(([e]) => (visible = e.isIntersecting), { threshold: 0.15 });
-    io.observe(canvas);
-    resize();
-    raf = requestAnimationFrame(frame);
-    window.addEventListener('resize', resize);
-    return () => {
-      cancelAnimationFrame(raf);
-      io.disconnect();
-      window.removeEventListener('resize', resize);
-    };
-  }, [simple]);
-
-  return <canvas ref={ref} aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full" />;
-}
+const LINES = ['One little wonder.', 'Infinite love.', 'A universe of dreams.'];
 
 export default function Finale({ onReplay }: { onReplay: () => void }) {
-  const root = useRef<HTMLElement>(null);
   const { simple } = useMotion();
-
-  // the camera slowly pulls away from the floating island
-  useLayoutEffect(() => {
-    const el = root.current;
-    if (simple || !el) return;
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        '.island-away',
-        { scale: 1.25, y: 0 },
-        { scale: 0.62, y: -30, ease: 'none', scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom bottom', scrub: true } },
-      );
-    }, el);
-    return () => ctx.revert();
-  }, [simple]);
+  const d = simple ? 0.05 : 1;
 
   return (
-    <section
-      ref={root}
-      id="finale"
-      aria-label="Grand finale"
-      className="relative flex min-h-[100svh] flex-col items-center overflow-hidden bg-[linear-gradient(180deg,#B8A6F0_0%,#2B1A57_8%,#4A2A8C_38%,#B8A6F0_66%,#FFB07A_86%,#FFD98A_100%)] px-5 pb-10 pt-32 text-center"
-    >
-      <StarField count={70} />
-      <Fireworks />
-      <Rainbow className="pointer-events-none absolute left-1/2 top-[34%] w-[140%] max-w-[1000px] -translate-x-1/2 opacity-70" />
-
-      {/* balloons rise into the sky */}
-      {[8, 22, 70, 86].map((l, i) => (
-        <div
-          key={l}
-          aria-hidden="true"
-          className="ambient hide-simple pointer-events-none absolute bottom-0 w-12 sm:w-16"
-          style={{ left: `${l}%`, ['--sway' as string]: `${(i % 2 ? 1 : -1) * 30}px`, animation: `riseUp ${16 + i * 3}s linear ${i * 2.5}s infinite` }}
+    <section id="finale" aria-label="Closing" className="relative overflow-hidden">
+      {/* 1 · lights */}
+      <div className="relative flex min-h-[100svh] items-center justify-center overflow-hidden" style={{ background: SKY.night }}>
+        <Motes count={26} seed={41} />
+        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 h-full w-full" aria-hidden="true">
+          {LINKS.map(([a, b], i) => (
+            <motion.line
+              key={i}
+              x1={a[0]}
+              y1={a[1]}
+              x2={b[0]}
+              y2={b[1]}
+              stroke="#F0B94B"
+              strokeOpacity=".7"
+              strokeWidth=".25"
+              initial={{ pathLength: 0, opacity: 0 }}
+              whileInView={{ pathLength: 1, opacity: 1 }}
+              viewport={{ once: true, margin: '-20%' }}
+              transition={{ duration: 0.9 * d, delay: (1.2 + i * 0.35) * d }}
+            />
+          ))}
+          {PTS.map(([x, y], i) => (
+            <motion.circle
+              key={i}
+              cx={x}
+              cy={y}
+              r={i === 0 ? 1.5 : 0.8}
+              fill="#FFE9A8"
+              initial={{ opacity: 0, scale: 0 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true, margin: '-20%' }}
+              transition={{ duration: 0.6 * d, delay: (i === 0 ? 0 : 0.9 + i * 0.35) * d }}
+              style={{ transformBox: 'fill-box', transformOrigin: 'center', filter: 'drop-shadow(0 0 1.2px #F0B94B)' }}
+            />
+          ))}
+        </svg>
+        <motion.p
+          className="relative z-10 px-6 text-center font-display text-3xl italic text-ivory [text-shadow:0_2px_20px_rgba(0,0,0,.5)] sm:text-5xl"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true, margin: '-30%' }}
+          transition={{ delay: 4.6 * d, duration: 1.4 }}
         >
-          <HotAirBalloon colors={i % 2 ? ['#8EE3C2', '#B8A6F0', '#FFC93C', '#FF9A3C', '#27C4C4'] : undefined} />
+          A single light became a universe.
+        </motion.p>
+      </div>
+
+      {/* 2 · through colourful clouds, then the message */}
+      <div className="relative flex min-h-[100svh] flex-col items-center justify-center overflow-hidden px-5 pb-16 pt-24 text-center" style={{ background: 'linear-gradient(180deg,#263B42 0%,#347D76 22%,#77B7B0 48%,#F0D9A0 78%,#F0B94B 100%)' }}>
+        <CloudLayer count={4} seed={171} depth={0.5} top={[0, 60]} />
+        <Balloon className="ambient absolute left-[8%] bottom-[12%] w-14 sm:w-20" colors={['#E98C56', '#F1E8D6']} style={{ animation: 'bob 10s ease-in-out infinite' }} />
+        <Balloon className="ambient absolute right-[8%] bottom-[22%] w-12 sm:w-16" colors={['#8974BD', '#F0B94B']} style={{ animation: 'bob 12s ease-in-out -3s infinite' }} />
+        <Motes count={14} seed={47} />
+
+        <div className="relative z-10">
+          <h2 className="font-display text-4xl font-semibold uppercase leading-[1.15] tracking-[0.03em] text-ivory [text-shadow:0_3px_22px_rgba(10,35,45,.65)] sm:text-6xl">
+            {LINES.map((l, i) => (
+              <motion.span key={l} className="block" initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-15%' }} transition={{ duration: 0.9, delay: i * 0.5 * d }}>
+                {l}
+              </motion.span>
+            ))}
+          </h2>
+          <motion.div initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-15%' }} transition={{ duration: 1, delay: 1.8 * d }}>
+            <Spark className="mx-auto mt-8 w-6" />
+            <p className="mx-auto mt-5 max-w-md font-display text-2xl italic text-ocean sm:text-3xl">We cannot wait to celebrate with you.</p>
+            <p className="mt-6 font-display text-xl font-medium text-ocean sm:text-2xl">With love,</p>
+            <p className="font-display text-4xl font-semibold italic text-ocean sm:text-6xl">{EVENT.parents}</p>
+            <p className="mt-6 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ocean/85">
+              {EVENT.dateLabel} · {EVENT.timeLabel} · {EVENT.venueName}
+            </p>
+            <button type="button" onClick={onReplay} className="btn-sun mt-9">
+              <RotateCcw size={18} aria-hidden="true" /> Replay our journey
+            </button>
+          </motion.div>
         </div>
-      ))}
-      <div className="ambient pointer-events-none absolute left-0 top-[48%]" style={{ animation: 'flyAcross 20s linear infinite' }} aria-hidden="true">
-        <Butterfly className="w-10" />
-      </div>
-      <div className="ambient pointer-events-none absolute left-0 top-[60%]" style={{ animation: 'flyBack 26s linear -10s infinite' }} aria-hidden="true">
-        <Butterfly className="w-8" a="#27C4C4" b="#FFC93C" />
-      </div>
-      {[
-        ['14%', '30%'],
-        ['84%', '26%'],
-        ['30%', '46%'],
-        ['72%', '50%'],
-        ['50%', '22%'],
-      ].map(([l, t], i) => (
-        <Star key={i} className="ambient absolute w-6" style={{ left: l, top: t, animation: `twinkle 2.6s ease-in-out ${i * 0.45}s infinite` }} />
-      ))}
-
-      <div className="relative z-10 mt-4">
-        <h2 className="font-display text-[10vw] font-semibold uppercase leading-[1.08] text-ivory drop-shadow-[0_4px_18px_rgba(43,26,87,.7)] sm:text-7xl">
-          <Words text="Tiny Hands." />
-          <br />
-          <Words text="Big Dreams." delay={0.3} />
-          <br />
-          <Words text="Endless Love." delay={0.6} />
-        </h2>
-        <Reveal delay={0.4}>
-          <p className="mx-auto mt-6 max-w-md font-display text-2xl font-medium text-plum drop-shadow-[0_2px_0_rgba(255,248,234,.7)] sm:text-3xl">
-            We cannot wait to meet our little wonder!
-          </p>
-          <p className="mt-6 font-display text-lg uppercase tracking-[0.3em] text-plum">With love,</p>
-          <p className="title-grad font-script text-6xl sm:text-8xl">{EVENT.parents}</p>
-        </Reveal>
-      </div>
-
-      {/* the island drifts away below */}
-      <div className="island-away relative z-10 mx-auto mt-auto w-[min(88vw,480px)] pt-12 will-change-transform">
-        <div className="animate-floaty ambient relative" style={{ animationDuration: '8s' }}>
-          <Island className="w-full" />
-          <Tree className="absolute bottom-[56%] left-[8%] w-[14%]" />
-          <Elephant className="absolute bottom-[55%] left-[28%] w-[24%]" />
-          <Rabbit className="absolute bottom-[56%] left-[54%] w-[11%]" />
-          <Deer className="absolute bottom-[55%] left-[65%] w-[16%]" />
-        </div>
-      </div>
-
-      <div className="relative z-10 mt-6 flex flex-col items-center gap-3">
-        <button type="button" onClick={onReplay} className="btn-sun">
-          <RotateCcw size={18} aria-hidden="true" /> Replay our magical journey
-        </button>
-        <p className="mt-3 text-xs font-bold uppercase tracking-[0.3em] text-plum/80">
-          {EVENT.dateLabel} · {EVENT.timeLabel} · {EVENT.venueName}
-        </p>
+        <Mist className="absolute inset-x-0 bottom-0 h-[12%] w-full" />
       </div>
     </section>
   );

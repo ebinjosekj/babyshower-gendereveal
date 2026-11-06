@@ -54,7 +54,7 @@ export function SectionHead({
       <Reveal>
         <p className={`kicker ${dark ? '!text-sun' : ''}`}>{kicker}</p>
       </Reveal>
-      <h2 className={`mt-4 font-display text-4xl font-semibold leading-tight sm:text-6xl ${dark ? 'text-ivory' : 'text-plum'}`}>
+      <h2 className={`mt-4 font-display text-4xl font-semibold uppercase leading-[1.1] tracking-[0.02em] sm:text-6xl ${dark ? 'text-ivory' : 'text-plum'}`}>
         <Words text={title} />
       </h2>
       <Reveal delay={0.2}>

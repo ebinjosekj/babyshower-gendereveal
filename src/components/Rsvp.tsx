@@ -3,7 +3,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Minus, Plus } from 'lucide-react';
 import { confetti } from '../lib/confetti';
 import { cleanName, EMAIL_RE, isConfigured, supabase, type Attendance } from '../lib/supabase';
-import { Star } from './art';
+import { CloudLayer, Meadow, Motes, SKY } from './atmosphere';
+import { Spark } from './world';
 import { Reveal, SectionHead } from './ui';
 
 const KEY = 'wonder-rsvp';
@@ -92,9 +93,12 @@ export default function Rsvp() {
     <section
       id="rsvp"
       aria-label="RSVP"
-      className="relative overflow-hidden bg-[linear-gradient(180deg,#FFE2A8_0%,#E6DDFB_55%,#B8A6F0_100%)] px-4 pb-28 pt-24 sm:pt-32"
+      className="relative overflow-hidden px-4 pb-32 pt-24 sm:pt-32"
+      style={{ background: SKY.golden }}
     >
-      <SectionHead kicker="Kindly reply" title="Will You Join Our Wonder?" sub="Let us know so we can save you a seat." />
+      <CloudLayer count={3} seed={151} depth={0.3} top={[0, 30]} />
+      <Motes count={12} seed={29} />
+      <SectionHead dark kicker="Kindly reply" title="Will You Join Our Wonder?" sub="Let us know so we can save you a seat." />
 
       <Reveal delay={0.1} className="mx-auto mt-12 max-w-xl">
         <AnimatePresence mode="wait">
@@ -116,7 +120,7 @@ export default function Rsvp() {
                   animate={{ y: -420 - (i % 4) * 60, opacity: [0, 1, 0], rotate: 180 }}
                   transition={{ duration: 5 + (i % 5), repeat: Infinity, delay: i * 0.35, ease: 'easeOut' }}
                 >
-                  <Star className="h-4 w-4" />
+                  <Spark className="h-4 w-4" />
                 </motion.span>
               ))}
               <p className="title-grad relative font-script text-6xl sm:text-7xl">Thank you, {done.split(' ')[0]}!</p>
@@ -155,7 +159,7 @@ export default function Rsvp() {
                       aria-pressed={status === o.value}
                       onClick={() => setStatus(o.value)}
                       className={`rounded-2xl border-2 px-3 py-4 text-center transition active:scale-[0.97] ${
-                        status === o.value ? 'border-tangerine bg-sun/40 shadow-lg' : 'border-champagne bg-ivory/70 hover:bg-sun/20'
+                        status === o.value ? 'border-coral bg-sun/40 shadow-lg' : 'border-champagne bg-ivory/70 hover:bg-sun/20'
                       }`}
                     >
                       <span className="block font-display text-lg font-semibold leading-tight text-plum">{o.title}</span>
@@ -227,6 +231,7 @@ export default function Rsvp() {
           )}
         </AnimatePresence>
       </Reveal>
+      <Meadow className="pointer-events-none absolute inset-x-0 bottom-0 h-[8%] w-full" />
     </section>
   );
 }

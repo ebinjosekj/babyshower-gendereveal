@@ -31,7 +31,7 @@ create unique index rsvps_name_key_uq on public.rsvps (name_key);
 create table public.predictions (
   id            uuid primary key default gen_random_uuid(),
   guest_name    text not null check (char_length(btrim(guest_name)) between 2 and 60),
-  selected_team text not null check (selected_team in ('sunshine', 'nature')),
+  selected_team text not null check (selected_team in ('sunshine', 'wonder')),
   created_at    timestamptz not null default now(),
   name_key      text generated always as (lower(regexp_replace(btrim(guest_name), '\s+', ' ', 'g'))) stored
 );
@@ -67,7 +67,7 @@ set search_path = public
 as $$
   select json_build_object(
     'sunshine', count(*) filter (where selected_team = 'sunshine'),
-    'nature',   count(*) filter (where selected_team = 'nature')
+    'wonder',   count(*) filter (where selected_team = 'wonder')
   )
   from public.predictions;
 $$;

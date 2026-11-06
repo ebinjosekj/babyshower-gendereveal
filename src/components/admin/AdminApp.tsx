@@ -39,7 +39,7 @@ const fmt = (iso: string) => new Date(iso).toLocaleString('en-CA', { dateStyle: 
 
 // Defined at module level so the inputs inside keep focus while typing.
 const Shell = ({ children }: { children: ReactNode }) => (
-  <main className="min-h-screen bg-[linear-gradient(180deg,#FFF1C9_0%,#FFF8EA_100%)] px-4 py-10 text-ink">
+  <main className="min-h-screen bg-[linear-gradient(180deg,#FFF1C9_0%,#F1E8D6_100%)] px-4 py-10 text-ink">
     <div className="mx-auto max-w-5xl">{children}</div>
   </main>
 );
@@ -113,7 +113,7 @@ export default function AdminApp() {
       declined: rsvps.filter((r) => r.attendance_status === 'declined').length,
       blessing: rsvps.filter((r) => r.attendance_status === 'blessing').length,
       sunshine: preds.filter((p) => p.selected_team === 'sunshine').length,
-      nature: preds.filter((p) => p.selected_team === 'nature').length,
+      wonder: preds.filter((p) => p.selected_team === 'wonder').length,
     };
   }, [rsvps, preds]);
 
@@ -183,9 +183,9 @@ export default function AdminApp() {
         {tile('RSVP responses', stats.total, 'text-plum')}
         {tile('Confirmed guests', stats.confirmed, 'text-emerald')}
         {tile('Declined', stats.declined, 'text-coral')}
-        {tile('Blessings', stats.blessing, 'text-[#8E74E0]')}
+        {tile('Blessings', stats.blessing, 'text-[#8974BD]')}
         {tile(TEAM_LABEL.sunshine, stats.sunshine, 'text-tangerine')}
-        {tile(TEAM_LABEL.nature, stats.nature, 'text-emerald')}
+        {tile(TEAM_LABEL.wonder, stats.wonder, 'text-emerald')}
       </section>
 
       <div className="mt-8 flex flex-wrap items-center gap-3">

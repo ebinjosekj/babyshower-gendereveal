@@ -6,8 +6,9 @@ export const EVENT = {
   parentTwo: 'Ebin',
   title: 'Baby Shower & Gender Reveal',
   heading: 'A Little Wonder Is On The Way!',
-  subtitle:
-    'Tiny hands, big dreams, endless possibilities. Join us as we celebrate the beginning of our greatest adventure.',
+  subtitle: 'Tiny hands, big dreams, endless possibilities.',
+  intro:
+    'A magical new chapter is beginning. Join us as we celebrate a tiny miracle, endless possibilities and a lifetime of love.',
   // 6:00 PM Eastern (EST, UTC-5 on Nov 21). Used by the countdown and calendar links.
   startISO: '2026-11-21T18:00:00-05:00',
   endISO: '2026-11-21T21:00:00-05:00',
@@ -15,16 +16,16 @@ export const EVENT = {
   dateLabel: 'November 21, 2026',
   timeLabel: '6:00 PM',
   venueName: 'Evoke',
-  // TODO: replace with the venue's full street address for an exact pin
-  // (e.g. 'Evoke, 123 Main St, Kitchener, ON'). Used by the map + directions.
-  venueQuery: 'Evoke, Kitchener, ON',
+  // Put the venue's real street address here (e.g. 'Evoke, 123 Main St, Kitchener, ON').
+  // While it is empty, the Directions button and map are hidden — no address is invented.
+  venueAddress: '',
   contacts: [
     { name: 'Ebin', tel: '+15197816212', display: '519 781 6212' },
     { name: 'Nikhitha', tel: '+15197310349', display: '519 731 0349' },
   ],
 } as const;
 
-export const TEAM_LABEL = { sunshine: 'Team Sunshine', nature: 'Team Nature' } as const;
+export const TEAM_LABEL = { sunshine: 'Team Sunshine', wonder: 'Team Wonder' } as const;
 
 // Photos live in /public/photos. Missing files are skipped automatically.
 // "invitation.jpg" is the artwork from your original invitation site.

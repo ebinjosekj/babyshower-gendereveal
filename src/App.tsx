@@ -2,14 +2,16 @@ import { lazy, Suspense, useEffect, useState } from 'react';
 import Opening from './components/Opening';
 import Nav from './components/Nav';
 import MusicPlayer from './components/MusicPlayer';
-import Adventure from './components/Adventure';
+import Hero from './components/Hero';
+import Story from './components/Story';
+import Explorer from './components/Explorer';
 import Countdown from './components/Countdown';
 import { MotionProvider, useMotion } from './context/MotionContext';
 import { useMusic } from './hooks/useMusic';
 import { useSmoothScroll } from './hooks/useSmoothScroll';
 
 // Everything below the fold loads on demand so the opening appears fast on phones.
-const WorldMap = lazy(() => import('./components/WorldMap'));
+const Journey = lazy(() => import('./components/Journey'));
 const RevealGame = lazy(() => import('./components/RevealGame'));
 const EventDetails = lazy(() => import('./components/EventDetails'));
 const Rsvp = lazy(() => import('./components/Rsvp'));
@@ -35,10 +37,12 @@ function Experience() {
       <MusicPlayer music={music} visible={entered} />
 
       <main>
-        <Adventure />
+        <Hero />
+        <Story />
+        <Explorer />
         <Countdown />
         <Suspense fallback={<div className="min-h-[100svh]" aria-hidden="true" />}>
-          <WorldMap />
+          <Journey />
           <RevealGame />
           <EventDetails />
           <Rsvp />
@@ -63,7 +67,7 @@ export default function App() {
   return (
     <MotionProvider>
       {admin ? (
-        <Suspense fallback={<div className="p-10 text-center font-display text-plum">Loading…</div>}>
+        <Suspense fallback={<div className="p-10 text-center font-display text-ocean">Loading…</div>}>
           <AdminApp />
         </Suspense>
       ) : (
