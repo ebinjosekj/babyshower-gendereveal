@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { RotateCcw } from 'lucide-react';
 import { EVENT } from '../config';
 import { confetti } from '../lib/confetti';
+import TwinLights from './TwinLights';
 import { Reveal } from './ui';
 
 // The orb behind dims into a single point of light as we reach the end.
@@ -11,13 +12,11 @@ export default function Finale({ onReplay }: { onReplay: () => void }) {
       <Reveal>
         <p className="font-sans text-xs font-medium uppercase tracking-[0.5em] text-sun">With love</p>
         <h2 className="mt-5 font-display text-6xl font-light leading-[0.98] text-ivory [text-shadow:0_4px_40px_rgba(0,0,0,.8)] sm:text-9xl">
-          See you on
-          <span className="block italic text-sun">November 21.</span>
+          See you
+          <span className="gold-text ambient block italic">very soon.</span>
         </h2>
         <p className="mt-8 font-display text-3xl font-light italic text-ivory sm:text-4xl">{EVENT.parents}</p>
-        <p className="mt-4 font-sans text-xs font-medium uppercase tracking-[0.35em] text-champagne">
-          {EVENT.timeLabel} · {EVENT.venueName}
-        </p>
+        <TwinLights className="mt-10" caption="Our little one is almost here." />
       </Reveal>
       <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} onViewportEnter={() => confetti({ y: window.innerHeight * 0.4, count: 120 })} transition={{ delay: 0.8, duration: 1 }} className="mt-14">
         <button type="button" onClick={onReplay} className="btn-ghost-light">

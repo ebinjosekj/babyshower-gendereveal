@@ -294,3 +294,8 @@ body {
   animation: none;
   display: none;
 }
+
+@keyframes ringGlow {
+  from { filter: drop-shadow(0 0 0 rgba(227, 190, 116, 0)); }
+  to { filter: drop-shadow(0 0 12px rgba(227, 190, 116, 0.5)); }
+}

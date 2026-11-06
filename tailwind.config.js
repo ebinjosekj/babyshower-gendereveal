@@ -15,6 +15,9 @@ export default {
         coral: '#C9975A',
         lavender: '#6C8F7F',
         ivory: '#EFE6D2',
+        // gender-reveal accents, used sparingly (team cards, confetti, twin lights)
+        blush: '#F2A6C0',
+        skyblue: '#7FB6E6',
         // legacy names still used in a few components, mapped onto the new palette
         tangerine: '#C9975A',
         mint: '#2E7D67',

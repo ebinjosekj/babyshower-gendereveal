@@ -122,15 +122,15 @@ export default function RevealGame() {
         whileTap={saved ? undefined : { scale: 0.96 }}
         animate={active ? { scale: 1.04 } : { scale: 1 }}
         className={`glass-dark relative flex flex-col items-center overflow-hidden rounded-[30px] border px-3 pb-6 pt-8 text-center transition-shadow disabled:cursor-default sm:pb-8 sm:pt-10 ${
-          active ? 'border-sun shadow-[0_0_60px_-8px_rgba(227,190,116,.55)]' : 'border-white/10'
+          active ? (gold ? 'border-blush shadow-[0_0_60px_-8px_rgba(242,166,192,.6)]' : 'border-skyblue shadow-[0_0_60px_-8px_rgba(127,182,230,.6)]') : gold ? 'border-blush/25' : 'border-skyblue/25'
         } ${saved && !active ? 'opacity-50' : ''}`}
       >
         <span className="relative block h-24 w-24 sm:h-32 sm:w-32" aria-hidden="true">
           <span className="absolute inset-0 rounded-full border border-white/15" />
           <span className="ambient absolute inset-0" style={{ animation: `orbit ${gold ? 14 : 18}s linear infinite` }}>
-            <span className="absolute left-1/2 top-[-4px] h-2 w-2 -translate-x-1/2 rounded-full" style={{ background: gold ? '#FFE9A8' : '#9BE0BF', boxShadow: `0 0 12px 3px ${gold ? 'rgba(227,190,116,.8)' : 'rgba(80,200,150,.7)'}` }} />
+            <span className="absolute left-1/2 top-[-4px] h-2 w-2 -translate-x-1/2 rounded-full" style={{ background: gold ? '#FFD3E3' : '#BFE0FF', boxShadow: `0 0 12px 3px ${gold ? 'rgba(242,166,192,.8)' : 'rgba(127,182,230,.8)'}` }} />
           </span>
-          <span className="absolute inset-[22%] rounded-full" style={{ background: gold ? 'radial-gradient(circle at 35% 30%,#FFF4D2,#C99A52 55%,#3A280F)' : 'radial-gradient(circle at 35% 30%,#D9F2E0,#2E8266 55%,#08201A)', boxShadow: gold ? '0 0 40px rgba(227,190,116,.5)' : '0 0 40px rgba(60,170,130,.45)' }} />
+          <span className="absolute inset-[22%] rounded-full" style={{ background: gold ? 'radial-gradient(circle at 35% 30%,#FFE8F1,#F2A6C0 55%,#5A1D36)' : 'radial-gradient(circle at 35% 30%,#E8F4FF,#7FB6E6 55%,#123454)', boxShadow: gold ? '0 0 40px rgba(242,166,192,.5)' : '0 0 40px rgba(127,182,230,.5)', animation: `floaty ${gold ? 4.6 : 5.4}s ease-in-out infinite` }} />
         </span>
         <span className="mt-4 font-display text-3xl font-light text-ivory sm:text-4xl">{TEAM_LABEL[team]}</span>
         <span className="mt-1 text-xs font-medium uppercase tracking-[0.25em] text-sun">{saved ? `${members(team).length} on the team` : 'Tap to join'}</span>
@@ -175,7 +175,7 @@ export default function RevealGame() {
                     <ul className="mt-3 max-h-56 space-y-1 overflow-y-auto pr-1 text-base" data-lenis-prevent>
                       {list.map((m, i) => (
                         <li key={`${m.name}-${i}`} className="flex items-center gap-2">
-                          <span className="h-1.5 w-1.5 shrink-0 rotate-45 bg-sun" /> {m.name}
+                          <span className={`h-1.5 w-1.5 shrink-0 rotate-45 ${t === 'girl' ? 'bg-blush' : 'bg-skyblue'}`} /> {m.name}
                         </li>
                       ))}
                     </ul>

@@ -14,6 +14,16 @@ const MOTES = Array.from({ length: 26 }, (_, i) => ({
   alpha: 0.35 + rnd(i + 200) * 0.45,
 }));
 
+const BITS = Array.from({ length: 16 }, (_, i) => ({
+  left: rnd(i + 300) * 100,
+  w: 5 + rnd(i + 340) * 5,
+  h: 8 + rnd(i + 380) * 8,
+  dur: 16 + rnd(i + 420) * 16,
+  delay: -rnd(i + 460) * 32,
+  sway: (rnd(i + 500) - 0.5) * 160,
+  color: ['#F2A6C0', '#7FB6E6', '#E3BE74', '#F6ECD0'][i % 4],
+}));
+
 // Gold progress line, drifting gold dust and a soft light that follows the cursor.
 export default function Atmosphere() {
   const { scrollYProgress } = useScroll();
@@ -65,6 +75,15 @@ export default function Atmosphere() {
               ['--sway' as string]: `${m.sway}px`,
               animation: `riseUp ${m.dur}s linear ${m.delay}s infinite`,
             }}
+          />
+        ))}
+      </div>
+      <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-[1] overflow-hidden">
+        {BITS.map((b, i) => (
+          <span
+            key={i}
+            className="ambient absolute top-0 rounded-[2px]"
+            style={{ left: `${b.left}%`, width: b.w, height: b.h, background: b.color, opacity: 0.5, ['--sway' as string]: `${b.sway}px`, animation: `fall ${b.dur}s linear ${b.delay}s infinite` }}
           />
         ))}
       </div>

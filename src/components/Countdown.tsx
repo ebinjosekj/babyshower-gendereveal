@@ -16,7 +16,7 @@ function Ring({ value, max, label }: { value: number; max: number; label: string
   const frac = Math.min(1, value / max);
   const a = frac * Math.PI * 2 - Math.PI / 2;
   return (
-    <div className="relative mx-auto aspect-square w-full max-w-[150px]">
+    <div className="ambient relative mx-auto aspect-square w-full max-w-[150px]" style={{ animation: 'ringGlow 3.6s ease-in-out infinite alternate' }}>
       <svg viewBox="0 0 100 100" className="absolute inset-0" aria-hidden="true" fill="none">
         <circle cx="50" cy="50" r="46" stroke="#E3BE74" strokeOpacity=".25" strokeWidth=".6" />
         <circle cx="50" cy="50" r="46" stroke="#E3BE74" strokeWidth="1" strokeDasharray={2 * Math.PI * 46} strokeDashoffset={2 * Math.PI * 46 * (1 - frac)} transform="rotate(-90 50 50)" style={{ transition: 'stroke-dashoffset .9s ease' }} />
