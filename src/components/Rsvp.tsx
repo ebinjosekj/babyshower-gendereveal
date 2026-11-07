@@ -15,6 +15,7 @@ const OPTIONS: { value: Exclude<Attendance, 'declined'>; title: string }[] = [
 // A sideways carousel: the three photos orbit round, one coming to the front at a time, forever.
 const SPARKS = [[-124, -56], [120, -64], [-104, 62], [108, 66], [0, -98], [-30, 92]];
 const R = 100;
+const STEP = 90; // 4 photos, a quarter turn each
 const rad = (d: number) => (d * Math.PI) / 180;
 
 function OrbitPhoto({ n, offset, angle }: { n: number; offset: number; angle: MotionValue<number> }) {
@@ -40,8 +41,8 @@ function ThankPhotos() {
   useEffect(() => {
     const t = window.setTimeout(() => confetti({ count: 60 }), 900);
     const id = window.setInterval(() => {
-      animate(angle, angle.get() + 120, { duration: 1.2, ease: [0.45, 0, 0.15, 1] });
-    }, 3000);
+      animate(angle, angle.get() + STEP, { duration: 0.85, ease: [0.45, 0, 0.15, 1] });
+    }, 1900);
     return () => { window.clearTimeout(t); window.clearInterval(id); };
   }, [angle]);
   return (
@@ -53,9 +54,9 @@ function ThankPhotos() {
           <span className="thank-spark block h-2 w-2 bg-sun" style={{ animationDelay: `${0.6 + i * 0.35}s` }} />
         </span>
       ))}
-      <OrbitPhoto n={1} offset={0} angle={angle} />
-      <OrbitPhoto n={2} offset={120} angle={angle} />
-      <OrbitPhoto n={3} offset={240} angle={angle} />
+      {[1, 2, 3, 4].map((n) => (
+        <OrbitPhoto key={n} n={n} offset={(n - 1) * STEP} angle={angle} />
+      ))}
     </motion.div>
   );
 }
