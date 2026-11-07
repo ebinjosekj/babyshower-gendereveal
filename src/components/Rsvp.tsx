@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { confetti } from '../lib/confetti';
 import { cleanName, isConfigured, supabase, type Attendance } from '../lib/supabase';
 import { changeReply, NOT_FOUND, SAME_NAME_RSVP, UNAVAILABLE } from '../lib/replies';
-import { Reveal, SectionHead } from './ui';
+import { Reveal, SectionHead, base } from './ui';
 
 const KEY = 'wonder-rsvp';
 
@@ -123,10 +123,10 @@ export default function Rsvp() {
         <AnimatePresence mode="wait">
           {done && !editing ? (
             <motion.div key="thanks" initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }} className="glass relative overflow-hidden rounded-[32px] px-6 py-14 text-center" role="status">
-              <span className="mx-auto block h-3 w-3 rotate-45 bg-sun" aria-hidden="true" />
-              <p className="mt-4 font-display text-5xl font-semibold italic text-ocean sm:text-6xl">Thank you, {done.name.split(' ')[0]}!</p>
+              <motion.img initial={{ scale: 0.3, opacity: 0, rotate: -12 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 140, damping: 14, delay: 0.15 }} src={`${base}photos/us-${(done.name.length % 3) + 1}.jpg`} alt="Nikki and Ebin" className="mx-auto h-40 w-40 rounded-full border-[3px] border-sun object-cover shadow-[0_0_36px_6px_rgba(230,190,110,.45)]" />
+              <p className="mt-6 font-display text-5xl font-semibold italic text-ocean sm:text-6xl">Thank you, {done.name.split(' ')[0]}!</p>
               <p className="mx-auto mt-5 max-w-sm font-display text-xl text-forest sm:text-2xl">
-                {done.status === 'attending' ? 'See you at the celebration!' : 'Your love will be with us on the day.'}
+                {done.status === 'attending' ? 'We can’t wait to see you.' : 'Your love will be with us on the day.'}
               </p>
               {!isConfigured && <p className="mt-4 text-xs italic text-ink-soft">Preview mode — this reply was not saved.</p>}
               <button type="button" className="btn-ghost mt-6" onClick={startEdit}>
