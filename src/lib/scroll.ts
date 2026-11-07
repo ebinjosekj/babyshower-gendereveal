@@ -11,6 +11,12 @@ export const scrollToTop = () => {
   else window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
+// Scroll the page by `dy` pixels (smoothly), e.g. to bring a form field above the on-screen keyboard.
+export const scrollByOffset = (dy: number) => {
+  if (instance) instance.scrollTo(window.scrollY + dy, { duration: 0.5 });
+  else window.scrollBy({ top: dy, behavior: 'smooth' });
+};
+
 export const scrollToId = (id: string) => {
   const el = document.getElementById(id);
   if (!el) return;

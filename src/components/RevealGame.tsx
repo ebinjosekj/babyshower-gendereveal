@@ -6,6 +6,7 @@ import { confetti } from '../lib/confetti';
 import { cleanName, isConfigured, supabase, type Team } from '../lib/supabase';
 import { changeReply, NOT_FOUND, SAME_NAME_TEAM, UNAVAILABLE } from '../lib/replies';
 import { Reveal, SectionHead } from './ui';
+import { useVisibleBox } from '../hooks/useVisualViewport';
 
 const KEY = 'wonder-team';
 const TEAMS: Team[] = ['boy', 'girl'];
@@ -37,6 +38,7 @@ export default function RevealGame() {
   savedRef.current = saved;
   const savedAt = useRef(0); // when this browser last saved a pick (to avoid pruning a pick that is still being written)
   const [pick, setPick] = useState<Team | null>(null);
+  const box = useVisibleBox(!!pick);
   const [name, setName] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -331,7 +333,8 @@ export default function RevealGame() {
       <AnimatePresence>
         {pick && !saved && (
           <motion.div
-            className="fixed inset-0 z-[140] flex items-end justify-center bg-black/70 p-3 backdrop-blur-sm sm:items-center"
+            className={`fixed inset-x-0 top-0 z-[140] flex flex-col items-center overflow-y-auto bg-black/70 p-3 backdrop-blur-sm ${box?.keyboard ? '[&>form]:my-auto' : '[&>form]:mt-auto sm:[&>form]:my-auto'}`}
+            style={box ? { top: box.top, height: box.height } : { bottom: 0 }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

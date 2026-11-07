@@ -12,6 +12,7 @@ import { MotionProvider, useMotion } from './context/MotionContext';
 import { useMusic } from './hooks/useMusic';
 import { sfx } from './lib/sfx';
 import { useSmoothScroll } from './hooks/useSmoothScroll';
+import { scrollByOffset } from './lib/scroll';
 
 // Everything below the fold loads on demand so the opening appears fast on phones.
 const RevealGame = lazy(() => import('./components/RevealGame'));
@@ -43,6 +44,27 @@ function Experience() {
     return () => {
       window.removeEventListener('pointerdown', unlock);
       window.removeEventListener('keydown', unlock);
+    };
+  }, []);
+  // On phones the keyboard covers the lower part of the screen: when a form field (RSVP) is tapped, bring it up above the keyboard.
+  useEffect(() => {
+    let id = 0;
+    const onFocus = (e: FocusEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (!t || !t.matches('input, textarea, select') || t.closest('[role="dialog"]')) return;
+      window.clearTimeout(id);
+      id = window.setTimeout(() => {
+        const vv = window.visualViewport;
+        const h = vv ? vv.height : window.innerHeight;
+        const r = t.getBoundingClientRect();
+        const top = r.top - (vv ? vv.offsetTop : 0);
+        if (top < 70 || top + r.height > h - 24) scrollByOffset(top - h * 0.3);
+      }, 400);
+    };
+    document.addEventListener('focusin', onFocus);
+    return () => {
+      document.removeEventListener('focusin', onFocus);
+      window.clearTimeout(id);
     };
   }, []);
   useSmoothScroll(entered, !simple);
