@@ -3,7 +3,7 @@ import type { Music } from '../hooks/useMusic';
 
 // The sound on/off button, bottom right, visible from the very first screen (above the opening overlay).
 export default function MusicPlayer({ music }: { music: Music; visible?: boolean }) {
-  const label = music.on ? 'Mute sound' : 'Turn sound on';
+  const label = music.on ? 'Mute sound' : music.muted ? 'Turn sound on' : 'Tap for sound';
   return (
     <div className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-3 z-[130]">
       <button
