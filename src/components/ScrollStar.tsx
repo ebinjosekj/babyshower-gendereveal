@@ -37,6 +37,7 @@ export default function ScrollStar() {
     let landed = '';
     let state = 'run';
     let fresh = true;
+    let touching = false;
     const px = new Float32Array(N).fill(hx);
     const py = new Float32Array(N).fill(hy);
 
@@ -66,7 +67,9 @@ export default function ScrollStar() {
       const ddy = ty - hy;
       hx += ddx * 0.24;
       hy += ddy * 0.16;
-      op += ((cur ? appear : 0) - op) * 0.18;
+      // visible only while the guest is touching the screen or scrolling; it fades away a moment after they stop
+      const want = cur && (touching || performance.now() - lastScroll < 900) ? appear : 0;
+      op += (want - op) * 0.14;
       // body: every segment trails the one in front, keeping a fixed gap, which makes it slither along the zigzag
       let lx = hx;
       let ly = hy;
@@ -106,7 +109,7 @@ export default function ScrollStar() {
         state = 'run';
         delete el.dataset.s;
       }
-      if (performance.now() - lastScroll < 350 || Math.abs(ddx) + Math.abs(ddy) > 0.6 || Math.abs((cur ? appear : 0) - op) > 0.01) raf = requestAnimationFrame(loop);
+      if (touching || performance.now() - lastScroll < 950 || Math.abs(ddx) + Math.abs(ddy) > 0.6 || Math.abs(want - op) > 0.01) raf = requestAnimationFrame(loop);
     };
     const kick = () => {
       lastScroll = performance.now();
@@ -117,11 +120,33 @@ export default function ScrollStar() {
       H = window.innerHeight;
       kick();
     };
+    const down = () => {
+      touching = true;
+      kick();
+    };
+    const up = () => {
+      touching = false;
+      kick();
+    };
     window.addEventListener('scroll', kick, { passive: true });
+    window.addEventListener('pointerdown', down, { passive: true });
+    window.addEventListener('pointerup', up, { passive: true });
+    window.addEventListener('pointercancel', up, { passive: true });
+    window.addEventListener('touchstart', down, { passive: true });
+    window.addEventListener('touchend', up, { passive: true });
+    window.addEventListener('touchcancel', up, { passive: true });
+    window.addEventListener('wheel', kick, { passive: true });
     window.addEventListener('resize', resize);
     kick();
     return () => {
       window.removeEventListener('scroll', kick);
+      window.removeEventListener('pointerdown', down);
+      window.removeEventListener('pointerup', up);
+      window.removeEventListener('pointercancel', up);
+      window.removeEventListener('touchstart', down);
+      window.removeEventListener('touchend', up);
+      window.removeEventListener('touchcancel', up);
+      window.removeEventListener('wheel', kick);
       window.removeEventListener('resize', resize);
       cancelAnimationFrame(raf);
     };
