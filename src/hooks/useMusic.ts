@@ -24,8 +24,7 @@ export function useMusic(): Music {
   }, []);
   const start = useCallback(() => sfx.unlock(), []);
   const toggle = useCallback(() => {
-    sfx.unlock();
-    sfx.setMuted(!sfx.isMuted());
+    sfx.toggle();
   }, []);
   const muted = sfx.isMuted();
   const on = !muted; // sound is meant to be on from the start; browsers only let it be heard after the first tap

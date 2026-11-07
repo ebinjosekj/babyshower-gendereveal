@@ -246,7 +246,7 @@ stage.appendChild(hint);
 const hintLabel=hint.querySelector('span');
 const refreshHint=()=>{hintLabel.textContent=sfx.isMuted()?'Sound off · tap to unmute':'Sound on · tap to mute'};
 refreshHint();
-const hintAct=(e)=>{e.stopPropagation();sfx.unlock();sfx.setMuted(!sfx.isMuted());refreshHint()};
+const hintAct=(e)=>{e.stopPropagation();sfx.toggle();refreshHint()};
 hintOut=()=>{A(hint,[{opacity:1},{opacity:0}],{duration:500,fill:'forwards'});hint.style.pointerEvents='none'};
 hint.addEventListener('click',hintAct);
 hint.addEventListener('keydown',(e)=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();hintAct(e)}});

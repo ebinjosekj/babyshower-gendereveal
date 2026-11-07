@@ -379,7 +379,22 @@ function fire(name: SfxName, delayMs: number, opt: Opt = {}) {
   }
 }
 
+// Was sound still locked when the guest started this tap? (Browsers keep audio silent until the first tap, so a first tap on the
+// sound button must switch sound ON and be heard, not mute something nobody has heard yet.)
+let pressedLocked: boolean | null = null;
+if (typeof document !== 'undefined') document.addEventListener('pointerdown', () => (pressedLocked = !(ctx && ctx.state === 'running')), true);
+
 export const sfx = {
+  /** The sound button: the first tap switches sound on (with a confirming note); after that it mutes / unmutes. */
+  toggle() {
+    const wasLocked = pressedLocked ?? !(ctx && ctx.state === 'running');
+    pressedLocked = null;
+    this.unlock();
+    if (wasLocked) {
+      this.setMuted(false);
+      this.cue('ping2', 0);
+    } else this.setMuted(!muted);
+  },
   /** Unlock sound (call from a tap / key press). Safe to call many times. */
   unlock() {
     const c = build();
