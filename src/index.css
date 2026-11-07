@@ -564,3 +564,7 @@ body {
 @keyframes heroBobB { 0%, 100% { translate: 0 0; } 50% { translate: 0 5px; } }
 @keyframes heroPillRing { 0% { opacity: .7; transform: scale(1); } 70%, 100% { opacity: 0; transform: scale(1.12, 1.5); } }
 @keyframes heroDust { 0% { opacity: 0; transform: translate(0, 30px) scale(.6); } 20% { opacity: .9; } 100% { opacity: 0; transform: translate(var(--x), -150px) scale(1); } }
+
+/* "swipe up" reminder between sections */
+@keyframes cueChev { 0% { opacity: 0; transform: translateY(-6px); } 40% { opacity: .95; } 100% { opacity: 0; transform: translateY(9px); } }
+@keyframes cueRing { 0% { opacity: .6; transform: scale(1); } 70%, 100% { opacity: 0; transform: scale(1.35, 1.2); } }

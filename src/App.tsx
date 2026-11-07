@@ -7,7 +7,7 @@ import { ScrollOrb } from './components/Orb';
 import Countdown from './components/Countdown';
 import Atmosphere from './components/Atmosphere';
 import Extras from './components/Extras';
-import { Divider } from './components/ui';
+import { Divider, SwipeCue } from './components/ui';
 import { MotionProvider, useMotion } from './context/MotionContext';
 import { useMusic } from './hooks/useMusic';
 import { useSmoothScroll } from './hooks/useSmoothScroll';
@@ -53,14 +53,19 @@ function Experience() {
 
       <main className="relative z-10">
         <Intro entered={entered} />
+        <SwipeCue to="countdown" />
         <Countdown />
+        <SwipeCue to="reveal" />
         <Suspense fallback={<div className="min-h-[100svh]" aria-hidden="true" />}>
           <Divider />
           <RevealGame />
+          <SwipeCue to="details" />
           <Divider />
           <EventDetails />
+          <SwipeCue to="rsvp" />
           <Divider />
           <Rsvp />
+          <SwipeCue to="finale" />
           <Finale onReplay={replay} />
         </Suspense>
       </main>

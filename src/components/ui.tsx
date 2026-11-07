@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { useMotion } from '../context/MotionContext';
 import { Ornament } from './art';
+import { scrollToId } from '../lib/scroll';
 
 // Each reveal enters a different way (up, from the left, from the right, zooming in) so the page never feels repetitive.
 const FROM = [
@@ -144,6 +145,38 @@ export function Divider() {
       <motion.span className="h-px flex-1 origin-right bg-gradient-to-l from-sun/70 to-transparent" initial={{ scaleX: 0 }} whileInView={{ scaleX: 1 }} viewport={{ once: true, margin: '-5%' }} transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }} />
       <motion.span className="mx-3 block h-2.5 w-2.5 rotate-45 bg-sun shadow-[0_0_14px_#E3BE74]" initial={{ scale: 0, rotate: 0 }} whileInView={{ scale: 1, rotate: 45 }} viewport={{ once: true, margin: '-5%' }} transition={{ type: 'spring', damping: 10, stiffness: 120, delay: 0.3 }} />
       <motion.span className="h-px flex-1 origin-left bg-gradient-to-r from-sun/70 to-transparent" initial={{ scaleX: 0 }} whileInView={{ scaleX: 1 }} viewport={{ once: true, margin: '-5%' }} transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }} />
+    </div>
+  );
+}
+
+// A quiet "keep going" reminder at the end of each section: it fades up when it comes into view, three chevrons pour
+// downwards in turn and the dot in the pill glides. Tapping it scrolls smoothly to the next section. (transform + opacity only)
+export function SwipeCue({ to }: { to: string }) {
+  return (
+    <div className="relative flex justify-center px-4 pb-16 pt-2 sm:pb-24">
+      <motion.button
+        type="button"
+        onClick={() => scrollToId(to)}
+        aria-label="Scroll down to the next section"
+        className="group flex flex-col items-center gap-2 text-ivory"
+        initial={{ opacity: 0, y: 22, scale: 0.94 }}
+        whileInView={{ opacity: 1, y: 0, scale: 1 }}
+        viewport={{ once: false, margin: '0px 0px -12% 0px' }}
+        transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <span className="font-sans text-[11px] font-medium uppercase tracking-[0.34em] [text-shadow:0_1px_8px_rgba(0,0,0,.9)]">Swipe up to continue</span>
+        <span className="relative flex h-14 w-9 items-start justify-center rounded-full border border-ivory/40 pt-2 transition-colors duration-500 group-hover:border-sun/70" aria-hidden="true">
+          <span className="ambient block h-2.5 w-2.5 rounded-full bg-sun" style={{ animation: 'swipeDot 2s ease-in-out infinite', boxShadow: '0 0 10px 2px rgba(227,190,116,.8)' }} />
+          <span className="ambient pointer-events-none absolute -inset-1 rounded-full border border-sun/50 opacity-0" style={{ animation: 'cueRing 3s ease-out infinite' }} />
+        </span>
+        <span className="-mt-1 flex flex-col items-center" aria-hidden="true">
+          {[0, 1, 2].map((i) => (
+            <svg key={i} viewBox="0 0 24 24" className="ambient -mt-2.5 h-5 w-5 text-sun opacity-0" style={{ animation: `cueChev 2.2s ease-in-out ${i * 0.22}s infinite` }} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+          ))}
+        </span>
+      </motion.button>
     </div>
   );
 }
