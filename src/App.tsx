@@ -7,7 +7,6 @@ import { ScrollOrb } from './components/Orb';
 import Countdown from './components/Countdown';
 import Atmosphere from './components/Atmosphere';
 import Extras from './components/Extras';
-import ScrollStar from './components/ScrollStar';
 import { Divider, SwipeCue } from './components/ui';
 import { MotionProvider, useMotion } from './context/MotionContext';
 import { useMusic } from './hooks/useMusic';
@@ -67,7 +66,6 @@ function Experience() {
       {entered && <ScrollOrb />}
       {entered && calm && !simple && <Atmosphere />}
       {entered && !simple && <Extras />}
-      {entered && !simple && <ScrollStar />}
       <Nav visible={entered} />
       <MusicPlayer music={music} />
 
