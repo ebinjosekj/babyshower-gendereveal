@@ -30,11 +30,11 @@ export default function PhotoOrbit() {
   const angle = useMotionValue(0);
   const timer = useRef(0);
   const next = useCallback(() => {
-    animate(angle, Math.round(angle.get() / STEP) * STEP + STEP, { duration: 0.85, ease: [0.45, 0, 0.15, 1] });
+    animate(angle, Math.round(angle.get() / STEP) * STEP + STEP, { duration: 1.7, ease: [0.45, 0, 0.2, 1] });
   }, [angle]);
   const start = useCallback(() => {
     window.clearInterval(timer.current);
-    timer.current = window.setInterval(next, 1900);
+    timer.current = window.setInterval(next, 3800);
   }, [next]);
   useEffect(() => {
     start();

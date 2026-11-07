@@ -4,7 +4,7 @@ import { EVENT } from '../config';
 import { confetti } from '../lib/confetti';
 import PhotoOrbit from './PhotoOrbit';
 import TwinLights from './TwinLights';
-import { Reveal, Words } from './ui';
+import { Reveal } from './ui';
 
 // The orb behind dims into a single point of light as we reach the end.
 export default function Finale({ onReplay }: { onReplay: () => void }) {
@@ -14,7 +14,7 @@ export default function Finale({ onReplay }: { onReplay: () => void }) {
         <PhotoOrbit />
         <p className="mt-8 font-sans text-xs font-medium uppercase tracking-[0.5em] text-sun">With love</p>
         <h2 className="mt-5 font-display text-6xl font-light leading-[0.98] text-ivory [text-shadow:0_4px_40px_rgba(0,0,0,.8)] sm:text-9xl">
-          <Words text="See you" />
+          See you
           <span className="gold-text glint ambient block italic">very soon.</span>
         </h2>
         <p className="mt-8 font-display text-3xl font-light italic text-ivory sm:text-4xl">{EVENT.parents}</p>
