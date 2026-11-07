@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type FormEvent, type MouseEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type FormEvent, type MouseEvent } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Check } from 'lucide-react';
 import { TEAM_LABEL } from '../config';
@@ -33,6 +33,9 @@ const readSaved = (): Saved | null => {
 
 export default function RevealGame() {
   const [saved, setSaved] = useState<Saved | null>(readSaved);
+  const savedRef = useRef<Saved | null>(saved);
+  savedRef.current = saved;
+  const savedAt = useRef(0); // when this browser last saved a pick (to avoid pruning a pick that is still being written)
   const [pick, setPick] = useState<Team | null>(null);
   const [name, setName] = useState('');
   const [busy, setBusy] = useState(false);
@@ -50,7 +53,19 @@ export default function RevealGame() {
       return;
     }
     setLoadError(false);
-    setRoster((data as Member[]).filter((m) => isTeam(m.team) && typeof m.name === 'string'));
+    const list = (data as Member[]).filter((m) => isTeam(m.team) && typeof m.name === 'string');
+    setRoster(list);
+    // If this phone remembers a pick that no longer exists on the server (e.g. the list was cleared), forget it.
+    const mine = savedRef.current;
+    if (mine && Date.now() - savedAt.current > 20000 && !list.some((m) => m.name.toLowerCase() === mine.name.toLowerCase())) {
+      try {
+        localStorage.removeItem(KEY);
+      } catch {
+        /* private mode */
+      }
+      setSaved(null);
+      setChanging(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -62,6 +77,7 @@ export default function RevealGame() {
   }, [refresh]);
 
   const persist = (record: Saved) => {
+    savedAt.current = Date.now();
     try {
       localStorage.setItem(KEY, JSON.stringify(record));
     } catch {

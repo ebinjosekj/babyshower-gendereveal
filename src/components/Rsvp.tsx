@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { confetti } from '../lib/confetti';
 import { cleanName, isConfigured, supabase, type Attendance } from '../lib/supabase';
@@ -28,6 +28,26 @@ export default function Rsvp() {
       return null;
     }
   });
+
+  // If this phone remembers a reply that no longer exists on the server (e.g. the list was cleared), forget it.
+  useEffect(() => {
+    if (!done) return;
+    let alive = true;
+    void changeReply('change_rsvp', { p_name: done.name, p_status: done.status }).then((res) => {
+      if (!alive || res !== 'not_found') return;
+      try {
+        localStorage.removeItem(KEY);
+      } catch {
+        /* private mode */
+      }
+      setDone(null);
+      setEditing(false);
+    });
+    return () => {
+      alive = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const store = (record: { name: string; status: string }) => {
     try {
