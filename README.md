@@ -37,7 +37,8 @@ Admin dashboard: `https://ebinjosekj.github.io/babyshower_genderreveal/#/admin`
 
 - `venueAddress` — set to 239 Eden Oak Trail, Kitchener, ON N2A 0L5 (drives Directions, the map and the calendar location).
 - Music — by default an **original music-box lullaby is generated in the browser** (no file, no licensing).
-  The page has no background track: its sound is a set of sound effects generated in the browser (src/lib/sfx.ts).
+  It is ONE soft background lullaby for the whole page, generated in the browser (src/lib/sfx.ts); there are no per-animation sound effects.
+  To use a real recording instead (for example a Malayalam lullaby you have the rights to), ask for it to be wired in: put the mp3 in public/audio/ and play it from src/lib/sfx.ts.
 
 ## How it behaves
 

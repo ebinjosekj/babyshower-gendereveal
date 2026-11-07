@@ -35,21 +35,14 @@ function Experience() {
     return () => window.clearTimeout(id);
   }, [entered]);
   const music = useMusic();
-  // Sound effects: the first touch anywhere unlocks them; every button gets a soft tap.
+  // The background music starts with the guest's first touch (browsers keep sound silent until then).
   useEffect(() => {
     const unlock = () => sfx.unlock();
-    const tap = (e: MouseEvent) => {
-      const t = e.target as HTMLElement | null;
-      if (!t || t.closest('#envx')) return;
-      if (t.closest('button, a, [role="button"], summary, label')) sfx.play('tap');
-    };
     window.addEventListener('pointerdown', unlock, { once: true });
     window.addEventListener('keydown', unlock, { once: true });
-    document.addEventListener('click', tap);
     return () => {
       window.removeEventListener('pointerdown', unlock);
       window.removeEventListener('keydown', unlock);
-      document.removeEventListener('click', tap);
     };
   }, []);
   useSmoothScroll(entered, !simple);
