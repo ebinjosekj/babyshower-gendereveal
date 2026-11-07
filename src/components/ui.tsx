@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { useMotion } from '../context/MotionContext';
 import { Ornament } from './art';
@@ -149,20 +149,54 @@ export function Divider() {
   );
 }
 
+// Once a cue has been seen and the guest then scrolls on, it has done its job: it fades away and stays gone.
+export function useDismissOnScroll<T extends HTMLElement>() {
+  const ref = useRef<T>(null);
+  const [gone, setGone] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || gone) return;
+    let visible = false;
+    let startY = 0;
+    const onScroll = () => {
+      if (visible && Math.abs(window.scrollY - startY) > 70) setGone(true);
+    };
+    const io = new IntersectionObserver(
+      ([en]) => {
+        visible = en.isIntersecting && en.intersectionRatio > 0.6;
+        if (visible) startY = window.scrollY;
+      },
+      { threshold: [0, 0.6, 1] },
+    );
+    io.observe(el);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      io.disconnect();
+      window.removeEventListener('scroll', onScroll);
+    };
+  }, [gone]);
+  return [ref, gone] as const;
+}
+
 // A quiet "keep going" reminder at the end of each section: it fades up when it comes into view, three chevrons pour
 // downwards in turn and the dot in the pill glides. Tapping it scrolls smoothly to the next section. (transform + opacity only)
 export function SwipeCue({ to }: { to: string }) {
+  const [ref, gone] = useDismissOnScroll<HTMLButtonElement>();
   return (
     <div className="relative flex justify-center px-4 pb-16 pt-2 sm:pb-24">
       <motion.button
+        ref={ref}
         type="button"
+        tabIndex={gone ? -1 : 0}
         onClick={() => scrollToId(to)}
         aria-label="Scroll down to the next section"
         className="group flex flex-col items-center gap-2 text-ivory"
+        style={{ pointerEvents: gone ? 'none' : 'auto' }}
         initial={{ opacity: 0, y: 22, scale: 0.94 }}
-        whileInView={{ opacity: 1, y: 0, scale: 1 }}
+        animate={gone ? { opacity: 0, y: -18, scale: 0.94 } : undefined}
+        whileInView={gone ? undefined : { opacity: 1, y: 0, scale: 1 }}
         viewport={{ once: false, margin: '0px 0px -12% 0px' }}
-        transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: gone ? 0.9 : 1.1, ease: [0.22, 1, 0.36, 1] }}
       >
         <span className="font-sans text-[11px] font-medium uppercase tracking-[0.34em] [text-shadow:0_1px_8px_rgba(0,0,0,.9)]">Swipe up to continue</span>
         <span className="relative flex h-14 w-9 items-start justify-center rounded-full border border-ivory/40 pt-2 transition-colors duration-500 group-hover:border-sun/70" aria-hidden="true">
