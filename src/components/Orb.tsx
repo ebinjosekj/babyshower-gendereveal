@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { motion, useAnimationControls, useScroll, useTransform, type MotionValue } from 'framer-motion';
 import { useMotion } from '../context/MotionContext';
+import { ANDROID } from '../lib/device';
 
 type Tone = 'gold' | 'emerald';
 
@@ -24,8 +25,10 @@ export function OrbBody({ tone = 'gold', rings = true, className = '' }: { tone?
     <div className={`relative aspect-square ${className}`} aria-hidden="true">
       <div className="absolute inset-[-35%] rounded-full" style={{ background: `radial-gradient(circle, ${t.glow} 0%, transparent 62%)` }} />
       <div className="ambient absolute inset-0 rounded-full" style={{ background: t.body, boxShadow: t.rim, animation: 'orbBreath 7s ease-in-out infinite' }}>
-        <div className="spin ambient absolute inset-0 rounded-full opacity-40 mix-blend-soft-light" style={{ background: 'conic-gradient(from 0deg, transparent 0%, rgba(255,255,255,.7) 14%, transparent 32%, rgba(255,255,255,.4) 58%, transparent 80%)', animationDuration: '40s' }} />
-        <div className="absolute left-[18%] top-[12%] h-[22%] w-[30%] -rotate-[28deg] rounded-full bg-white/30 blur-xl" />
+        {!ANDROID && (
+          <div className="spin ambient absolute inset-0 rounded-full opacity-40 mix-blend-soft-light" style={{ background: 'conic-gradient(from 0deg, transparent 0%, rgba(255,255,255,.7) 14%, transparent 32%, rgba(255,255,255,.4) 58%, transparent 80%)', animationDuration: '40s' }} />
+        )}
+        <div className={`absolute left-[18%] top-[12%] h-[22%] w-[30%] -rotate-[28deg] rounded-full ${ANDROID ? '' : 'bg-white/30 blur-xl'}`} style={ANDROID ? { background: 'radial-gradient(ellipse, rgba(255,255,255,.34), transparent 70%)' } : undefined} />
       </div>
       {rings && (
         <svg viewBox="0 0 100 100" className="pointer-events-none absolute inset-[-28%] h-[156%] w-[156%] overflow-visible" fill="none">
@@ -87,12 +90,12 @@ export function ScrollOrb() {
   const still = simple ? { scale: 1, opacity: 0.55 } : undefined;
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.8, ease: 'easeInOut' }} className="pointer-events-none fixed inset-0 z-0 flex items-start justify-center overflow-hidden" aria-hidden="true">
-      <motion.div style={still ?? { scale, y, opacity, rotate }} className="mt-[9svh] w-[min(72vw,440px)]">
+      <motion.div style={still ?? (ANDROID ? { scale, y, opacity } : { scale, y, opacity, rotate })} className="mt-[9svh] w-[min(72vw,440px)]">
         <motion.div animate={kick} className="relative">
           <motion.div style={{ opacity: simple ? 1 : gold }}>
             <OrbBody tone="gold" />
           </motion.div>
-          {!simple && <HeroLife />}
+          {!simple && !ANDROID && <HeroLife />}
           {!simple && (
             <motion.div style={{ opacity: emerald }} className="absolute inset-0">
               <OrbBody tone="emerald" rings={false} />

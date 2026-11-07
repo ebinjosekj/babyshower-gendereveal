@@ -3,6 +3,7 @@ import { AnimatePresence, motion, useScroll, useSpring, useTransform, useVelocit
 import { confetti } from '../lib/confetti';
 import NudgeStar from './NudgeStar';
 import { flash } from '../lib/flash';
+import { ANDROID } from '../lib/device';
 
 const rnd = (n: number) => {
   const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
@@ -151,7 +152,7 @@ export default function Atmosphere() {
       <ScrollCue />
       <DawnGlow />
       <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-[1] overflow-hidden">
-        {MOTES.map((m, i) => (
+        {(ANDROID ? MOTES.slice(0, 12) : MOTES).map((m, i) => (
           <span
             key={i}
             className="ambient absolute bottom-0 rounded-full bg-[#F3DC9C]"
@@ -168,7 +169,7 @@ export default function Atmosphere() {
         ))}
       </div>
       <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-[1] overflow-hidden">
-        {BITS.map((b, i) => (
+        {(ANDROID ? BITS.slice(0, 6) : BITS).map((b, i) => (
           <span
             key={i}
             className="ambient absolute top-0 rounded-[2px]"
@@ -177,17 +178,17 @@ export default function Atmosphere() {
         ))}
       </div>
       <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-[1] overflow-hidden">
-        <motion.div className="absolute -left-[20%] top-[60%] h-[60vmax] w-[60vmax] rounded-full opacity-[.16]" style={{ y: cloudA, background: 'radial-gradient(circle, #7FB6E6, transparent 65%)' }} />
-        <motion.div className="absolute -right-[25%] top-[100%] h-[55vmax] w-[55vmax] rounded-full opacity-[.15]" style={{ y: cloudB, background: 'radial-gradient(circle, #F2A6C0, transparent 65%)' }} />
-        <motion.div className="absolute left-[10%] top-[170%] h-[50vmax] w-[50vmax] rounded-full opacity-[.14]" style={{ y: cloudC, background: 'radial-gradient(circle, #E3BE74, transparent 65%)' }} />
-        <motion.div className="absolute left-1/2 top-1/2 -ml-[min(48vw,330px)] -mt-[min(48vw,330px)] h-[min(96vw,660px)] w-[min(96vw,660px)] rounded-full border border-sun/25" style={{ rotate: ringTurn, scale: ringScale }}>
+        <motion.div className="absolute -left-[20%] top-[60%] h-[60vmax] w-[60vmax] rounded-full opacity-[.16]" style={{ y: ANDROID ? 0 : cloudA, background: 'radial-gradient(circle, #7FB6E6, transparent 65%)' }} />
+        <motion.div className="absolute -right-[25%] top-[100%] h-[55vmax] w-[55vmax] rounded-full opacity-[.15]" style={{ y: ANDROID ? 0 : cloudB, background: 'radial-gradient(circle, #F2A6C0, transparent 65%)' }} />
+        <motion.div className="absolute left-[10%] top-[170%] h-[50vmax] w-[50vmax] rounded-full opacity-[.14]" style={{ y: ANDROID ? 0 : cloudC, background: 'radial-gradient(circle, #E3BE74, transparent 65%)' }} />
+        <motion.div className="absolute left-1/2 top-1/2 -ml-[min(48vw,330px)] -mt-[min(48vw,330px)] h-[min(96vw,660px)] w-[min(96vw,660px)] rounded-full border border-sun/25" style={{ rotate: ANDROID ? 0 : ringTurn, scale: ANDROID ? 1 : ringScale }}>
           <span className="absolute -top-1 left-1/2 h-2 w-2 -translate-x-1/2 rounded-full bg-[#FFE9A8] shadow-[0_0_12px_3px_rgba(227,190,116,.8)]" />
           <span className="absolute -bottom-1 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-blush shadow-[0_0_10px_2px_rgba(242,166,192,.7)]" />
         </motion.div>
-        {SHOOTERS.map((m, i) => (
+        {(ANDROID ? SHOOTERS.slice(0, 1) : SHOOTERS).map((m, i) => (
           <span key={i} className="ambient absolute block h-[2px] w-[130px] rounded-full opacity-0" style={{ top: `${m.top}%`, left: `${m.left}%`, background: 'linear-gradient(90deg,#FFF6D6,rgba(255,246,214,0))', boxShadow: '0 0 10px 2px rgba(255,236,160,.5)', animation: `shoot ${m.dur}s linear ${m.delay}s infinite` }} />
         ))}
-        {SPARKLES.map((m, i) => (
+        {(ANDROID ? SPARKLES.slice(0, 5) : SPARKLES).map((m, i) => (
           <svg key={i} viewBox="0 0 24 24" className="ambient absolute opacity-0" style={{ left: `${m.left}%`, top: `${m.top}%`, width: m.size, height: m.size, animation: `twirl ${m.dur}s ease-in-out ${m.delay}s infinite` }}>
             <path d="M12 0L14.6 9.4L24 12L14.6 14.6L12 24L9.4 14.6L0 12L9.4 9.4Z" fill="#F3DC9C" />
           </svg>
