@@ -1,26 +1,14 @@
-import { useRef } from 'react';
 import { Volume2, VolumeX } from 'lucide-react';
 import type { Music } from '../hooks/useMusic';
-import { sfx } from '../lib/sfx';
 
 // The sound on/off button, bottom right, visible from the very first screen (above the opening overlay).
 export default function MusicPlayer({ music }: { music: Music; visible?: boolean }) {
-  const wasLocked = useRef(false);
-  const label = !music.on ? (music.muted ? 'Turn sound on' : 'Tap for sound') : 'Turn sound off';
+  const label = music.on ? 'Mute sound' : 'Turn sound on';
   return (
     <div className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-3 z-[130]">
       <button
         type="button"
-        // a first tap both unlocks sound and must leave it ON, so remember whether it was locked before the page-wide unlock runs
-        onPointerDownCapture={() => {
-          wasLocked.current = !sfx.running();
-        }}
-        onClick={() => {
-          if (wasLocked.current) {
-            sfx.setMuted(false);
-            sfx.unlock();
-          } else music.toggle();
-        }}
+        onClick={music.toggle}
         aria-label={label}
         aria-pressed={music.on}
         className="glass relative flex h-12 w-12 items-center justify-center rounded-full text-plum"

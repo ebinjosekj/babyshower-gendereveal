@@ -244,11 +244,9 @@ const hint=document.createElement('div');hint.className='sndhint';hint.setAttrib
 hint.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg><span></span>';
 stage.appendChild(hint);
 const hintLabel=hint.querySelector('span');
-const refreshHint=()=>{hintLabel.textContent=!sfx.running()?'Tap for sound':sfx.isMuted()?'Sound off · tap to unmute':'Sound on · tap to mute'};
+const refreshHint=()=>{hintLabel.textContent=sfx.isMuted()?'Sound off · tap to unmute':'Sound on · tap to mute'};
 refreshHint();
-let wasLocked=false;
-hint.addEventListener('pointerdown',()=>{wasLocked=!sfx.running()},true);
-const hintAct=(e)=>{e.stopPropagation();if(wasLocked||!sfx.running()){sfx.setMuted(false);startMusic();sfx.unlock()}else sfx.setMuted(!sfx.isMuted());wasLocked=false;refreshHint()};
+const hintAct=(e)=>{e.stopPropagation();sfx.unlock();sfx.setMuted(!sfx.isMuted());refreshHint()};
 hintOut=()=>{A(hint,[{opacity:1},{opacity:0}],{duration:500,fill:'forwards'});hint.style.pointerEvents='none'};
 hint.addEventListener('click',hintAct);
 hint.addEventListener('keydown',(e)=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();hintAct(e)}});

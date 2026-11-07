@@ -15,14 +15,7 @@ let master: GainNode;
 let bus: GainNode;
 let send: GainNode;
 let noiseBuf: AudioBuffer;
-const MUTE_KEY = 'baby-shower-sound-muted';
-let muted = (() => {
-  try {
-    return localStorage.getItem(MUTE_KEY) === '1';
-  } catch {
-    return false;
-  }
-})();
+let muted = false; // sound starts ON every visit; the button mutes/unmutes
 let unlocked = false;
 const last: Record<string, number> = {};
 let queue: { at: number; name: SfxName; opt?: Opt }[] = [];
@@ -423,11 +416,6 @@ export const sfx = {
   },
   setMuted(m: boolean) {
     muted = m;
-    try {
-      localStorage.setItem(MUTE_KEY, m ? '1' : '0');
-    } catch {
-      /* private mode */
-    }
     if (ctx) master.gain.setTargetAtTime(m ? 0 : 0.9, ctx.currentTime, 0.05);
     emit();
   },
