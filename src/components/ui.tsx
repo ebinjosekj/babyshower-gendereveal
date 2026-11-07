@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { useRef } from 'react';
+import { motion } from 'framer-motion';
 import { useMotion } from '../context/MotionContext';
 import { Ornament } from './art';
 
@@ -60,18 +59,15 @@ export function SectionHead({
   sub?: string;
   dark?: boolean;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] });
-  const drift = useTransform(scrollYProgress, [0, 1], [18, -18]);
   return (
-    <div ref={ref} className="mx-auto max-w-2xl text-center">
+    <div className="mx-auto max-w-2xl text-center">
       <Reveal>
         <p className={`kicker ${dark ? '!text-sun' : ''}`}>{kicker}</p>
         <motion.span className="mx-auto mt-2 block h-px w-24 origin-center bg-gradient-to-r from-transparent via-sun to-transparent" initial={{ scaleX: 0 }} whileInView={{ scaleX: 1 }} viewport={{ once: true }} transition={{ duration: 1.2, delay: 0.5, ease: [0.22, 1, 0.36, 1] }} />
       </Reveal>
-      <motion.h2 style={{ y: drift }} className={`mt-4 font-display text-5xl font-light leading-[1.05] sm:text-7xl ${dark ? 'text-ivory' : 'text-plum'}`}>
+      <h2 className={`mt-4 font-display text-5xl font-light leading-[1.05] sm:text-7xl ${dark ? 'text-ivory' : 'text-plum'}`}>
         <Words text={title} />
-      </motion.h2>
+      </h2>
       <Reveal delay={0.2}>
         <Ornament className="mt-5" dark={dark} />
         {sub && (

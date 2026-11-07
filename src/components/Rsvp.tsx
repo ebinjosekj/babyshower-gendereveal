@@ -153,7 +153,7 @@ export default function Rsvp() {
                       whileTap={{ scale: 0.94 }}
                       animate={status === o.value ? { scale: [1, 1.07, 1.02] } : { scale: 1 }}
                       transition={{ duration: 0.4 }}
-                      className={`rounded-2xl border-2 px-3 py-5 text-center transition ${status === o.value ? '' : 'opt-idle '}${status === o.value ? 'border-coral bg-sun/40 shadow-lg' : 'border-champagne bg-ivory/70 hover:bg-sun/20'}`}
+                      className={`rounded-2xl border-2 px-3 py-5 text-center transition ${status === o.value ? 'border-coral bg-sun/40 shadow-lg' : 'border-champagne bg-ivory/70 hover:bg-sun/20'}`}
                     >
                       <span className="block font-display text-2xl font-semibold leading-tight text-ocean">{o.title}</span>
                     </motion.button>

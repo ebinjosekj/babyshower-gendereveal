@@ -42,15 +42,11 @@ body {
   }
   .glass {
     background: linear-gradient(145deg, rgba(243, 235, 216, 0.97), rgba(232, 222, 198, 0.92));
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
     border: 1px solid rgba(184, 161, 106, 0.7);
     box-shadow: 0 24px 50px -24px rgba(24, 61, 75, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.8);
   }
   .glass-dark {
     background: linear-gradient(145deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
     border: 1px solid rgba(227, 190, 116, 0.28);
     box-shadow: 0 24px 50px -24px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.18);
   }
@@ -296,8 +292,8 @@ body {
 }
 
 @keyframes ringGlow {
-  from { filter: drop-shadow(0 0 0 rgba(227, 190, 116, 0)); }
-  to { filter: drop-shadow(0 0 12px rgba(227, 190, 116, 0.5)); }
+  from { opacity: 0.8; }
+  to { opacity: 1; }
 }
 
 
@@ -527,9 +523,6 @@ body {
 .simple .thank-spark, .simple .thank-halo { animation: none; opacity: 1; }
 
 /* ── extra polish ── */
-/* 6 cards glow a little brighter when pointed at */
-.glass { transition: box-shadow .5s ease, border-color .5s ease; }
-@media (hover: hover) { .glass:hover { box-shadow: 0 30px 60px -22px rgba(24,61,75,.55), 0 0 0 1px rgba(227,190,116,.55), inset 0 1px 0 rgba(255,255,255,.8); } }
 /* 7 form fields lift and grow a gold halo when focused */
 .field { transition: transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s ease, border-color .3s ease, background-color .3s ease; }
 .field:focus { transform: translateY(-2px); background-color: #fff; }
@@ -543,13 +536,12 @@ body {
   100% { transform: none; }
 }
 /* 11 menu rows slide a gold bar in on hover */
-.nav-item { position: relative; transition: padding-left .3s ease, background-color .3s ease; }
+.nav-item { position: relative; transition: background-color .3s ease; }
 .nav-item::before { content: ""; position: absolute; left: 10px; top: 50%; width: 3px; height: 0; border-radius: 3px; background: #E3BE74; transform: translateY(-50%); transition: height .3s ease; }
-.nav-item:hover { padding-left: 1.5rem; }
 .nav-item:hover::before { height: 55%; }
 /* 15 a slow glint sweeps across "very soon." (overlay, no change to the gold text) */
 .glint { position: relative; overflow: hidden; padding: 0 .12em .22em; margin: 0 -.12em -.22em; }
-.glint::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(110deg, transparent 38%, rgba(255,255,255,.55) 50%, transparent 62%); transform: translateX(-120%); animation: glintSweep 5s ease-in-out 1.5s infinite; mix-blend-mode: overlay; }
+.glint::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(110deg, transparent 38%, rgba(255,255,255,.55) 50%, transparent 62%); transform: translateX(-120%); animation: glintSweep 5s ease-in-out 1.5s infinite; }
 @keyframes glintSweep { 0%, 50% { transform: translateX(-120%); } 100% { transform: translateX(120%); } }
 /* 20 icons inside buttons nudge on hover */
 .btn-sun svg, .btn-ghost svg, .btn-ghost-light svg, .btn-mint svg { transition: transform .35s cubic-bezier(.22,1,.36,1); }
@@ -559,12 +551,10 @@ body {
 .btn-sun:active, .btn-mint:active { box-shadow: 0 0 0 6px rgba(227,190,116,.35), 0 12px 28px -10px rgba(227,190,116,.45); }
 .btn-sun, .btn-mint { transition: transform .25s cubic-bezier(.22,1,.36,1), box-shadow .35s ease, filter .3s ease; }
 /* 22 reply choices breathe gently while waiting */
-@keyframes optBreath { 0%, 100% { box-shadow: 0 0 0 0 rgba(227,190,116,0); } 50% { box-shadow: 0 0 0 5px rgba(227,190,116,.22); } }
-.opt-idle { animation: optBreath 3.4s ease-in-out infinite; }
 /* 23 a glint travels along the little ornament under headings */
 @keyframes ornGlint { 0%, 60% { transform: translateX(-60px); opacity: 0; } 70% { opacity: 1; } 100% { transform: translateX(60px); opacity: 0; } }
 .orn-glint { animation: ornGlint 4.5s ease-in-out infinite; }
 /* 17 photo carousel: ripples spread outward */
 @keyframes orbitRipple { from { transform: scale(.55); opacity: .7; } to { transform: scale(1.6); opacity: 0; } }
 .orbit-ripple { animation: orbitRipple 3.6s ease-out infinite; }
-.simple .orbit-ripple, .simple .orn-glint, .simple .opt-idle, .simple .glint::after { animation: none; display: none; }
+.simple .orbit-ripple, .simple .orn-glint, .simple .glint::after { animation: none; display: none; }

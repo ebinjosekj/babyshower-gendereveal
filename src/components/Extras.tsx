@@ -1,16 +1,15 @@
 import { useEffect } from 'react';
-import { motion, useScroll, useSpring } from 'framer-motion';
+import { motion, useScroll } from 'framer-motion';
 
-// Page-wide polish: scroll progress hairline, magnetic buttons, soft 3D tilt on cards.
+// Page-wide polish: scroll progress hairline and magnetic buttons.
 // Pointer effects only run for a real mouse (never on touch) and only touch transform.
 export default function Extras() {
   const { scrollYProgress } = useScroll();
-  const scaleX = useSpring(scrollYProgress, { stiffness: 120, damping: 28, mass: 0.4 });
 
   useEffect(() => {
     if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
     let el: HTMLElement | null = null;
-    let kind: 'mag' | 'tilt' | null = null;
+    let kind: 'mag' | null = null;
     let raf = 0;
 
     const reset = (e: HTMLElement | null) => {
@@ -19,11 +18,11 @@ export default function Extras() {
       e.style.transform = '';
     };
     const move = (ev: PointerEvent) => {
-      const t = (ev.target as HTMLElement | null)?.closest?.('.btn-sun, .btn-ghost, .btn-ghost-light, .glass') as HTMLElement | null;
+      const t = (ev.target as HTMLElement | null)?.closest?.('.btn-sun, .btn-ghost, .btn-ghost-light') as HTMLElement | null;
       if (t !== el) {
         reset(el);
         el = t;
-        kind = t ? (t.classList.contains('glass') ? 'tilt' : 'mag') : null;
+        kind = t ? 'mag' : null;
         if (t) t.style.transition = 'transform .12s ease-out';
       }
       if (!el || !kind) return;
@@ -33,10 +32,7 @@ export default function Extras() {
         const r = el.getBoundingClientRect();
         const px = (ev.clientX - r.left) / r.width - 0.5;
         const py = (ev.clientY - r.top) / r.height - 0.5;
-        el.style.transform =
-          kind === 'mag'
-            ? `translate(${px * 8}px, ${py * 6}px)`
-            : `perspective(900px) rotateX(${-py * 3}deg) rotateY(${px * 3}deg)`;
+        el.style.transform = `translate(${px * 8}px, ${py * 6}px)`;
       });
     };
     window.addEventListener('pointermove', move, { passive: true });
@@ -51,7 +47,7 @@ export default function Extras() {
     <motion.div
       aria-hidden="true"
       className="pointer-events-none fixed inset-x-0 top-0 z-[70] h-[3px] origin-left bg-gradient-to-r from-transparent via-sun to-[#FFE9A8] shadow-[0_0_10px_rgba(227,190,116,.8)]"
-      style={{ scaleX }}
+      style={{ scaleX: scrollYProgress }}
     />
   );
 }

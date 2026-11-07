@@ -1,4 +1,4 @@
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 import { EVENT } from '../config';
 import TwinLights from './TwinLights';
@@ -8,12 +8,9 @@ const LINES = ['Two hearts.', 'One new beginning.', 'A little wonder, on the way
 
 // Hero + three big statements, floating over the page-long orb.
 export default function Intro({ entered }: { entered: boolean }) {
-  const { scrollY } = useScroll();
-  const heroOpacity = useTransform(scrollY, [0, 520], [1, 0.15]);
-  const heroScale = useTransform(scrollY, [0, 520], [1, 0.94]);
   return (
     <>
-      <motion.section id="top" aria-label="Welcome" style={{ opacity: heroOpacity, scale: heroScale }} className="relative flex min-h-[100svh] flex-col items-center justify-end px-5 pb-[9svh] text-center">
+      <section id="top" aria-label="Welcome" className="relative flex min-h-[100svh] flex-col items-center justify-end px-5 pb-[9svh] text-center">
         <motion.p initial={{ opacity: 0, y: -10 }} animate={entered ? { opacity: 1, y: 0 } : { opacity: 0, y: -10 }} transition={{ delay: entered ? 0.3 : 0, duration: entered ? 1.2 : 0.3 }} className="rounded-full border border-sun/50 bg-ocean/70 px-5 py-2.5 font-sans text-[11px] font-medium uppercase tracking-[0.4em] text-ivory shadow-[0_8px_30px_-8px_rgba(0,0,0,.8)] [text-shadow:0_1px_6px_rgba(0,0,0,.9)] sm:text-xs">
           {EVENT.title}
         </motion.p>
@@ -31,7 +28,7 @@ export default function Intro({ entered }: { entered: boolean }) {
           </span>
           <ChevronDown size={20} className="ambient -mt-1" style={{ animation: 'bob 2s ease-in-out infinite' }} aria-hidden="true" />
         </motion.button>
-      </motion.section>
+      </section>
 
       <section id="story" aria-label="Our story" className="relative py-[10svh]">
         {LINES.map((l, i) => (
