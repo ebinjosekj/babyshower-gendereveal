@@ -51,8 +51,8 @@ export default function ScrollStar() {
       const appear = Math.min(1, y0 / 180);
       const cur = appear > 0 ? true : null;
       // the zigzag: swings across the screen as the page scrolls past, with a small gentle sway of its own
-      const amp = Math.min(W * 0.36, 150);
-      const tx = Math.min(W - 18, Math.max(18, W / 2 + amp * Math.sin(travelled / 170) + 6 * Math.sin(performance.now() / 700)));
+      const amp = W / 2 - 12; // wide enough to touch both edges of the screen
+      const tx = Math.min(W - 10, Math.max(10, W / 2 + amp * Math.sin(travelled / 170)));
       const ty = H * (0.12 + 0.74 * p);
       if (fresh && appear < 0.05) {
         // a new section: start the snake coiled at the top
@@ -64,7 +64,7 @@ export default function ScrollStar() {
       fresh = appear < 0.05;
       const ddx = tx - hx;
       const ddy = ty - hy;
-      hx += ddx * 0.16;
+      hx += ddx * 0.24;
       hy += ddy * 0.16;
       op += ((cur ? appear : 0) - op) * 0.18;
       // body: every segment trails the one in front, keeping a fixed gap, which makes it slither along the zigzag
