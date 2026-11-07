@@ -5,6 +5,7 @@ import { useMotion } from '../context/MotionContext';
 import { OrbBody } from './Orb';
 import { confetti } from '../lib/confetti';
 import NudgeStar from './NudgeStar';
+import { flash } from '../lib/flash';
 import { StarField } from './ui';
 
 const rnd = (n: number) => {
@@ -51,6 +52,11 @@ export default function Opening({ onStartMusic, onEnter, onDone }: Props) {
   // if the guest hasn't tapped after 5 seconds, a shooting star flies to the orb (and again every 9 seconds)
   const [nudge, setNudge] = useState(0);
   const [pulse, setPulse] = useState(0);
+  const pillRef = useRef<HTMLSpanElement>(null);
+  const pillTarget = () => {
+    const r = pillRef.current?.getBoundingClientRect();
+    return r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : { x: window.innerWidth / 2, y: window.innerHeight * 0.75 };
+  };
   useEffect(() => {
     if (lit || simple) return;
     let id = 0;
@@ -231,20 +237,20 @@ export default function Opening({ onStartMusic, onEnter, onDone }: Props) {
       {/* a quiet, elegant cue under the orb: a beating dot and one short line */}
       <div className="pointer-events-none absolute inset-x-0 top-[calc(50%+11rem)] flex justify-center sm:top-[calc(50%+12.5rem)]" aria-hidden="true">
         <motion.div initial={{ opacity: 0, y: 14 }} animate={lit ? { opacity: 0, y: -8, scale: 0.96 } : { opacity: 1, y: 0, scale: 1 }} transition={lit ? { duration: 0.6, ease: 'easeIn' } : { duration: 1.6, delay: 1.8, ease: [0.22, 1, 0.36, 1] }}>
-          <span className="relative flex items-center gap-3 rounded-full border border-sun/40 bg-ocean/50 px-5 py-2.5 font-sans text-[11px] font-medium uppercase tracking-[0.3em] text-ivory">
+          <span ref={pillRef} className="relative flex items-center gap-3 rounded-full border border-sun/40 bg-ocean/50 px-5 py-2.5 font-sans text-[11px] font-medium uppercase tracking-[0.3em] text-ivory">
             <span className="relative flex h-2 w-2">
               <span className="ambient absolute inset-0 rounded-full bg-sun" style={{ animation: 'ripple 2.2s ease-out infinite' }} />
               <span className="relative block h-2 w-2 rounded-full bg-sun" style={{ boxShadow: '0 0 10px 2px rgba(227,190,116,.8)' }} />
             </span>
             Tap the light to open
             <span className="ambient absolute -inset-1.5 rounded-full border border-sun/25" style={{ animation: 'gatePulse 3.2s ease-in-out infinite' }} />
-            <span key={pulse} className="absolute -inset-2 rounded-full border-2 border-sun opacity-0" style={{ animation: pulse ? 'pillFlash 1.8s ease-out 1' : undefined }} />
+
           </span>
         </motion.div>
       </div>
 
       {nudge > 0 && !lit && (
-        <NudgeStar key={nudge} from={{ x: window.innerWidth * 0.9, y: window.innerHeight * 0.07 }} to={{ x: window.innerWidth / 2, y: window.innerHeight * 0.5 }} onLand={() => setPulse((p) => p + 1)} />
+        <NudgeStar key={nudge} from={{ x: window.innerWidth * 0.9, y: window.innerHeight * 0.07 }} to={pillTarget()} onLand={() => { flash(pillRef.current); timers.current.push(window.setTimeout(() => setPulse((p) => p + 1), 350)); }} />
       )}
       {pulse > 0 && !lit && <span key={`r${pulse}`} aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2 -ml-12 -mt-12 block h-24 w-24 rounded-full border-2 border-sun" style={{ animation: 'openRing 1.5s ease-out both' }} />}
 

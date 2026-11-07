@@ -491,3 +491,30 @@ body {
   25% { opacity: 1; }
   100% { opacity: 0; transform: scale(1.18); }
 }
+
+/* the smooth "notice me" pop a button gets when the shooting star lands on it */
+@keyframes nudgePop {
+  0% { transform: scale(1); }
+  28% { transform: scale(1.13); }
+  52% { transform: scale(0.98); }
+  76% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+@keyframes nudgeRing {
+  from { transform: scale(0.96); opacity: 0.95; }
+  to { transform: scale(1.35); opacity: 0; }
+}
+.nudged {
+  position: relative;
+  animation: nudgePop 1.4s cubic-bezier(0.22, 1, 0.36, 1);
+  filter: drop-shadow(0 0 16px rgba(255, 224, 140, 0.85));
+}
+.nudged::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border-radius: 9999px;
+  border: 2px solid #e3be74;
+  pointer-events: none;
+  animation: nudgeRing 1.4s ease-out forwards;
+}

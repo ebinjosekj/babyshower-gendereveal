@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useScroll, useSpring, useTransform, useVelocity } from 'framer-motion';
 import { confetti } from '../lib/confetti';
 import NudgeStar from './NudgeStar';
+import { flash } from '../lib/flash';
 
 const rnd = (n: number) => {
   const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
@@ -242,13 +243,27 @@ function ScrollCue() {
   const [typing, setTyping] = useState(false);
   const [more, setMore] = useState(true);
   const [shot, setShot] = useState(0);
-  // while the guest stays idle, a shooting star flies down towards the cue (and again every 9 seconds)
+  const [onHero, setOnHero] = useState(false);
+  const pillRef = useRef<HTMLSpanElement>(null);
+  const heroBtn = () => document.getElementById('swipe-cue');
+  // while the guest stays idle, a shooting star flies to the scroll button (and again every 9 seconds):
+  // the swipe-up button on the first screen, or the "keep scrolling" pill anywhere further down
   useEffect(() => {
     if (!idle) return;
-    setShot((n) => n + 1);
-    const id = window.setInterval(() => setShot((n) => n + 1), 9000);
+    const fire = () => {
+      const r = heroBtn()?.getBoundingClientRect();
+      setOnHero(!!r && r.top > 0 && r.bottom < window.innerHeight && window.scrollY < 300);
+      setShot((n) => n + 1);
+    };
+    fire();
+    const id = window.setInterval(fire, 9000);
     return () => window.clearInterval(id);
   }, [idle]);
+  const target = () => {
+    const el = onHero ? heroBtn() : pillRef.current;
+    const r = el?.getBoundingClientRect();
+    return r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : { x: window.innerWidth / 2, y: window.innerHeight - 56 };
+  };
   useEffect(() => scrollYProgress.on('change', (v) => setMore(v < 0.96)), [scrollYProgress]);
   useEffect(() => {
     let id = 0;
@@ -277,11 +292,11 @@ function ScrollCue() {
   }, []);
   return (
  <>
-    {idle && more && !typing && shot > 0 && <NudgeStar key={shot} z="z-[61]" duration={1.5} from={{ x: window.innerWidth * 0.9, y: window.innerHeight * 0.1 }} to={{ x: window.innerWidth / 2, y: window.innerHeight - 56 }} />}
+    {idle && more && !typing && shot > 0 && <NudgeStar key={shot} z="z-[61]" duration={1.5} from={{ x: window.innerWidth * 0.9, y: window.innerHeight * 0.1 }} to={target()} onLand={() => flash(onHero ? heroBtn() : pillRef.current)} />}
     <AnimatePresence>
-      {idle && more && !typing && (
-        <motion.div aria-hidden="true" className="pointer-events-none fixed inset-x-0 z-[60] flex justify-center" style={{ bottom: 'max(18px, env(safe-area-inset-bottom, 0px))' }} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10, transition: { duration: 0.35, delay: 0 } }} transition={{ duration: 0.7, delay: 1.1, ease: [0.22, 1, 0.36, 1] }}>
-          <span className="flex flex-col items-center rounded-full border border-sun/50 bg-ocean/80 px-5 pb-1 pt-2.5 font-sans text-[11px] font-medium uppercase tracking-[0.3em] text-ivory shadow-[0_8px_30px_-8px_rgba(0,0,0,.8)]">
+ {idle && more && !typing && !onHero && (
+        <motion.div aria-hidden="true" className="pointer-events-none fixed inset-x-0 z-[60] flex justify-center" style={{ bottom: 'max(18px, env(safe-area-inset-bottom, 0px))' }} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10, transition: { duration: 0.35, delay: 0 } }} transition={{ duration: 0.7, delay: 1.0, ease: [0.22, 1, 0.36, 1] }}>
+          <span ref={pillRef} className="flex flex-col items-center rounded-full border border-sun/50 bg-ocean/80 px-5 pb-1 pt-2.5 font-sans text-[11px] font-medium uppercase tracking-[0.3em] text-ivory shadow-[0_8px_30px_-8px_rgba(0,0,0,.8)]">
             Keep scrolling
             <span className="ambient mt-0.5 block text-sun" style={{ animation: 'bob 1.8s ease-in-out infinite' }}>
               <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
