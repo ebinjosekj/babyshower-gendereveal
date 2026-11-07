@@ -570,17 +570,20 @@ body {
 @keyframes cueRing { 0% { opacity: .6; transform: scale(1); } 70%, 100% { opacity: 0; transform: scale(1.35, 1.2); } }
 
 /* ---- scroll-following star (ScrollStar.tsx) ---- */
-.sstar { width: 0; height: 0; will-change: transform, opacity; }
-.sstar-tail { position: absolute; left: -1.5px; bottom: 0; width: 3px; height: 90px; border-radius: 3px; transform-origin: 50% 100%; background: linear-gradient(to top, rgba(255,233,168,.7), rgba(255,233,168,0)); }
-.sstar-core { position: absolute; left: -6px; top: -6px; width: 12px; height: 12px; border-radius: 50%; background: #fff8e0; box-shadow: 0 0 12px 4px rgba(255,224,140,.85); animation: sstarPulse 2.4s ease-in-out infinite; }
+.sstar { width: 0; height: 0; will-change: opacity; }
+.sstar-head, .sstar-dot { position: absolute; left: 0; top: 0; will-change: transform; }
+.sstar-dot { width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 50%; transition: opacity .5s; }
+.sstar-core { position: absolute; left: -9px; top: -9px; width: 18px; height: 18px; background: #fff8e0; clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); animation: sstarPulse 2.4s ease-in-out infinite; }
+.sstar-core::before { content: ""; }
+.sstar-head::before { content: ""; position: absolute; left: -11px; top: -11px; width: 22px; height: 22px; border-radius: 50%; background: radial-gradient(circle, rgba(255,230,150,.75), rgba(255,230,150,0) 70%); }
 .sstar-ring, .sstar-spark { position: absolute; opacity: 0; }
 .sstar-ring { left: -16px; top: -16px; width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid rgba(255,224,140,.9); }
 .sstar-spark { left: -2px; top: -2px; width: 4px; height: 4px; border-radius: 50%; background: #ffe9a8; box-shadow: 0 0 6px 2px rgba(255,224,140,.8); }
 .sstar[data-s="land"] .sstar-core { animation: sstarLand 1.1s cubic-bezier(.3,.7,.3,1) forwards; }
-.sstar[data-s="land"] .sstar-tail { opacity: 0; transition: opacity .3s; }
+.sstar[data-s="land"] .sstar-dot { opacity: 0 !important; transition: opacity .9s; }
 .sstar[data-s="land"] .sstar-ring { animation: sstarRing 1.1s cubic-bezier(.2,.7,.3,1) forwards; }
 .sstar[data-s="land"] .sstar-spark { animation: sstarSpark 1.1s cubic-bezier(.2,.7,.3,1) forwards; }
-@keyframes sstarPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.18); } }
-@keyframes sstarLand { 0% { transform: scale(1); opacity: 1; } 25% { transform: scale(1.7); opacity: 1; } 100% { transform: scale(.2); opacity: 0; } }
+@keyframes sstarPulse { 0%,100% { transform: scale(1) rotate(0deg); } 50% { transform: scale(1.15) rotate(12deg); } }
+@keyframes sstarLand { 0% { transform: scale(1); opacity: 1; } 25% { transform: scale(1.8); opacity: 1; } 100% { transform: scale(.2); opacity: 0; } }
 @keyframes sstarRing { 0% { transform: scale(.2); opacity: .95; } 100% { transform: scale(2.6); opacity: 0; } }
 @keyframes sstarSpark { 0% { transform: translate(0,0) scale(1); opacity: 1; } 100% { transform: translate(var(--dx),var(--dy)) scale(.2); opacity: 0; } }
