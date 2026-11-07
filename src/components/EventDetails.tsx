@@ -390,15 +390,17 @@ export default function EventDetails() {
 
       <Reveal delay={0.1} className="relative z-10 mx-auto mt-12 max-w-3xl">
         <p className="mt-4 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-center text-sm font-medium text-ivory">
-          Questions? Call{' '}
-          {EVENT.contacts.map((c, i) => (
-            <span key={c.tel}>
-              {i > 0 && ' or '}
-              <a className="underline decoration-sun decoration-2 underline-offset-2" href={`tel:${c.tel}`}>
-                {c.name} {c.display}
-              </a>
-            </span>
-          ))}
+          <span className="block">Questions? Call</span>
+          <span className="mt-1 flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
+            {EVENT.contacts.map((c, i) => (
+              <span key={c.tel} className="inline-flex items-center gap-3 whitespace-nowrap">
+                {i > 0 && <span className="text-ivory/60">or</span>}
+                <a className="whitespace-nowrap underline decoration-sun decoration-2 underline-offset-2" href={`tel:${c.tel}`}>
+                  {c.name} {c.display.replace(/ /g, '\u00a0')}
+                </a>
+              </span>
+            ))}
+          </span>
         </p>
       </Reveal>
     </section>

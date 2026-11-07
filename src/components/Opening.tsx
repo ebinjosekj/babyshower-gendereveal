@@ -49,7 +49,7 @@ export default function Opening({ onStartMusic, onEnter, onDone }: Props) {
   const [lit, setLit] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const timers = useRef<number[]>([]);
-  // if the guest hasn't tapped after 5 seconds, a shooting star flies to the orb (and again every 9 seconds)
+  // if the guest hasn't tapped after 3 seconds, a shooting star flies to the tap button (and again every 8 seconds)
   const [nudge, setNudge] = useState(0);
   const [pulse, setPulse] = useState(0);
   const pillRef = useRef<HTMLSpanElement>(null);
@@ -62,9 +62,9 @@ export default function Opening({ onStartMusic, onEnter, onDone }: Props) {
     let id = 0;
     const loop = () => {
       setNudge((n) => n + 1);
-      id = window.setTimeout(loop, 9000);
+      id = window.setTimeout(loop, 8000);
     };
-    id = window.setTimeout(loop, 5000);
+    id = window.setTimeout(loop, 3000);
     return () => window.clearTimeout(id);
   }, [lit, simple]);
   // the light leans gently towards the finger / cursor

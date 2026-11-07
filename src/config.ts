@@ -27,10 +27,10 @@ export const EVENT = {
 
 export const TEAM_LABEL = { boy: 'Team Boy', girl: 'Team Girl' } as const;
 
-// Music: by default an original music-box lullaby is generated in the browser
-// (no file, no licensing). To use your own licensed track instead, put it at
-// public/audio/wonder.mp3 and set useFile to true.
+// Music: public/audio/wonder.mp3 is an original, royalty-free instrumental made for this
+// invitation ("Golden Hour": soft piano, bells and a warm pad). Set useFile to false to fall
+// back to the small music-box lullaby that the browser can generate by itself.
 export const MUSIC = {
-  useFile: false,
+  useFile: true,
   src: `${import.meta.env.BASE_URL}audio/wonder.mp3`,
 };

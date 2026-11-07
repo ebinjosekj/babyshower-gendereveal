@@ -150,7 +150,7 @@ function createSynth(initialLevel: number): Engine {
 function createFile(initialLevel: number): Engine {
   const a = new Audio(MUSIC.src);
   a.loop = true;
-  a.preload = 'none';
+  a.preload = 'auto';
   a.volume = initialLevel;
   return {
     play: () => void a.play().catch(() => undefined),

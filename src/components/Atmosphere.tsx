@@ -256,7 +256,7 @@ function ScrollCue() {
       setShot((n) => n + 1);
     };
     fire();
-    const id = window.setInterval(fire, 9000);
+    const id = window.setInterval(fire, 8000);
     return () => window.clearInterval(id);
   }, [idle]);
   const target = () => {
@@ -270,7 +270,7 @@ function ScrollCue() {
     const arm = () => {
       setIdle(false);
       window.clearTimeout(id);
-      id = window.setTimeout(() => setIdle(true), 5000);
+      id = window.setTimeout(() => setIdle(true), 3000);
     };
     const inField = () => setTyping(['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName ?? ''));
     arm();

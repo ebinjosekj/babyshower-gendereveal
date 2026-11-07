@@ -1,4 +1,2 @@
-Optional: your own background track.
-1) Save a licensed/owned instrumental as  wonder.mp3  in this folder (keep under ~3 MB).
-2) In src/config.ts set  MUSIC.useFile = true.
-Without it, the site plays an original music-box lullaby generated in the browser.
+wonder.mp3 is an original instrumental ("Golden Hour") created for this invitation, so it is free to use.
+To use your own track instead, replace wonder.mp3 (keep it under ~3 MB). To switch back to the browser-made music-box lullaby, set MUSIC.useFile = false in src/config.ts.
