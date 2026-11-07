@@ -6,6 +6,7 @@ import Intro from './components/Intro';
 import { ScrollOrb } from './components/Orb';
 import Countdown from './components/Countdown';
 import Atmosphere from './components/Atmosphere';
+import Extras from './components/Extras';
 import { Divider } from './components/ui';
 import { MotionProvider, useMotion } from './context/MotionContext';
 import { useMusic } from './hooks/useMusic';
@@ -46,6 +47,7 @@ function Experience() {
       {showOpening && <Opening onStartMusic={music.start} onEnter={() => setEntered(true)} onDone={() => setShowOpening(false)} />}
       {entered && <ScrollOrb />}
       {entered && calm && !simple && <Atmosphere />}
+      {entered && !simple && <Extras />}
       <Nav visible={entered} />
       <MusicPlayer music={music} visible={entered} />
 

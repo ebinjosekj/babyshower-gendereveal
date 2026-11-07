@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { animate, motion, useMotionValue, useTransform, type MotionValue } from 'framer-motion';
 import { base } from './ui';
 
@@ -28,14 +28,29 @@ function OrbitPhoto({ n, offset, angle }: { n: number; offset: number; angle: Mo
 
 export default function PhotoOrbit() {
   const angle = useMotionValue(0);
-  useEffect(() => {
-    const id = window.setInterval(() => {
-      animate(angle, angle.get() + STEP, { duration: 0.85, ease: [0.45, 0, 0.15, 1] });
-    }, 1900);
-    return () => window.clearInterval(id);
+  const timer = useRef(0);
+  const next = useCallback(() => {
+    animate(angle, Math.round(angle.get() / STEP) * STEP + STEP, { duration: 0.85, ease: [0.45, 0, 0.15, 1] });
   }, [angle]);
+  const start = useCallback(() => {
+    window.clearInterval(timer.current);
+    timer.current = window.setInterval(next, 1900);
+  }, [next]);
+  useEffect(() => {
+    start();
+    return () => window.clearInterval(timer.current);
+  }, [start]);
+  // Tap a photo to bring the next one round straight away.
+  const tap = () => {
+    next();
+    start();
+    try { navigator.vibrate?.(12); } catch { /* ignore */ }
+  };
   return (
-    <motion.div initial={{ opacity: 0, scale: 0.6 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ type: 'spring', stiffness: 120, damping: 14, delay: 0.1 }} className="relative mx-auto flex h-48 items-center justify-center" style={{ perspective: 700 }} aria-hidden="true">
+    <motion.div initial={{ opacity: 0, scale: 0.6 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ type: 'spring', stiffness: 120, damping: 14, delay: 0.1 }} className="relative mx-auto flex h-48 cursor-pointer items-center justify-center" style={{ perspective: 700 }} onClick={tap}>
+      {[0, 1.2, 2.4].map((d) => (
+        <span key={d} className="orbit-ripple ambient absolute h-44 w-44 rounded-full border border-sun/50" style={{ animationDelay: `${d}s` }} />
+      ))}
       <span className="thank-halo absolute h-44 w-44 rounded-full bg-sun/25" />
       <span className="ambient absolute h-56 w-56 rounded-full border border-dashed border-sun/60" style={{ animation: 'spin 28s linear infinite' }} />
       {SPARKS.map(([x, y], i) => (

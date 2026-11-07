@@ -153,7 +153,7 @@ export default function Rsvp() {
                       whileTap={{ scale: 0.94 }}
                       animate={status === o.value ? { scale: [1, 1.07, 1.02] } : { scale: 1 }}
                       transition={{ duration: 0.4 }}
-                      className={`rounded-2xl border-2 px-3 py-5 text-center transition ${status === o.value ? 'border-coral bg-sun/40 shadow-lg' : 'border-champagne bg-ivory/70 hover:bg-sun/20'}`}
+                      className={`rounded-2xl border-2 px-3 py-5 text-center transition ${status === o.value ? '' : 'opt-idle '}${status === o.value ? 'border-coral bg-sun/40 shadow-lg' : 'border-champagne bg-ivory/70 hover:bg-sun/20'}`}
                     >
                       <span className="block font-display text-2xl font-semibold leading-tight text-ocean">{o.title}</span>
                     </motion.button>
@@ -168,7 +168,7 @@ export default function Rsvp() {
                 </label>
               </div>
 
-              <p id="rsvp-err" className="mt-4 min-h-[1.5rem] text-center text-sm font-semibold text-[#B5412C]" role="alert">
+              <p id="rsvp-err" key={error} className={`${error ? 'err-in ' : ''}mt-4 min-h-[1.5rem] text-center text-sm font-semibold text-[#B5412C]`} role="alert">
                 {error}
               </p>
               <button type="submit" className="btn-sun mt-2 w-full" disabled={busy}>

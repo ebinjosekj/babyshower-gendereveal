@@ -31,7 +31,7 @@ export default function Nav({ visible }: { visible: boolean }) {
         aria-label={open ? 'Close menu' : 'Open menu'}
         className="glass flex h-12 w-12 items-center justify-center rounded-full text-plum"
       >
-        {open ? <X size={20} /> : <Menu size={20} />}
+        <motion.span key={String(open)} initial={{ rotate: -90, opacity: 0, scale: 0.6 }} animate={{ rotate: 0, opacity: 1, scale: 1 }} transition={{ type: 'spring', stiffness: 260, damping: 18 }} className="flex">{open ? <X size={20} /> : <Menu size={20} />}</motion.span>
       </button>
       <AnimatePresence>
         {open && (
@@ -41,16 +41,16 @@ export default function Nav({ visible }: { visible: boolean }) {
             exit={{ opacity: 0, y: -8, scale: 0.96 }}
             className="glass mt-2 w-60 rounded-3xl p-2"
           >
-            {LINKS.map(([id, label]) => (
-              <li key={id}>
+            {LINKS.map(([id, label], i) => (
+              <motion.li key={id} initial={{ opacity: 0, x: -14 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.05 + i * 0.045, duration: 0.35, ease: 'easeOut' }}>
                 <button
                   type="button"
                   onClick={() => go(id)}
-                  className="w-full rounded-2xl px-4 py-3 text-left font-display text-base text-plum hover:bg-sun/30"
+                  className="nav-item w-full rounded-2xl px-4 py-3 text-left font-display text-base text-plum hover:bg-sun/30"
                 >
                   {label}
                 </button>
-              </li>
+              </motion.li>
             ))}
             <li className="mt-1 border-t border-champagne/70 pt-1">
               <button

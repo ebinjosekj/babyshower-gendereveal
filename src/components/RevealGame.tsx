@@ -265,7 +265,7 @@ export default function RevealGame() {
                 </button>
               )}
               {error && (
-                <p className="mx-auto mt-3 max-w-md text-sm font-semibold text-[#F0B49A]" role="alert">
+                <p key={String(error)} className="err-in mx-auto mt-3 max-w-md text-sm font-semibold text-[#F0B49A]" role="alert">
                   {error}
                 </p>
               )}
@@ -339,7 +339,7 @@ export default function RevealGame() {
                 Your name
               </label>
               <input id="predict-name" className="field mt-4" placeholder="Your name" value={name} onChange={(e) => { setName(e.target.value); setTaken(false); }} maxLength={60} autoComplete="name" autoFocus aria-invalid={!!error} aria-describedby="predict-error" />
-              <p id="predict-error" className="mt-2 min-h-[1.25rem] text-sm font-semibold text-[#B5412C]" role="alert">
+              <p id="predict-error" key={String(error)} className="err-in mt-2 min-h-[1.25rem] text-sm font-semibold text-[#B5412C]" role="alert">
                 {error}
               </p>
               {taken && (

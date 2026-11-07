@@ -16,7 +16,7 @@ function Ring({ value, max, label, order }: { value: number; max: number; label:
   const frac = Math.min(1, value / max);
   const a = frac * Math.PI * 2 - Math.PI / 2;
   return (
-    <motion.div initial={{ opacity: 0, scale: 0.5, rotate: -120 }} whileInView={{ opacity: 1, scale: 1, rotate: 0 }} viewport={{ once: true, margin: '-10%' }} transition={{ type: 'spring', damping: 16, stiffness: 70, delay: order * 0.15 }} className="relative mx-auto aspect-square w-full max-w-[150px]">
+    <motion.div initial={{ opacity: 0, scale: 0.5, rotate: -120 }} whileInView={{ opacity: 1, scale: 1, rotate: 0 }} viewport={{ once: true, margin: '-10%' }} whileHover={{ scale: 1.07 }} transition={{ type: 'spring', damping: 16, stiffness: 70, delay: order * 0.15 }} className="relative mx-auto aspect-square w-full max-w-[150px]">
     <div className="ambient relative h-full w-full" style={{ animation: 'ringGlow 3.6s ease-in-out infinite alternate' }}>
       <svg viewBox="0 0 100 100" className="absolute inset-0" aria-hidden="true" fill="none">
         <circle cx="50" cy="50" r="46" stroke="#E3BE74" strokeOpacity=".25" strokeWidth=".6" />

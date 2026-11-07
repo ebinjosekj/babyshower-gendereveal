@@ -54,8 +54,9 @@ export default function MusicPlayer({ music, visible }: { music: Music; visible:
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
         aria-label="Music"
-        className="glass flex h-12 w-12 items-center justify-center rounded-full text-plum"
+        className="glass relative flex h-12 w-12 items-center justify-center rounded-full text-plum"
       >
+        {music.playing && !music.muted && <span className="ambient pointer-events-none absolute inset-0 rounded-full border border-sun/70" style={{ animation: 'tickRing 2.2s ease-out infinite' }} aria-hidden="true" />}
         {music.playing && !music.muted ? (
           <span className="flex h-5 items-end gap-[3px]" aria-hidden="true">
             {[0, 0.25, 0.5, 0.15].map((d) => (
