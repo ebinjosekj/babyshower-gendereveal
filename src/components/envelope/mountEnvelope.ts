@@ -149,8 +149,9 @@ function loopOnce(){
 }
 function startIdle(){loopOnce();idle=window.setInterval(loopOnce,6800)}
 let started=false;
+let hintOut=()=>{};
 function go(){
- if(started)return;if(!ready){pending=true;return}clearInterval(idle);stage.style.pointerEvents='none';startMusic();sfx.unlock();sfx.stopScheduled();
+ if(started)return;if(!ready){pending=true;return}clearInterval(idle);stage.style.pointerEvents='none';startMusic();sfx.unlock();sfx.stopScheduled();hintOut();
  sfx.cue('charge',0);sfx.cue('crack',380);sfx.cue('flap',550);sfx.cue('leak',650);sfx.cue('swell',900,{dur:3.7});
  for(let i=0;i<6;i++)sfx.cue('ringPing',1250+i*170,{i});
  for(let i=0;i<16;i+=2)sfx.cue('twinkle',1300+i*150);
@@ -228,7 +229,7 @@ function emerge(T){
 
 function startMusic(){if(musicOn)return;musicOn=true;try{hooks.onStartMusic()}catch(e){}}
 function skipNow(){
- if(started)return;started=true;window.clearInterval(idle);stage.style.pointerEvents='none';startMusic();sfx.unlock();sfx.stopScheduled();sfx.cue('whoosh',0);sfx.cue('landing',300);
+ if(started)return;started=true;window.clearInterval(idle);stage.style.pointerEvents='none';startMusic();sfx.unlock();sfx.stopScheduled();hintOut();sfx.cue('whoosh',0);sfx.cue('landing',300);
  A($('ssbox'),[{opacity:1},{opacity:0}],{duration:300});
  hooks.onEnter();A(stage,[{opacity:1},{opacity:0}],{duration:700,easing:'ease-in-out'});TO(()=>hooks.onDone(),800);
 }
@@ -237,16 +238,22 @@ const onMove=(e)=>{if(!ready||started)return;const nx=e.clientX/innerWidth-.5,ny
 stage.addEventListener('click',onClick);
 stage.addEventListener('pointermove',onMove);
 arrive();
-// "Tap for sound": browsers keep pages silent until a tap, so offer it up front. Tapping it also starts the music.
+// Sound button on the first screen. Sound is "on" by default; browsers keep pages silent until a tap, so until then it
+// reads "Tap for sound". Once sound is running it reads "Sound on · tap to mute" and toggles the mute.
 const hint=document.createElement('div');hint.className='sndhint';hint.setAttribute('role','button');hint.tabIndex=0;
-hint.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg><span>Tap for sound</span>';
+hint.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg><span></span>';
 stage.appendChild(hint);
-const hideHint=()=>{A(hint,[{opacity:1},{opacity:0}],{duration:600,fill:'forwards'});hint.style.pointerEvents='none'};
-const unlockHint=(e)=>{e.stopPropagation();startMusic();sfx.unlock();hideHint()};
-hint.addEventListener('click',unlockHint);
-hint.addEventListener('keydown',(e)=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();unlockHint(e)}});
-const offUnlock=sfx.onUnlock(()=>{if(hint.style.pointerEvents!=='none')hideHint()});
-if(sfx.running()){hint.style.display='none'}else{A(hint,[{opacity:0,transform:'translate(-50%,-8px)'},{opacity:1,transform:'translate(-50%,0)'}],{duration:900,delay:900,fill:'both',easing:E2})}
+const hintLabel=hint.querySelector('span');
+const refreshHint=()=>{hintLabel.textContent=!sfx.running()?'Tap for sound':sfx.isMuted()?'Sound off · tap to unmute':'Sound on · tap to mute'};
+refreshHint();
+let wasLocked=false;
+hint.addEventListener('pointerdown',()=>{wasLocked=!sfx.running()},true);
+const hintAct=(e)=>{e.stopPropagation();if(wasLocked||!sfx.running()){sfx.setMuted(false);startMusic();sfx.unlock()}else sfx.setMuted(!sfx.isMuted());wasLocked=false;refreshHint()};
+hintOut=()=>{A(hint,[{opacity:1},{opacity:0}],{duration:500,fill:'forwards'});hint.style.pointerEvents='none'};
+hint.addEventListener('click',hintAct);
+hint.addEventListener('keydown',(e)=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();hintAct(e)}});
+const offUnlock=sfx.subscribe(refreshHint);
+A(hint,[{opacity:0,transform:'translate(-50%,8px)'},{opacity:1,transform:'translate(-50%,0)'}],{duration:900,delay:900,fill:'both',easing:E2});
 return function cleanup(){
  offUnlock();sfx.clearQueue();
  timers.forEach(id=>window.clearTimeout(id));window.clearInterval(idle);

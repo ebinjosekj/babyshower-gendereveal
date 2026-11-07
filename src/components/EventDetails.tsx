@@ -1,3 +1,4 @@
+import { sfx } from '../lib/sfx';
 import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { CalendarPlus, Heart, MapPin } from 'lucide-react';
@@ -97,6 +98,7 @@ function ScratchZone({ open, onOpen, children, hint = false }: { open: boolean; 
 
   const finish = useCallback(() => {
     const r = wrap.current?.getBoundingClientRect();
+    sfx.play('scratchDone');
     onOpen(r ? r.left + r.width / 2 : window.innerWidth / 2, r ? r.top + r.height / 2 : window.innerHeight / 2);
   }, [onOpen]);
 
@@ -125,6 +127,7 @@ function ScratchZone({ open, onOpen, children, hint = false }: { open: boolean; 
     const x = e.currentTarget.getContext('2d', { willReadFrequently: true });
     if (!x || open) return;
     const [px, py] = pos(e);
+    sfx.play('scratch', 0, { dur: Math.hypot(px - st.lx, py - st.ly) });
     x.strokeStyle = '#000';
     x.lineWidth = 36;
     x.lineCap = 'round';

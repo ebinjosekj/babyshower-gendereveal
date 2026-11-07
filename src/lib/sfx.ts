@@ -6,7 +6,7 @@
 export type SfxName =
   | 'comet' | 'impact' | 'ping1' | 'ping2' | 'spin' | 'settle' | 'pip' | 'stamp' | 'starPass' | 'pillHit' | 'toSeal' | 'merge'
   | 'charge' | 'crack' | 'flap' | 'leak' | 'swell' | 'ringPing' | 'twinkle' | 'release' | 'bloom' | 'landing'
-  | 'tap' | 'chime' | 'diamond' | 'cue' | 'swish' | 'pop' | 'success' | 'heroPill' | 'heroNames' | 'heroTwin' | 'heroCue' | 'whoosh';
+  | 'scratch' | 'scratchDone' | 'tap' | 'chime' | 'diamond' | 'cue' | 'swish' | 'pop' | 'success' | 'heroPill' | 'heroNames' | 'heroTwin' | 'heroCue' | 'whoosh';
 
 interface Opt { i?: number; side?: number; dur?: number }
 
@@ -15,11 +15,20 @@ let master: GainNode;
 let bus: GainNode;
 let send: GainNode;
 let noiseBuf: AudioBuffer;
-let muted = false;
+const MUTE_KEY = 'baby-shower-sound-muted';
+let muted = (() => {
+  try {
+    return localStorage.getItem(MUTE_KEY) === '1';
+  } catch {
+    return false;
+  }
+})();
 let unlocked = false;
 const last: Record<string, number> = {};
 let queue: { at: number; name: SfxName; opt?: Opt }[] = [];
 const listeners = new Set<() => void>();
+const watchers = new Set<() => void>();
+const emit = () => watchers.forEach((w) => w());
 
 const PENT = [0, 2, 4, 7, 9];
 const mtof = (m: number) => 440 * Math.pow(2, (m - 69) / 12);
@@ -379,6 +388,36 @@ const VOICES: Record<SfxName, (t: number, o: Opt) => void> = {
     // the lullaby's opening phrase, as a soft goodbye to the envelope
     arp(t + 0.3, [76, 79, 76, 74, 72], 0.42, 0.11, 1.8);
   },
+  scratch: (t, o) => {
+    // a tiny grain of foil rasp: louder and brighter the faster the finger moves
+    const sp = Math.min(40, o.dur ?? 10);
+    const c = ctx!;
+    const n = noiseSrc(t, 0.09);
+    const bp = c.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.Q.value = 1.3;
+    bp.frequency.value = rnd(2600, 5200) + sp * 30;
+    const hp = c.createBiquadFilter();
+    hp.type = 'highpass';
+    hp.frequency.value = 1400;
+    const g = c.createGain();
+    const v = 0.1 + sp * 0.006;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(v, t + 0.008);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.085);
+    n.connect(bp);
+    bp.connect(hp);
+    hp.connect(g);
+    g.connect(bus);
+    if (Math.random() < 0.22) bell(t, pent(Math.floor(rnd(14, 20))), 0.025, 0.5);
+  },
+  scratchDone: (t) => {
+    // the foil is cleared: a bright reveal
+    whoosh(t, 0.7, 900, 4200, 0.12, 0.9, bus, 0.35);
+    chord(t + 0.05, [72, 79, 84, 88], 0.16, 2.6);
+    arp(t + 0.1, [79, 84, 88, 91, 96], 0.07, 0.08, 1.6);
+    shimmer(t + 0.1, 1.2, 14, 0.06);
+  },
   tap: (t) => {
     bell(t, 1760, 0.1, 0.5);
     click(t, 0.04, 4500, 0.025);
@@ -428,7 +467,7 @@ const VOICES: Record<SfxName, (t: number, o: Opt) => void> = {
 
 
 // ---------- public api ----------
-const MIN_GAP: Partial<Record<SfxName, number>> = { pip: 450, tap: 90, chime: 700, diamond: 500, cue: 600, swish: 500, pop: 250, twinkle: 40 };
+const MIN_GAP: Partial<Record<SfxName, number>> = { scratch: 48, pip: 450, tap: 90, chime: 700, diamond: 500, cue: 600, swish: 500, pop: 250, twinkle: 40 };
 
 function fire(name: SfxName, delayMs: number, opt: Opt = {}) {
   if (!ctx || ctx.state !== 'running') return;
@@ -464,6 +503,7 @@ export const sfx = {
       }
       flush();
       listeners.forEach((l) => l());
+      emit();
     };
     if (c.state === 'running') done();
     else void c.resume().then(done, () => undefined);
@@ -481,7 +521,21 @@ export const sfx = {
   },
   setMuted(m: boolean) {
     muted = m;
+    try {
+      localStorage.setItem(MUTE_KEY, m ? '1' : '0');
+    } catch {
+      /* private mode */
+    }
     if (ctx) master.gain.setTargetAtTime(m ? 0 : 0.9, ctx.currentTime, 0.05);
+    emit();
+  },
+  isMuted: () => muted,
+  /** Re-run `fn` whenever sound is unlocked or muted/unmuted (for the buttons). */
+  subscribe(fn: () => void) {
+    watchers.add(fn);
+    return () => {
+      watchers.delete(fn);
+    };
   },
   /** Play now (or `delayMs` from now). */
   play(name: SfxName, delayMs = 0, opt?: Opt) {

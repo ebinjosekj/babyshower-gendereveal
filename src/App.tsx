@@ -35,8 +35,7 @@ function Experience() {
     return () => window.clearTimeout(id);
   }, [entered]);
   const music = useMusic();
-  // Sound effects follow the music's mute button; the first touch anywhere unlocks them; every button gets a soft tap.
-  useEffect(() => sfx.setMuted(music.muted), [music.muted]);
+  // Sound effects: the first touch anywhere unlocks them; every button gets a soft tap.
   useEffect(() => {
     const unlock = () => sfx.unlock();
     const tap = (e: MouseEvent) => {
@@ -68,7 +67,7 @@ function Experience() {
       {entered && calm && !simple && <Atmosphere />}
       {entered && !simple && <Extras />}
       <Nav visible={entered} />
-      <MusicPlayer music={music} visible={entered} />
+      <MusicPlayer music={music} />
 
       <main className="relative z-10">
         <Intro entered={entered} />

@@ -1,28 +1,33 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { sfx } from '../lib/sfx';
 
-// There is no background track any more: the page's sound is the set of sound effects that go with its animations
-// (see lib/sfx.ts). This hook keeps the same shape the rest of the app uses, now as a simple sound on/off switch.
+// There is no background track: the page's sound is the set of sound effects that go with its animations (lib/sfx.ts).
+// This hook is the sound on/off switch the buttons use. Sound is on by default; browsers keep it silent until the first
+// tap, so "on" only means audible once sound has been unlocked.
 export interface Music {
-  playing: boolean;
+  on: boolean; // sound is unlocked and not muted
   muted: boolean;
+  playing: boolean;
   volume: number;
   start: () => void; // unlock sound (call from a user gesture)
-  toggle: () => void;
+  toggle: () => void; // unlock if locked, otherwise mute/unmute
   toggleMute: () => void;
   setVolume: (v: number) => void;
 }
 
 export function useMusic(): Music {
-  const [muted, setMuted] = useState(false);
-  const [started, setStarted] = useState(false);
-  const start = useCallback(() => {
-    sfx.unlock();
-    setStarted(true);
+  const [, bump] = useState(0);
+  useEffect(() => {
+    sfx.tryAuto();
+    bump((n) => n + 1);
+    return sfx.subscribe(() => bump((n) => n + 1));
   }, []);
-  const toggleMute = useCallback(() => {
-    sfx.unlock();
-    setMuted((m) => !m);
+  const start = useCallback(() => sfx.unlock(), []);
+  const toggle = useCallback(() => {
+    if (!sfx.running()) sfx.unlock();
+    else sfx.setMuted(!sfx.isMuted());
   }, []);
-  return { playing: started && !muted, muted, volume: 1, start, toggle: toggleMute, toggleMute, setVolume: () => undefined };
+  const muted = sfx.isMuted();
+  const on = sfx.running() && !muted;
+  return { on, muted, playing: on, volume: 1, start, toggle, toggleMute: toggle, setVolume: () => undefined };
 }
