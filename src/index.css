@@ -558,3 +558,9 @@ body {
 @keyframes orbitRipple { from { transform: scale(.55); opacity: .7; } to { transform: scale(1.6); opacity: 0; } }
 .orbit-ripple { animation: orbitRipple 3.6s ease-out infinite; }
 .simple .orbit-ripple, .simple .orn-glint, .simple .glint::after { animation: none; display: none; }
+
+/* hero life: gentle float for the names, a soft ring off the title pill, rising dust around the orb (all transform/opacity) */
+@keyframes heroBobA { 0%, 100% { translate: 0 0; } 50% { translate: 0 -4px; } }
+@keyframes heroBobB { 0%, 100% { translate: 0 0; } 50% { translate: 0 5px; } }
+@keyframes heroPillRing { 0% { opacity: .7; transform: scale(1); } 70%, 100% { opacity: 0; transform: scale(1.12, 1.5); } }
+@keyframes heroDust { 0% { opacity: 0; transform: translate(0, 30px) scale(.6); } 20% { opacity: .9; } 100% { opacity: 0; transform: translate(var(--x), -150px) scale(1); } }

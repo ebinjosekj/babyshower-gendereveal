@@ -43,6 +43,29 @@ export function OrbBody({ tone = 'gold', rings = true, className = '' }: { tone?
   );
 }
 
+const DUST = Array.from({ length: 14 }, (_, i) => {
+  const r = (n: number) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+  const a = r(i + 3) * Math.PI * 2, d = 0.42 + r(i + 9) * 0.5;
+  return { l: 50 + Math.cos(a) * d * 50, t: 50 + Math.sin(a) * d * 50, x: (r(i + 17) - 0.5) * 50, dur: 5 + r(i + 23) * 4, delay: -r(i + 31) * 8 };
+});
+
+// A little life around the hero orb: a gold and a pale-blue light slowly circling, and gold dust drifting up. (transform + opacity only)
+function HeroLife() {
+  return (
+    <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+      <span className="ambient absolute -inset-[14%] rounded-full" style={{ animation: 'orbit 46s linear infinite' }}>
+        <span className="absolute left-1/2 top-[-4px] h-2 w-2 -translate-x-1/2 rounded-full bg-[#FFE9A8]" style={{ boxShadow: '0 0 12px 3px rgba(227,190,116,.75)' }} />
+      </span>
+      <span className="ambient absolute -inset-[6%] rounded-full" style={{ animation: 'orbit 70s linear infinite reverse' }}>
+        <span className="absolute left-1/2 top-[-3px] h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-skyblue" style={{ boxShadow: '0 0 10px 3px rgba(127,182,230,.6)' }} />
+      </span>
+      {DUST.map((d, i) => (
+        <span key={i} className="ambient absolute h-[3px] w-[3px] rounded-full bg-[#FFEFC0] opacity-0" style={{ left: `${d.l}%`, top: `${d.t}%`, boxShadow: '0 0 6px 2px rgba(255,226,150,.7)', ['--x' as string]: `${d.x}px`, animation: `heroDust ${d.dur}s ease-in-out ${d.delay}s infinite` }} />
+      ))}
+    </div>
+  );
+}
+
 // The page-long orb: fixed behind the content; scroll brightens, shrinks, shifts to emerald, then dims to a point.
 export function ScrollOrb() {
   const { simple } = useMotion();
@@ -69,6 +92,7 @@ export function ScrollOrb() {
           <motion.div style={{ opacity: simple ? 1 : gold }}>
             <OrbBody tone="gold" />
           </motion.div>
+          {!simple && <HeroLife />}
           {!simple && (
             <motion.div style={{ opacity: emerald }} className="absolute inset-0">
               <OrbBody tone="emerald" rings={false} />
