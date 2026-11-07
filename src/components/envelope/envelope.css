@@ -112,3 +112,8 @@
 #envx #flash{position:absolute;inset:0;z-index:27;background:radial-gradient(circle at 50% 40%,rgba(255,246,214,.95),rgba(255,230,160,.5) 55%,rgba(227,190,116,.2));opacity:0;pointer-events:none}
 #envx #bgx{position:absolute;inset:0;background:radial-gradient(120vmin 90vmin at 50% 46%,rgba(70,58,30,.55),transparent 70%),linear-gradient(#0a0f0d,#0b110e 60%,#15160f)}
 
+
+#envx .sndhint{position:absolute;z-index:40;left:50%;bottom:max(26px,calc(env(safe-area-inset-bottom,0px) + 20px));transform:translate(-50%,0);display:flex;align-items:center;gap:8px;padding:9px 16px;border-radius:99px;border:1px solid rgba(227,190,116,.5);background:rgba(10,14,12,.55);color:#EFE6D2;font:500 11px Jost,sans-serif;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;white-space:nowrap;opacity:0}
+#envx .sndhint svg{width:16px;height:16px;color:#E3BE74}
+#envx .sndhint:before{content:"";position:absolute;inset:-1px;border-radius:99px;border:1px solid rgba(227,190,116,.7);animation:xe-sndRing 2.6s ease-out infinite}
+@keyframes xe-sndRing{0%{opacity:.7;transform:scale(1)}70%,100%{opacity:0;transform:scale(1.18,1.7)}}

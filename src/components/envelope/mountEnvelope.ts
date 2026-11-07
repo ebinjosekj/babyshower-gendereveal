@@ -3,6 +3,7 @@
 // It is a straight port of the approved preview, wired to the real page: tapping starts the music, the light
 // ball swells into the page's own orb and hands the stage over via hooks.onEnter / hooks.onDone.
 import markup from './envelope.html?raw';
+import { sfx } from '../../lib/sfx';
 
 export interface EnvelopeHooks {
   onStartMusic: () => void;
@@ -44,6 +45,13 @@ const pillEl=root.querySelector('.pill'),skipEl=root.querySelector('.skip');
 let ready=false,pending=false;
 function arrive(){
  const W=innerWidth,H=innerHeight,wr=wrapEl.getBoundingClientRect(),cx=wr.left+wr.width/2,cy=wr.top+wr.height/2;
+ // sound cues, timed to the same clock as the animations below (they queue until the guest unlocks sound)
+ sfx.tryAuto();
+ const IMs=1800,SDs=IMs+2500;
+ sfx.cue('comet',300);sfx.cue('impact',IMs);sfx.cue('ping1',IMs+60);sfx.cue('ping2',IMs+280);
+ sfx.cue('spin',IMs+80);sfx.cue('settle',IMs+1740);
+ h1.querySelectorAll('.w').forEach((w,i)=>sfx.cue('pip',IMs+900+i*190,{i:i*1+2}));
+ sfx.cue('stamp',SDs+390);sfx.cue('cue',SDs+560);
  // 0. the night sky wakes up
  A($('stars'),[{opacity:0},{opacity:1}],{duration:2200,easing:'ease-out'});
  // 1. a golden comet crosses the sky and falls to where the envelope will be
@@ -85,6 +93,7 @@ function loopOnce(){
  const pr=pillEl.getBoundingClientRect(),px=pr.left+pr.width/2,py=pr.top+pr.height/2;
  const sr=seal.getBoundingClientRect(),qx=sr.left+sr.width/2,qy=sr.top+sr.height/2;
  const box=$('ssbox'),DUR=4400,T1=2150,T2=3050,T3=4250;
+ sfx.cue('starPass',0,{side:1,dur:T1/1000});sfx.cue('starPass',0,{side:-1,dur:T1/1000});sfx.cue('pillHit',T2-60);sfx.cue('toSeal',T2);sfx.cue('merge',T3-120);
  const cfg=[{c:'#8fc4f0',a0:Math.PI,a1:Math.PI*2+1.15,rad:R,px:px-26},{c:'#f4a9c6',a0:0,a1:-Math.PI-1.15,rad:R*1.1,px:px+26}];
  const els=[];
  cfg.forEach((q,si)=>{
@@ -141,7 +150,12 @@ function loopOnce(){
 function startIdle(){loopOnce();idle=window.setInterval(loopOnce,6800)}
 let started=false;
 function go(){
- if(started)return;if(!ready){pending=true;return}clearInterval(idle);stage.style.pointerEvents='none';startMusic();A($('ssbox'),[{opacity:1},{opacity:0}],{duration:350});started=true;stage.classList.add('go');tilt.style.transition='transform 1.2s ease';tilt.style.transform='none';[h1,pillEl,skipEl].forEach(e=>A(e,[{opacity:1},{opacity:0}],{duration:700}));try{navigator.vibrate&&navigator.vibrate([14,40,14,60])}catch(e){}
+ if(started)return;if(!ready){pending=true;return}clearInterval(idle);stage.style.pointerEvents='none';startMusic();sfx.unlock();sfx.stopScheduled();
+ sfx.cue('charge',0);sfx.cue('crack',380);sfx.cue('flap',550);sfx.cue('leak',650);sfx.cue('swell',900,{dur:3.7});
+ for(let i=0;i<6;i++)sfx.cue('ringPing',1250+i*170,{i});
+ for(let i=0;i<16;i+=2)sfx.cue('twinkle',1300+i*150);
+ sfx.cue('release',1650);
+ A($('ssbox'),[{opacity:1},{opacity:0}],{duration:350});started=true;stage.classList.add('go');tilt.style.transition='transform 1.2s ease';tilt.style.transform='none';[h1,pillEl,skipEl].forEach(e=>A(e,[{opacity:1},{opacity:0}],{duration:700}));try{navigator.vibrate&&navigator.vibrate([14,40,14,60])}catch(e){}
  // 0. camera leans in over the envelope
  A(env,[{transform:'perspective(900px) rotateX(0deg) scale(1)'},{transform:'perspective(900px) rotateX(16deg) scale(1.08)'}],{duration:1500,easing:E1});
  // 1. the wax seal cracks, halves fall, little crumbs fly
@@ -179,6 +193,7 @@ function emerge(T){
  const mx=er.left+er.width/2,my=er.top+er.height*0.2;
  const dx=mx-cx,dy=my-cy,s0=(er.width*0.15)/D;
  const dur=5600;
+ sfx.cue('bloom',T+dur*.52);sfx.cue('landing',T+dur*.78);
  // 1) a small ball of light is born in the envelope, rises, hovers and pulses, then swells and drifts to centre
  const lb=$('lball');const bs=64,k=D/bs,ease='cubic-bezier(.4,0,.2,1)';
  const TR=[{translate:`${dx}px ${dy+er.height*.1}px`,offset:0},{translate:`${dx}px ${dy-er.height*.1}px`,offset:.1},{translate:`${dx}px ${dy-er.height*.42}px`,offset:.26},{translate:`${dx+8}px ${dy-er.height*.52}px`,offset:.4},{translate:`${dx*.7}px ${dy-er.height*.5}px`,offset:.5},{translate:`${dx*.12}px ${dy*.1-12}px`,offset:.78},{translate:'0px 0px',offset:1}];
@@ -213,16 +228,27 @@ function emerge(T){
 
 function startMusic(){if(musicOn)return;musicOn=true;try{hooks.onStartMusic()}catch(e){}}
 function skipNow(){
- if(started)return;started=true;window.clearInterval(idle);stage.style.pointerEvents='none';startMusic();
+ if(started)return;started=true;window.clearInterval(idle);stage.style.pointerEvents='none';startMusic();sfx.unlock();sfx.stopScheduled();sfx.cue('whoosh',0);sfx.cue('landing',300);
  A($('ssbox'),[{opacity:1},{opacity:0}],{duration:300});
  hooks.onEnter();A(stage,[{opacity:1},{opacity:0}],{duration:700,easing:'ease-in-out'});TO(()=>hooks.onDone(),800);
 }
-const onClick=(e)=>{if(e.target.closest&&e.target.closest('.skip')){e.stopPropagation();skipNow();return}startMusic();go()};
+const onClick=(e)=>{if(e.target.closest&&e.target.closest('.sndhint'))return;if(e.target.closest&&e.target.closest('.skip')){e.stopPropagation();skipNow();return}startMusic();sfx.unlock();go()};
 const onMove=(e)=>{if(!ready||started)return;const nx=e.clientX/innerWidth-.5,ny=e.clientY/innerHeight-.5;tilt.style.transform=`rotateY(${nx*16}deg) rotateX(${-ny*12}deg)`};
 stage.addEventListener('click',onClick);
 stage.addEventListener('pointermove',onMove);
 arrive();
+// "Tap for sound": browsers keep pages silent until a tap, so offer it up front. Tapping it also starts the music.
+const hint=document.createElement('div');hint.className='sndhint';hint.setAttribute('role','button');hint.tabIndex=0;
+hint.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg><span>Tap for sound</span>';
+stage.appendChild(hint);
+const hideHint=()=>{A(hint,[{opacity:1},{opacity:0}],{duration:600,fill:'forwards'});hint.style.pointerEvents='none'};
+const unlockHint=(e)=>{e.stopPropagation();startMusic();sfx.unlock();hideHint()};
+hint.addEventListener('click',unlockHint);
+hint.addEventListener('keydown',(e)=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();unlockHint(e)}});
+const offUnlock=sfx.onUnlock(()=>{if(hint.style.pointerEvents!=='none')hideHint()});
+if(sfx.running()){hint.style.display='none'}else{A(hint,[{opacity:0,transform:'translate(-50%,-8px)'},{opacity:1,transform:'translate(-50%,0)'}],{duration:900,delay:900,fill:'both',easing:E2})}
 return function cleanup(){
+ offUnlock();sfx.clearQueue();
  timers.forEach(id=>window.clearTimeout(id));window.clearInterval(idle);
  stage.removeEventListener('click',onClick);stage.removeEventListener('pointermove',onMove);
  try{stage.getAnimations({subtree:true}).forEach(a=>a.cancel())}catch(e){}

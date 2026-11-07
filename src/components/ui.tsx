@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useMotion } from '../context/MotionContext';
 import { Ornament } from './art';
 import { scrollToId } from '../lib/scroll';
+import { sfx } from '../lib/sfx';
 
 // Each reveal enters a different way (up, from the left, from the right, zooming in) so the page never feels repetitive.
 const FROM = [
@@ -21,6 +22,7 @@ export function Reveal({ children, delay = 0, className }: { children: ReactNode
       initial={{ opacity: 0, ...from }}
       whileInView={{ opacity: 1, y: 0, x: 0, scale: 1 }}
       viewport={{ once: true, margin: '-10% 0px' }}
+      onViewportEnter={() => sfx.play('pip', Math.round(delay * 1000), { i: from.y % 5 + (revealCount % 5) })}
       transition={{ duration: 1, delay, ease: [0.22, 1, 0.36, 1] }}
     >
       {children}
@@ -61,7 +63,7 @@ export function SectionHead({
   dark?: boolean;
 }) {
   return (
-    <div className="mx-auto max-w-2xl text-center">
+    <motion.div className="mx-auto max-w-2xl text-center" onViewportEnter={() => sfx.play('chime', 150, { i: 6 + (revealCount % 4) })} viewport={{ once: true, margin: '-10% 0px' }}>
       <Reveal>
         <p className={`kicker ${dark ? '!text-sun' : ''}`}>{kicker}</p>
         <motion.span className="mx-auto mt-2 block h-px w-24 origin-center bg-gradient-to-r from-transparent via-sun to-transparent" initial={{ scaleX: 0 }} whileInView={{ scaleX: 1 }} viewport={{ once: true }} transition={{ duration: 1.2, delay: 0.5, ease: [0.22, 1, 0.36, 1] }} />
@@ -77,7 +79,7 @@ export function SectionHead({
           </p>
         )}
       </Reveal>
-    </div>
+    </motion.div>
   );
 }
 
@@ -143,7 +145,7 @@ export function Divider() {
     <div className="relative mx-auto flex w-full max-w-md items-center justify-center px-6" aria-hidden="true">
       <motion.span className="absolute left-1/2 top-1/2 -ml-3 -mt-3 block h-6 w-6 rounded-full border border-sun/70" initial={{ scale: 0, opacity: 0 }} whileInView={{ scale: [0.2, 3.4], opacity: [0.9, 0] }} viewport={{ once: true, margin: '-5%' }} transition={{ duration: 1.5, delay: 0.45, ease: 'easeOut' }} />
       <motion.span className="h-px flex-1 origin-right bg-gradient-to-l from-sun/70 to-transparent" initial={{ scaleX: 0 }} whileInView={{ scaleX: 1 }} viewport={{ once: true, margin: '-5%' }} transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }} />
-      <motion.span className="mx-3 block h-2.5 w-2.5 rotate-45 bg-sun shadow-[0_0_14px_#E3BE74]" initial={{ scale: 0, rotate: 0 }} whileInView={{ scale: 1, rotate: 45 }} viewport={{ once: true, margin: '-5%' }} transition={{ type: 'spring', damping: 10, stiffness: 120, delay: 0.3 }} />
+      <motion.span className="mx-3 block h-2.5 w-2.5 rotate-45 bg-sun shadow-[0_0_14px_#E3BE74]" initial={{ scale: 0, rotate: 0 }} whileInView={{ scale: 1, rotate: 45 }} viewport={{ once: true, margin: '-5%' }} onViewportEnter={() => sfx.play('diamond', 300)} transition={{ type: 'spring', damping: 10, stiffness: 120, delay: 0.3 }} />
       <motion.span className="h-px flex-1 origin-left bg-gradient-to-r from-sun/70 to-transparent" initial={{ scaleX: 0 }} whileInView={{ scaleX: 1 }} viewport={{ once: true, margin: '-5%' }} transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }} />
     </div>
   );
@@ -196,6 +198,7 @@ export function SwipeCue({ to }: { to: string }) {
         animate={gone ? { opacity: 0, y: -18, scale: 0.94 } : undefined}
         whileInView={gone ? undefined : { opacity: 1, y: 0, scale: 1 }}
         viewport={{ once: false, margin: '0px 0px -12% 0px' }}
+        onViewportEnter={() => { if (!gone) sfx.play('cue', 500); }}
         transition={{ duration: gone ? 0.9 : 1.1, ease: [0.22, 1, 0.36, 1] }}
       >
         <span className="font-sans text-[11px] font-medium uppercase tracking-[0.34em] [text-shadow:0_1px_8px_rgba(0,0,0,.9)]">Swipe up to continue</span>

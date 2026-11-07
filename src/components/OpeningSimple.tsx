@@ -1,3 +1,4 @@
+import { sfx } from '../lib/sfx';
 import { useEffect, useRef, useState } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { SkipForward } from 'lucide-react';
@@ -87,6 +88,9 @@ export default function OpeningSimple({ onStartMusic, onEnter, onDone }: Props) 
   const ignite = () => {
     if (lit) return;
     onStartMusic();
+    sfx.unlock();
+    sfx.cue('swell', 0, { dur: 1 });
+    sfx.cue('bloom', 1000);
     setLit(true);
     if (simple) {
       leave(400);
@@ -97,6 +101,8 @@ export default function OpeningSimple({ onStartMusic, onEnter, onDone }: Props) 
   };
   const skip = () => {
     onStartMusic();
+    sfx.unlock();
+    sfx.cue('whoosh', 0);
     leave(0);
   };
   // Cross-dissolve: the page starts appearing underneath while the golden overlay fades away on top of it.

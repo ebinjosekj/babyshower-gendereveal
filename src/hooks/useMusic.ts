@@ -176,8 +176,8 @@ export function useMusic(): Music {
   const engine = useRef<Engine | null>(null);
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(false);
-  const [volume, setVolumeState] = useState(0.6);
-  const levelRef = useRef(0.6);
+  const [volume, setVolumeState] = useState(0.3);
+  const levelRef = useRef(0.3);
 
   const level = muted ? 0 : volume;
   useEffect(() => {

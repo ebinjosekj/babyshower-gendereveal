@@ -10,6 +10,7 @@ import Extras from './components/Extras';
 import { Divider, SwipeCue } from './components/ui';
 import { MotionProvider, useMotion } from './context/MotionContext';
 import { useMusic } from './hooks/useMusic';
+import { sfx } from './lib/sfx';
 import { useSmoothScroll } from './hooks/useSmoothScroll';
 
 // Everything below the fold loads on demand so the opening appears fast on phones.
@@ -34,6 +35,24 @@ function Experience() {
     return () => window.clearTimeout(id);
   }, [entered]);
   const music = useMusic();
+  // Sound effects follow the music's mute button; the first touch anywhere unlocks them; every button gets a soft tap.
+  useEffect(() => sfx.setMuted(music.muted), [music.muted]);
+  useEffect(() => {
+    const unlock = () => sfx.unlock();
+    const tap = (e: MouseEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (!t || t.closest('#envx')) return;
+      if (t.closest('button, a, [role="button"], summary, label')) sfx.play('tap');
+    };
+    window.addEventListener('pointerdown', unlock, { once: true });
+    window.addEventListener('keydown', unlock, { once: true });
+    document.addEventListener('click', tap);
+    return () => {
+      window.removeEventListener('pointerdown', unlock);
+      window.removeEventListener('keydown', unlock);
+      document.removeEventListener('click', tap);
+    };
+  }, []);
   useSmoothScroll(entered, !simple);
 
   const replay = () => {

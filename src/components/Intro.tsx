@@ -1,4 +1,6 @@
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { sfx } from '../lib/sfx';
 import { ChevronDown } from 'lucide-react';
 import { EVENT } from '../config';
 import TwinLights from './TwinLights';
@@ -10,6 +12,14 @@ const LINES = ['Two hearts.', 'One new beginning.', 'A little wonder, on the way
 // Hero + three big statements, floating over the page-long orb.
 export default function Intro({ entered }: { entered: boolean }) {
   const [cueRef, cueGone] = useDismissOnScroll<HTMLButtonElement>();
+  // The page's own entrance, in step with the animations below (pill 0.3s, names 0.5s, twin lights 1.1s, swipe cue 2s).
+  useEffect(() => {
+    if (!entered) return;
+    sfx.cue('heroPill', 300);
+    sfx.cue('heroNames', 500);
+    sfx.cue('heroTwin', 1100);
+    sfx.cue('heroCue', 2000);
+  }, [entered]);
   return (
     <>
       <section id="top" aria-label="Welcome" className="relative flex min-h-[100svh] flex-col items-center justify-end px-5 pb-[9svh] text-center">

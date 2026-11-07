@@ -1,3 +1,4 @@
+import { sfx } from '../lib/sfx';
 import { useEffect, useState, type FormEvent } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { confetti } from '../lib/confetti';
@@ -58,6 +59,7 @@ export default function Rsvp() {
     setDone(record);
     setEditing(false);
     setTaken(false);
+    sfx.play('success');
     confetti({ count: 150 });
   };
 
