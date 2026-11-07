@@ -26,11 +26,3 @@ export const EVENT = {
 } as const;
 
 export const TEAM_LABEL = { boy: 'Team Boy', girl: 'Team Girl' } as const;
-
-// Music: public/audio/wonder.mp3 is an original, royalty-free instrumental made for this
-// invitation ("Golden Hour": soft piano, bells and a warm pad). Set useFile to false to fall
-// back to the small music-box lullaby that the browser can generate by itself.
-export const MUSIC = {
-  useFile: true,
-  src: `${import.meta.env.BASE_URL}audio/wonder.mp3`,
-};

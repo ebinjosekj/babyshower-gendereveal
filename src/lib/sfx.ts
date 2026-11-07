@@ -210,6 +210,28 @@ function riser(t: number, dur: number, vel: number) {
   whoosh(t, dur + 0.1, 1200, 7000, vel * 0.35, 0.8, bus, 0.9);
 }
 
+// a soft plucked-harp note
+function pluck(t: number, f: number, vel: number, decay = 1.1, out: AudioNode = bus) {
+  const c = ctx!;
+  [[1, 1, 'triangle'], [2, 0.3, 'sine']].forEach(([r, g, ty]) => {
+    const o = c.createOscillator();
+    const e = c.createGain();
+    o.type = ty as OscillatorType;
+    o.frequency.value = f * (r as number);
+    e.gain.setValueAtTime(0.0001, t);
+    e.gain.exponentialRampToValueAtTime(vel * (g as number), t + 0.008);
+    e.gain.exponentialRampToValueAtTime(0.0001, t + decay);
+    o.connect(e);
+    e.connect(out);
+    o.start(t);
+    o.stop(t + decay + 0.05);
+  });
+}
+// a run of plucked notes (midi list), `step` seconds apart
+function arp(t: number, notes: number[], step: number, vel: number, decay = 1.1) {
+  notes.forEach((m, i) => pluck(t + i * step, mtof(m), vel, decay));
+}
+
 function chord(t: number, notes: number[], vel: number, decay: number) {
   notes.forEach((m, i) => bell(t + i * 0.03, mtof(m), vel, decay));
 }
@@ -226,6 +248,7 @@ const VOICES: Record<SfxName, (t: number, o: Opt) => void> = {
     chord(t, [72, 76, 79, 84], 0.17, 3);
     shimmer(t + 0.05, 1.4, 14, 0.07);
     click(t, 0.09, 4000, 0.08);
+    arp(t + 0.1, [72, 76, 79, 84, 88, 91], 0.1, 0.1, 1.6);
   },
   ping1: (t) => bell(t, pent(10), 0.2, 1.6),
   ping2: (t) => bell(t, pent(13), 0.17, 1.6),
@@ -233,6 +256,7 @@ const VOICES: Record<SfxName, (t: number, o: Opt) => void> = {
     whoosh(t, 1.35, 260, 2600, 0.22, 0.9, bus, 0.55);
     whoosh(t + 0.35, 1.0, 3200, 700, 0.1, 1.4, bus, 0.4);
     glide(t, 220, 440, 1.2, 0.035);
+    arp(t + 0.1, [72, 74, 76, 79, 81, 84, 86, 88], 0.14, 0.09, 1.2);
   },
   settle: (t) => {
     thump(t, 110, 50, 0.3, 0.14);
@@ -245,6 +269,7 @@ const VOICES: Record<SfxName, (t: number, o: Opt) => void> = {
     click(t, 0.16, 1400, 0.06);
     bell(t + 0.02, mtof(52), 0.12, 1.4);
     bell(t + 0.07, pent(9), 0.08, 1.0);
+    arp(t + 0.12, [48, 55, 60, 64], 0.06, 0.08, 1.4);
   },
   starPass: (t, o) => {
     const s = o.side ?? 1;
@@ -261,6 +286,8 @@ const VOICES: Record<SfxName, (t: number, o: Opt) => void> = {
     }
     whoosh(t, d, s > 0 ? 1500 : 1100, s > 0 ? 3600 : 2800, 0.1, 3.5, out, 0.45);
     glide(t, s > 0 ? 1320 : 990, s > 0 ? 1980 : 1480, d, 0.022, out);
+    // a little tune follows each star round the envelope: blue climbs, pink answers by falling
+    for (let k = 0; k < 10; k++) pluck(t + (k / 10) * d, pent(s > 0 ? 8 + k : 17 - k, 72), 0.045, 0.9, out);
   },
   pillHit: (t) => {
     bell(t, pent(7), 0.2, 1.5);
@@ -279,6 +306,7 @@ const VOICES: Record<SfxName, (t: number, o: Opt) => void> = {
     glide(t, 1800, 6200, 0.35, 0.03);
     shimmer(t + 0.05, 1.1, 12, 0.07);
     click(t, 0.08, 3800, 0.06);
+    arp(t + 0.05, [79, 84, 88, 91, 96], 0.07, 0.08, 1.6);
   },
   charge: (t) => {
     glide(t, 98, 196, 1.1, 0.12, bus, 'triangle');
@@ -319,7 +347,13 @@ const VOICES: Record<SfxName, (t: number, o: Opt) => void> = {
     shimmer(t, 1.3, 7, 0.045, 12, 18);
     glide(t, 1200, 2400, 1.3, 0.016);
   },
-  swell: (t, o) => riser(t, o.dur ?? 3.7, 0.2),
+  swell: (t, o) => {
+    const d = o.dur ?? 3.7;
+    riser(t, d, 0.2);
+    // a rising harp figure under the swell, climbing to the bloom
+    const n = Math.floor(d / 0.3);
+    for (let k = 0; k < n; k++) pluck(t + k * 0.3, pent(k % 10 + Math.floor(k / 4), 60), 0.03 + 0.07 * (k / n), 1.0);
+  },
   ringPing: (t, o) => {
     bell(t, pent((o.i ?? 0) + 3, 72), 0.14, 1.5);
     glide(t, 700, 1500, 0.4, 0.018);
@@ -336,11 +370,14 @@ const VOICES: Record<SfxName, (t: number, o: Opt) => void> = {
     [16, 14, 12].forEach((n, i) => bell(t + i * 0.26, pent(n), 0.2, 1.8));
     whoosh(t, 1.6, 6000, 1500, 0.07, 0.7, bus, 0.15);
     shimmer(t + 0.1, 2.2, 22, 0.08);
+    arp(t + 0.2, [76, 79, 83, 84, 88, 91, 95, 96], 0.15, 0.1, 2.2);
   },
   landing: (t) => {
     shimmer(t, 1.8, 22, 0.06);
     chord(t, [64, 71, 76, 83], 0.11, 3.4);
     glide(t, 900, 3600, 0.9, 0.025);
+    // the lullaby's opening phrase, as a soft goodbye to the envelope
+    arp(t + 0.3, [76, 79, 76, 74, 72], 0.42, 0.11, 1.8);
   },
   tap: (t) => {
     bell(t, 1760, 0.1, 0.5);
@@ -355,13 +392,17 @@ const VOICES: Record<SfxName, (t: number, o: Opt) => void> = {
     shimmer(t, 0.5, 4, 0.04);
   },
   cue: (t) => bell(t, pent(9), 0.08, 1.2),
-  swish: (t) => whoosh(t, 0.75, 500, 1900, 0.09, 0.9, bus, 0.4),
+  swish: (t) => {
+    whoosh(t, 0.75, 500, 1900, 0.09, 0.9, bus, 0.4);
+    arp(t + 0.1, [79, 83, 86], 0.12, 0.05, 1.0);
+  },
   whoosh: (t) => whoosh(t, 0.8, 400, 2200, 0.13, 0.9, bus, 0.45),
   pop: (t) => {
     click(t, 0.2, 1200, 0.07);
     thump(t, 260, 90, 0.14, 0.25);
     for (let k = 0; k < 6; k++) bell(t + 0.02 + k * 0.045, pent(Math.floor(rnd(9, 17))), 0.07, 0.8);
     shimmer(t + 0.1, 0.9, 8, 0.045);
+    arp(t + 0.05, [76, 79, 83, 88], 0.06, 0.07, 1.0);
   },
   success: (t) => {
     [9, 11, 12, 14, 16].forEach((n, i) => bell(t + i * 0.085, pent(n), 0.15, 1.8));
@@ -375,6 +416,7 @@ const VOICES: Record<SfxName, (t: number, o: Opt) => void> = {
     bell(t, mtof(64), 0.17, 2.4);
     bell(t + 0.16, mtof(71), 0.15, 2.4);
     bell(t + 0.3, mtof(76), 0.13, 2.6);
+    arp(t + 0.35, [76, 79, 76, 74, 72], 0.26, 0.07, 1.6);
     whoosh(t, 0.9, 700, 2600, 0.07, 0.9, bus, 0.5);
   },
   heroTwin: (t) => {
