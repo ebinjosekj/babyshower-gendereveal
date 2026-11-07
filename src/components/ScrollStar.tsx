@@ -1,10 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { sfx } from '../lib/sfx';
 
-// A little star with a snake-like tail that weaves from side to side (a zigzag) as the guest scrolls through each section. It
-// starts at the top of a section, travels down with the scroll and, when the section ends, drops into a small burst of light at
-// the bottom and fades away. The next section sends a new star.
-const IDS = ['story', 'countdown', 'reveal', 'details', 'rsvp', 'finale'];
+// A little star with a snake-like tail that weaves from side to side (a zigzag) as the guest scrolls down the page. It drifts
+// slowly down the screen across all the sections and only reaches the bottom when the guest reaches the end of the page,
+// where it drops into a small burst of light and fades away.
 const N = 20; // body segments
 const GAP = 10; // px between segments
 const SPARKS = Array.from({ length: 8 }, (_, i) => {
@@ -43,27 +42,17 @@ export default function ScrollStar() {
 
     const loop = () => {
       raf = 0;
-      let cur: HTMLElement | null = null;
-      let p = 0;
-      let appear = 0;
-      let travelled = 0;
-      for (const id of IDS) {
-        const s = document.getElementById(id);
-        if (!s) continue;
-        const r = s.getBoundingClientRect();
-        const range = r.height - H;
-        if (range < 120) continue;
-        if (r.top <= H * 0.6 && r.bottom > H * 0.4) {
-          cur = s;
-          travelled = Math.max(0, -r.top);
-          p = Math.min(1, travelled / range);
-          appear = Math.min(1, Math.max(0, (H * 0.6 - r.top) / (H * 0.35)));
-          break;
-        }
-      }
+      // one star for the whole page: its height follows how far down the page the guest is, so it only reaches the bottom of
+      // the screen when the guest reaches the end of the page
+      const y0 = window.scrollY;
+      const total = Math.max(1, document.documentElement.scrollHeight - H);
+      const p = Math.min(1, Math.max(0, y0 / total));
+      const travelled = y0;
+      const appear = Math.min(1, y0 / 180);
+      const cur = appear > 0 ? true : null;
       // the zigzag: swings across the screen as the page scrolls past, with a small gentle sway of its own
       const amp = Math.min(W * 0.36, 150);
-      const tx = Math.min(W - 18, Math.max(18, W / 2 + amp * Math.sin(travelled / 150) + 6 * Math.sin(performance.now() / 700)));
+      const tx = Math.min(W - 18, Math.max(18, W / 2 + amp * Math.sin(travelled / 170) + 6 * Math.sin(performance.now() / 700)));
       const ty = H * (0.12 + 0.74 * p);
       if (fresh && appear < 0.05) {
         // a new section: start the snake coiled at the top
@@ -103,8 +92,8 @@ export default function ScrollStar() {
       el.style.opacity = op.toFixed(2);
       // landing: the section's end has reached the bottom of the screen
       if (cur) {
-        if (p >= 0.985 && landed !== cur.id) {
-          landed = cur.id;
+        if (p >= 0.985 && landed !== 'end') {
+          landed = 'end';
           state = 'land';
           el.dataset.s = 'land';
           sfx.play('diamond');
