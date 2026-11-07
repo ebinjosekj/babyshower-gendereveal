@@ -2,7 +2,6 @@ import { motion } from 'framer-motion';
 import { RotateCcw } from 'lucide-react';
 import { EVENT } from '../config';
 import { confetti } from '../lib/confetti';
-import Constellation from './Constellation';
 import TwinLights from './TwinLights';
 import { Reveal } from './ui';
 
@@ -11,9 +10,7 @@ export default function Finale({ onReplay }: { onReplay: () => void }) {
   return (
     <section id="finale" aria-label="Closing" className="relative flex min-h-[100svh] flex-col items-center justify-center px-6 py-28 text-center">
       <Reveal>
-        <p className="mx-auto max-w-xs font-display text-2xl italic text-ivory/90">Every star here is a memory of us.</p>
-        <Constellation />
-        <p className="mt-20 font-sans text-xs font-medium uppercase tracking-[0.5em] text-sun">With love</p>
+        <p className="font-sans text-xs font-medium uppercase tracking-[0.5em] text-sun">With love</p>
         <h2 className="mt-5 font-display text-6xl font-light leading-[0.98] text-ivory [text-shadow:0_4px_40px_rgba(0,0,0,.8)] sm:text-9xl">
           See you
           <span className="gold-text ambient block italic">very soon.</span>

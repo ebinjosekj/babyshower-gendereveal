@@ -518,3 +518,10 @@ body {
   pointer-events: none;
   animation: nudgeRing 1.4s ease-out forwards;
 }
+
+/* RSVP thank-you */
+.thank-halo { opacity: 0; animation: halo 1s 0.3s forwards, glowBreath 4s ease-in-out 1.3s infinite; }
+.thank-spark { opacity: 0; transform: rotate(45deg); animation: thankSpark 2.4s ease-in-out infinite; }
+@keyframes thankSpark { 0%, 100% { opacity: 0; transform: rotate(45deg) scale(0); } 50% { opacity: 1; transform: rotate(45deg) scale(1.2); } }
+@keyframes halo { from { opacity: 0; transform: scale(.4); } to { opacity: 1; transform: scale(1); } }
+.simple .thank-spark, .simple .thank-halo { animation: none; opacity: 1; }

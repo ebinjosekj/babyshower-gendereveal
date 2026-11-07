@@ -1,5 +1,5 @@
-import { useState, type FormEvent } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { useEffect, useState, type FormEvent } from 'react';
+import { AnimatePresence, animate, motion, useMotionValue, useTransform, type MotionValue } from 'framer-motion';
 import { confetti } from '../lib/confetti';
 import { cleanName, isConfigured, supabase, type Attendance } from '../lib/supabase';
 import { changeReply, NOT_FOUND, SAME_NAME_RSVP, UNAVAILABLE } from '../lib/replies';
@@ -11,6 +11,54 @@ const OPTIONS: { value: Exclude<Attendance, 'declined'>; title: string }[] = [
   { value: 'attending', title: 'Count me in' },
   { value: 'blessing', title: 'Cheering from afar' },
 ];
+
+// A sideways carousel: the three photos orbit round, one coming to the front at a time, forever.
+const SPARKS = [[-124, -56], [120, -64], [-104, 62], [108, 66], [0, -98], [-30, 92]];
+const R = 100;
+const rad = (d: number) => (d * Math.PI) / 180;
+
+function OrbitPhoto({ n, offset, angle }: { n: number; offset: number; angle: MotionValue<number> }) {
+  const th = useTransform(angle, (a) => rad(offset - a));
+  const x = useTransform(th, (t) => Math.sin(t) * R);
+  const front = useTransform(th, (t) => (Math.cos(t) + 1) / 2); // 1 = in front, 0 = behind
+  const scale = useTransform(front, (f) => 0.58 + 0.5 * f);
+  const opacity = useTransform(front, (f) => 0.5 + 0.5 * f);
+  const rotateY = useTransform(th, (t) => -Math.sin(t) * 38);
+  const zIndex = useTransform(front, (f) => Math.round(f * 10));
+  return (
+    <motion.img
+      src={`${base}photos/us-${n}.jpg`}
+      alt=""
+      className="absolute h-[132px] w-[132px] rounded-full border-[3px] border-sun object-cover shadow-[0_14px_30px_-10px_rgba(26,36,31,.65)]"
+      style={{ x, scale, opacity, rotateY, zIndex }}
+    />
+  );
+}
+
+function ThankPhotos() {
+  const angle = useMotionValue(0);
+  useEffect(() => {
+    const t = window.setTimeout(() => confetti({ count: 60 }), 900);
+    const id = window.setInterval(() => {
+      animate(angle, angle.get() + 120, { duration: 1.2, ease: [0.45, 0, 0.15, 1] });
+    }, 3000);
+    return () => { window.clearTimeout(t); window.clearInterval(id); };
+  }, [angle]);
+  return (
+    <motion.div initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: 'spring', stiffness: 120, damping: 14, delay: 0.1 }} className="relative mx-auto flex h-48 items-center justify-center" style={{ perspective: 700 }} aria-hidden="true">
+      <span className="thank-halo absolute h-44 w-44 rounded-full bg-sun/25" />
+      <span className="ambient absolute h-56 w-56 rounded-full border border-dashed border-sun/60" style={{ animation: 'spin 28s linear infinite' }} />
+      {SPARKS.map(([x, y], i) => (
+        <span key={i} className="absolute" style={{ marginLeft: x, marginTop: y }}>
+          <span className="thank-spark block h-2 w-2 bg-sun" style={{ animationDelay: `${0.6 + i * 0.35}s` }} />
+        </span>
+      ))}
+      <OrbitPhoto n={1} offset={0} angle={angle} />
+      <OrbitPhoto n={2} offset={120} angle={angle} />
+      <OrbitPhoto n={3} offset={240} angle={angle} />
+    </motion.div>
+  );
+}
 
 export default function Rsvp() {
   const [name, setName] = useState('');
@@ -123,11 +171,11 @@ export default function Rsvp() {
         <AnimatePresence mode="wait">
           {done && !editing ? (
             <motion.div key="thanks" initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }} className="glass relative overflow-hidden rounded-[32px] px-6 py-14 text-center" role="status">
-              <motion.img initial={{ scale: 0.3, opacity: 0, rotate: -12 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 140, damping: 14, delay: 0.15 }} src={`${base}photos/us-${(done.name.length % 3) + 1}.jpg`} alt="Nikki and Ebin" className="mx-auto h-40 w-40 rounded-full border-[3px] border-sun object-cover shadow-[0_0_36px_6px_rgba(230,190,110,.45)]" />
-              <p className="mt-6 font-display text-5xl font-semibold italic text-ocean sm:text-6xl">Thank you, {done.name.split(' ')[0]}!</p>
-              <p className="mx-auto mt-5 max-w-sm font-display text-xl text-forest sm:text-2xl">
+              <ThankPhotos />
+              <motion.p initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7, duration: 0.8, ease: 'easeOut' }} className="mt-6 font-display text-5xl font-semibold italic text-ocean sm:text-6xl">Thank you, {done.name.split(' ')[0]}!</motion.p>
+              <motion.p initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.0, duration: 0.8, ease: 'easeOut' }} className="mx-auto mt-5 max-w-sm font-display text-xl text-forest sm:text-2xl">
                 {done.status === 'attending' ? 'We can’t wait to see you.' : 'Your love will be with us on the day.'}
-              </p>
+              </motion.p>
               {!isConfigured && <p className="mt-4 text-xs italic text-ink-soft">Preview mode — this reply was not saved.</p>}
               <button type="button" className="btn-ghost mt-6" onClick={startEdit}>
                 Changed your mind? Update my reply
